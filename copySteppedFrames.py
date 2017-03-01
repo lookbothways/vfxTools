@@ -44,14 +44,16 @@ else:
 
 option=cmds.confirmDialog( 
 	title='frameSteps to copyBuffer',
-	message="Copy stepped frame range: {} - {} ?\n\nFirst frame, last frame, every tenth frame, remaining frames. \n\n{}\n\nStart frame {} ftrack. \nEnd frame {} ftrack".format(fStart, fEnd, alert, matchStart, matchEnd),
-	button=['Copy','Cancel'],
+	message="Create stepped frame range list: {} - {} ?\n{}\n\nStart frame {} ftrack. \nEnd frame {} ftrack".format(fStart, fEnd, alert, matchStart, matchEnd),
+	button=['Tenths','Fill gaps','Cancel'],
 	defaultButton='Copy',
 	cancelButton='Cancel',
 	dismissString='Cancel'
 	)
 	
-if option == 'Copy':
+	
+
+if option == 'Tenths':
 
     
     # Create stepped string
@@ -71,9 +73,30 @@ if option == 'Copy':
     clipboard= QtGui.QApplication.clipboard()
     clipboard.setText(frameSplit) # set clipboard
     print "Range copied: {}".format(clipboard.text()) 
+    
+
+if option == 'Fill gaps': 
+    
+    # Evenly Distributed frames
+    
+    framelist= [fStart, fEnd]
+    gaps= True #go into loop
+    while gaps:
+        a= list(sorted(framelist))
+        print "sorted framelist", a
+        gaps= [x+ (y- x)// 2 for x, y in zip(list(a)[:-1], list(a)[1:]) if x+ (y- x)// 2 not in a]
+        print "gaps", gaps
+        framelist+= gaps
+                
+    frameSplit = "".join(str(framelist))
         
-else:
-    print "Range not copied."
+    
+    # puts frameSplit in the copybuffer
+    
+    from PySide import QtGui
+    clipboard= QtGui.QApplication.clipboard()
+    clipboard.setText(frameSplit) # set clipboard
+    print "Range copied: {}".format(clipboard.text()) 
 
 
 
