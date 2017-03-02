@@ -6,6 +6,8 @@ import pymel.core
 import os
 import time 
 
+#ATK sanitychecks
+
 #Add file path metaData
 #Hide assistants
 #Set project here
@@ -132,20 +134,20 @@ def checkRenderCamera():
 
 
 def executeThis():
-    
     #checks to see if distortion file exists:
     distortionExists=True
     matching = []
-        
+    	
     fileNodes=cmds.ls(typ='aiImage')
     matching = [s for s in fileNodes if "UV_lensDistortionMap" in s]
     
     if matching:
-        print "Lens Distortion aiImage exists."
-        distortionExists=False
-    	
-    
-    
+    	print "Lens Distortion UV_lensDistortionMap aiImage exists."
+    	distortionExists=False
+    else:
+    	print "Lens distortion UV_lensDistortionMap aiImage does not exist"
+
+
     #Creates a dialogue with checkboxes for the above defs
     
 
@@ -237,3 +239,4 @@ def executeThis():
     b_cls = createMyLayoutCls()  
     b_cls.show()
 
+executeThis()
