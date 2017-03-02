@@ -126,16 +126,19 @@ def makeUVMapConnection(camera,myMap):
 
 def connectUVMap(proj,camera):
 
-	uvMap=stMapPath(proj)
-	if uvMap is not None:
-		#print(uvMap)
-		if not breakConnection(camera,'test'): # test for existing connection
-			makeUVMapConnection(camera,uvMap)
-		else:
-			print('There is already a map connected to aiUvRemap.')
-	else:
-		print('Map not found.')
-
+    uvMap=stMapPath(proj)
+    if stMapPath(proj):
+       print "Attempting to connect {}".format(stMapPath(proj))
+       
+    if uvMap is not None:
+    	#print(uvMap)
+    	if not breakConnection(camera,'test'): # test for existing connection
+    		makeUVMapConnection(camera,uvMap)
+    	else:
+    		cmds.warning( "There is already a map connected to aiUvRemap." )
+    else:
+    	cmds.warning( "Map not found!" )
+		
 def breakConnection(camera,mode):
 	conn=cmds.listConnections(camera+'.aiUvRemap',d=False,s=True,p=True) 
 	if conn is not None:
@@ -168,3 +171,4 @@ def doSomething():
 		setResolution(camera,'default')
 
 
+doSomething()
