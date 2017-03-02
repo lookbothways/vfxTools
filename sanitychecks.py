@@ -1,10 +1,3 @@
-"""
-
-from sanityChecks import sanityChecks
-reload(sanityChecks)
-sanityChecks.executeThis()
-
-"""
 
 import maya.cmds as cmds
 import maya.mel as mel
@@ -17,6 +10,7 @@ import time
 #Hide assistants
 #Set project here
 #hide all imagePlanes
+#Sets up distortion ST maps connections
 
 
 
@@ -132,6 +126,8 @@ def checkRenderCamera():
     return 1
 
 
+
+
 #-------------------------------------------------------------------------------
 
 
@@ -163,10 +159,12 @@ def executeThis():
             mainLayout = cmds.columnLayout(w = 200, h = 200, cw = 10, rs = 8, co = ['both',2])
 
             # Control - which things to do
-            self.hideAssbox = cmds.checkBox('Hide Assistants', value=True)
+            
             self.AFPMDbox = cmds.checkBox('Add file path MetaData', value=True)
             self.setProjectbox = cmds.checkBox('Set Project Here', value=True)
-            self.hideImageplanebox = cmds.checkBox('Hide imageplanes', value=True)
+            self.hideImageplanebox = cmds.checkBox('Hide imageplanes', value=False)
+            self.hideAssbox = cmds.checkBox('Hide Assistants', value=False)
+            self.distortion = cmds.checkBox('Setup distortion', value=False)
 
             # Buttons that do things
             btnDoSelected = cmds.button(label = 'Do Selected', width = 200, height = 40, c = self.GetSelectedNodes)
@@ -182,7 +180,7 @@ def executeThis():
             AFPMD = cmds.checkBox(self.AFPMDbox,q = True, v = True)
             setProject = cmds.checkBox(self.setProjectbox,q = True, v = True)
             hideImageplanes = cmds.checkBox(self.hideImageplanebox,q = True, v = True)
-            
+            distortion = cmds.checkBox(self.distortion,q = True, v = True)
             
             print hideAss
             if hideAss == True:
@@ -199,8 +197,13 @@ def executeThis():
 
             print hideImageplanes
             if hideImageplanes == True:
-                hideAllImageplanes()  
-             
+                hideAllImageplanes() 
+                
+            print distortion
+            if distortion == True:
+                import setupMayaLensDistortionOptions
+                reload(setupMayaLensDistortionOptions)
+                setupMayaLensDistortionOptions.doSomething()
 
             if cmds.window('utility', exists = True):
                 cmds.deleteUI('utility')
@@ -219,4 +222,3 @@ def executeThis():
     b_cls = createMyLayoutCls()  
     b_cls.show()
 
-    
