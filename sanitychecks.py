@@ -132,7 +132,22 @@ def checkRenderCamera():
 
 
 def executeThis():
+    
+    #checks to see if distortion file exists:
+    distortionExists=True
+    matching = []
+        
+    fileNodes=cmds.ls(typ='aiImage')
+    matching = [s for s in fileNodes if "UV_lensDistortionMap" in s]
+    
+    if matching:
+        print "Lens Distortion aiImage exists."
+        distortionExists=False
+    	
+    
+    
     #Creates a dialogue with checkboxes for the above defs
+    
 
     if not checkRenderCamera():
         cmds.error('Please pick a camera to render')
@@ -150,8 +165,8 @@ def executeThis():
             if cmds.window('utility', exists = True):
                 cmds.deleteUI('utility')
 
-            # create our window
-            self.window = cmds.window('utility', widthHeight = (200, 200), title = 'Pre-render checks', resizeToFitChildren=1, sizeable = False)
+            # create window
+            self.window = cmds.window('utility', widthHeight = (200, 500), title = 'Pre-render checks', resizeToFitChildren=1, sizeable = False)
 
             cmds.setParent(menu=True)
 
@@ -164,7 +179,7 @@ def executeThis():
             self.setProjectbox = cmds.checkBox('Set Project Here', value=True)
             self.hideImageplanebox = cmds.checkBox('Hide imageplanes', value=False)
             self.hideAssbox = cmds.checkBox('Hide Assistants', value=False)
-            self.distortion = cmds.checkBox('Setup distortion', value=False)
+            self.distortion = cmds.checkBox('Setup distortion', value=distortionExists)
 
             # Buttons that do things
             btnDoSelected = cmds.button(label = 'Do Selected', width = 200, height = 40, c = self.GetSelectedNodes)
