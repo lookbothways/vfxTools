@@ -1,35 +1,41 @@
 import maya.cmds as cmds
 import re
 import string
+import maya.mel as mel
+import os
 
-def getHighestThreeDigitPadVersion(path):
-	
-	dirList=cmds.getFileList(fld=path,fs='v*')
-	versions=[]
-	for x in dirList:
-		if re.search(r"^v[0-9][0-9][0-9]$",x):
-			versions.append(x)
-	return versions[(len(versions)-1)]
+exists=False
 
-def getHighestVersion(proj):
 
-	# example:
-	#/mnt/projects/revolt/publish/scenes/sc147/sh150/pfbarrel/3d_tracking/v001/sc147_sh150_UV_distorted.exr
-	
-	temp=string.split(proj,'/')
-	seq=temp[6]
-	shot=temp[7]
+def stMapPath(proj):
 
-	pubDir=('/mnt/projects/tt/publish/scenes/'+seq+'/'+shot+'/pfbarrel/3d_tracking/')
-	highestVersion=getHighestThreeDigitPadVersion(pubDir)
+    #Gets the correct filename
+    temp=string.split(proj,'/')
+    seq="sc"+temp[6]
+    shot="sh"+temp[7]
+    
+    pubDir=('/mnt/projects/tt/publish/scenes/'+seq+'/'+shot+'/distortion/')
+    
+    
+    distortion=[]
+    distortion=str(cmds.getFileList(fld=pubDir,fs='*distorted.exr'))
+    distortion=distortion[3:-2]
+    print "Looking for {}".format(distortion)
+    
+    dirList=str(pubDir)+str(distortion)
+    fileExists=os.path.exists(dirList)
+                
+    if fileExists == True:
+        
+        mapPath=dirList
+        print "File exists: {} ".format(dirList)
+        return mapPath
+        exists=True
 
-	dirList=cmds.getFileList(fld=pubDir+highestVersion,fs=seq+'_'+shot+'_UV_distorted.exr')
+    else:
+        return   
 
-	if len(dirList) is not 0:
-		mapPath=pubDir+highestVersion+'/'+dirList[0]
-		return mapPath
-	else:
-		return
+
 
 def getRes(camera):
 
@@ -48,7 +54,6 @@ def getCamera():
 	cameras=cmds.ls(typ='camera')
 
 	for x in cameras:
-		#print(x)
 		if re.search('rendercamera',x.lower()):
 			return x
 			break
@@ -80,18 +85,21 @@ def getOption():
 	return option
 
 def mkFileNode(myName):
-	#return cmds.createNode('file',name=myName)
 	return cmds.createNode('aiImage',name=myName)
 
-def assignMap(node,path): 
-	#cmds.setAttr(node+'.fileTextureName',path,type='string')
-	cmds.setAttr(node+'.filename',path,type='string')
+def assignMap(node,path):
+    
+    if re.search(".exr",path):
+        print "Connecting ST file: "+path
+    else:
+        cmds.warning( "Distortion setup failed: ST map is not in the correct location / incorrectly named." )
 
-	#setAttr "aiImage1.swrap" 2;
-	#setAttr "aiImage1.twrap" 2;
-
-	cmds.setAttr(node+'.swrap',2) # clamp texture tiling
-	cmds.setAttr(node+'.twrap',2)
+    cmds.setAttr(node+'.filename',path,type='string')
+    
+    
+    cmds.setAttr(node+'.swrap',2) # clamp texture tiling - IMPORTANT
+    cmds.setAttr(node+'.twrap',2)
+	
 
 def checkForExistingFileNode(myMap):
 
@@ -113,22 +121,20 @@ def makeUVMapConnection(camera,myMap):
 		print('made aiImage node '+txFileNode)
 
 	assignMap(txFileNode,myMap)
-
-	#print('cmds.connectAttr('+str(txFileNode)+'.outColor,'+str(camera)+'.aiUvRemap)')
 	cmds.connectAttr(txFileNode+'.outColor',camera+'.aiUvRemap')
 
 
 def connectUVMap(proj,camera):
 
-	uvMap=getHighestVersion(proj)
+	uvMap=stMapPath(proj)
 	if uvMap is not None:
 		#print(uvMap)
 		if not breakConnection(camera,'test'): # test for existing connection
 			makeUVMapConnection(camera,uvMap)
 		else:
-			print('There is already a map connected to aiUvRemap')
+			print('There is already a map connected to aiUvRemap.')
 	else:
-		print('Map not found')
+		print('Map not found.')
 
 def breakConnection(camera,mode):
 	conn=cmds.listConnections(camera+'.aiUvRemap',d=False,s=True,p=True) 
@@ -160,6 +166,5 @@ def doSomething():
 	if option=='Bypass':
 		breakConnection(camera,'break')
 		setResolution(camera,'default')
-
 
 
