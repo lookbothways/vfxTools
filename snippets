@@ -13,3 +13,12 @@ import os
 for env in os.environ.keys():
     print env + " : " + os.environ[env]
     
+#Example global being updated inside a def (proc)
+
+moo2= 1
+def make_moo():
+    global moo2
+    moo2=2222
+    
+make_moo()
+print moo2
