@@ -5,7 +5,21 @@ import maya.mel as mel
 import os
 
 exists=False
+distortionFilename=""
 
+
+"""
+#Example global being updated inside a def (proc)
+moo2= 1
+
+def make_moo():
+    global moo2
+    moo2=2222
+    
+
+make_moo()
+print moo2
+"""
 
 def stMapPath(proj):
 
@@ -24,6 +38,10 @@ def stMapPath(proj):
     
     dirList=str(pubDir)+str(distortion)
     fileExists=os.path.exists(dirList)
+    
+    global distortionFilename
+    distortionFilename = pubDir+"tt_{}_{}_distorted.exr".format(seq,shot)
+    
                 
     if fileExists == True:
         
@@ -31,6 +49,7 @@ def stMapPath(proj):
         print "File exists: {} ".format(dirList)
         return mapPath
         exists=True
+        
 
     else:
         return   
@@ -91,10 +110,12 @@ def assignMap(node,path):
     
     if re.search(".exr",path):
         print "Connecting ST file: "+path
+        cmds.setAttr(node+'.filename',path,type='string')
     else:
-        cmds.warning( "Distortion setup failed: ST map is not in the correct location / incorrectly named." )
+        cmds.warning( "Distortion setup failed: ST map is not in the correct location / incorrectly named. File should be {}".format(distortionFilename) )
+        # Example: 
 
-    cmds.setAttr(node+'.filename',path,type='string')
+    #cmds.setAttr(node+'.filename',path,type='string')
     
     
     cmds.setAttr(node+'.swrap',2) # clamp texture tiling - IMPORTANT
@@ -171,4 +192,3 @@ def doSomething():
 		setResolution(camera,'default')
 
 
-doSomething()
