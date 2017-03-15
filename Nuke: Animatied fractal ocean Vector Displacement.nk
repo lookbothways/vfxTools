@@ -1,0 +1,90 @@
+set cut_paste_input [stack 0]
+version 9.0 v4
+Noise {
+ inputs 0
+ output {-rgba.red rgba.green -rgba.blue rgba.alpha}
+ size 1000
+ zoffset {{(t+1000)/500}}
+ octaves 8
+ lacunarity 2.1
+ gamma 1
+ center {1024 778}
+ name Noise1
+ selected true
+ xpos 70
+ ypos -48
+}
+push 0
+Noise {
+ inputs 0
+ output {rgba.red -rgba.green -rgba.blue rgba.alpha}
+ size 320
+ zoffset {{(t+1000)/330}}
+ octaves 15
+ lacunarity 1.68
+ gamma 1
+ center {1024 778}
+ name Noise3
+ selected true
+ xpos -40
+ ypos -48
+}
+push $cut_paste_input
+Noise {
+ output {-rgba.red -rgba.green rgba.blue rgba.alpha}
+ size 245
+ zoffset {{(t+1000)/170}}
+ octaves 3
+ gamma 1
+ center {1024 778}
+ name Noise2
+ selected true
+ xpos 180
+ ypos -48
+}
+Merge2 {
+ inputs 3+1
+ operation plus
+ name Merge1
+ selected true
+ xpos 70
+ ypos 94
+}
+Grade {
+ multiply 4
+ add -1
+ gamma 0.37
+ name Grade1
+ selected true
+ xpos 70
+ ypos 120
+}
+set Necc1880 [stack 0]
+Reformat {
+ format "256 256 0 0 256 256 1 square_256"
+ name Reformat1
+ selected true
+ xpos 70
+ ypos 184
+}
+Write {
+ file /mnt/projects/tt/publish/assets/environment/titanSurface/nuke/render/ocean_vectorDisplacementMap_v002.####.exr
+ file_type exr
+ datatype "32 bit float"
+ version 4
+ name Write1
+ selected true
+ xpos 207
+ ypos 228
+}
+push $Necc1880
+Write {
+ file /mnt/projects/tt/publish/assets/environment/titanSurface/nuke/render/ocean_vectorDisplacementMap_v002_HQ.####.exr
+ file_type exr
+ datatype "32 bit float"
+ version 5
+ name Write2
+ selected true
+ xpos -68
+ ypos 234
+}
