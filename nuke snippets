@@ -1,0 +1,3 @@
+# List comprehension - set all selected node's on_error to 'nearest frame'
+
+[node['on_error'].setValue('nearest frame') for node in nuke.selectedNodes()]
