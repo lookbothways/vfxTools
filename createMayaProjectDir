@@ -1,0 +1,164 @@
+"""
+import createMayaProjectDir
+reload(createMayaProjectDir)
+
+
+createMayaProjectDir
+
+
+
+"""
+
+import maya.cmds as cmds
+import maya.mel as mel
+import ftrack
+import pwd
+import os
+import re
+
+
+"""
+Creates work/mark/ project directory structures for currently-open published animation scene.
+IMPORTANT '/mark' is currently hardcoded!!
+
+
+
+Improvements to make: 
+
+* MAKE SO IT RUNS FROM SCRIPTS DIR!!
+
+* code for any user - via popup dialogue? Or 'Smart' via fTrack getuser (better)
+
+* arnoldSettings filename is hardcoded - versioning is soft
+
+* if v001 exists, offer option to version up or abort
+
+* get user (currently hardcoded to me)
+
+"""
+
+# gets the highest arnoldSettings version
+
+
+
+def getHighestThreeDigitPadVersion(path):
+	
+	dirList=cmds.getFileList(fld=path,fs='v*')
+	versions=[]
+	for x in dirList:
+		if re.search(r"^v[0-9][0-9][0-9]$",x):
+			versions.append(x)
+	return versions[(len(versions)-1)]
+	
+	
+def latestArnoldSettings():
+    print "Opening latest arnoldSettings"
+    if cmds.file( arnoldSettingsFile, q=True, ex=True ):
+        cmds.file( arnoldSettingsFile, o=True, f=True)
+    else:
+        print "ERROR: \nArnoldSettings file not found: \n{}".format(arnoldSettingsFile)
+
+def create_folder( directory ):
+    if not os.path.exists( directory ):
+        os.makedirs( directory )
+        
+
+# constructs the lighting file-path and saves if v001 doesn't exist
+
+def saveLightingScene():
+    sceneName=shotName+"_lighting_v001.mb"
+    fullPath=maya_dir+"/scenes/"+sceneName
+    print fullPath
+    
+    if cmds.file( fullPath, q=True, ex=True ):
+        print "Lighting file v001 already exists: "+fullPath
+
+	
+        
+    else:
+        cmds.file( rename=fullPath )
+        cmds.file( save=True, type='mayaBinary' )
+        print "Saved lighting file v001 to "+fullPath
+    
+
+def createDirStructure():
+    create_folder( maya_dir )
+    mel.eval('setProject \"' + maya_dir + '\"')
+    
+    for file_rule in cmds.workspace(query=True, fileRuleList=True):
+        file_rule_dir = cmds.workspace(fileRuleEntry=file_rule)
+        maya_file_rule_dir = os.path.join( maya_dir, file_rule_dir)
+        create_folder( maya_file_rule_dir )  
+ 
+
+# Gets fTrack info
+    
+taskId = os.getenv('FTRACK_TASKID')
+task = ftrack.Task(taskId)
+shot = task.getParent()
+seq =shot.getParent()
+show = seq.getParent()
+
+print "User: "+pwd.getpwuid(os.getuid())[4] 
+print "Current shot: " +show.get("name")+"_"+seq.get("name")+"_"+shot.get("name")
+shotName = show.get("name")+"_"+seq.get("name")+"_"+shot.get("name")
+print "Frame range : %s-%s"%(shot.get("fstart"),shot.get("fend"))
+fStart = shot.get("fstart")
+fEnd = shot.get("fend")
+
+
+#Clears 'option' incase running again:   
+option=""
+option=cmds.confirmDialog(title='Setup Maya project directories',message="Create {} directories, save / discard\n{}".format(shotName,"current scene, open arnoldSettings?"),button=['Open arnoldSettings','Save current','Cancel'],defaultButton='Open arnoldSettings',cancelButton='Cancel',dismissString='Cancel')
+    
+# creates the maya_dir string: 
+
+user = "mark"
+maya_dir = "/mnt/projects/{}/work/{}/{}/{}/maya".format(show.get("name"),user,seq.get("name"),shot.get("name"))
+print maya_dir
+
+
+
+path = "/mnt/projects/tt/publish/assets/lightrig/arnoldsettings/"
+version = getHighestThreeDigitPadVersion(path)
+arnoldSettingsFile = "/mnt/projects/tt/publish/assets/lightrig/arnoldsettings/{}/arnoldsettings_arnoldSettings_lightrig_mayaBinaryScene_{}.mb".format(version,version)
+
+
+
+
+
+def doSomething():
+
+
+	if option=='Cancel':
+		return
+
+	if option=='Open arnoldSettings':
+		latestArnoldSettings()
+		create_folder( maya_dir )
+		mel.eval('setProject \"' + maya_dir + '\"')
+		
+		for file_rule in cmds.workspace(query=True, fileRuleList=True):
+		    file_rule_dir = cmds.workspace(fileRuleEntry=file_rule)
+		    maya_file_rule_dir = os.path.join( maya_dir, file_rule_dir)
+		    create_folder( maya_file_rule_dir )
+    
+		saveLightingScene()
+		print "Created maya project directory: "+maya_dir
+		
+		
+	if option=='Save current':
+		print "Saving current scene in {} directory.".format(shotName)
+		createDirStructure()
+		saveLightingScene()
+		
+	if option=='Bypass':
+		breakConnection(camera,'break')
+		setResolution(camera,'default')
+
+doSomething()
+
+
+
+
+
