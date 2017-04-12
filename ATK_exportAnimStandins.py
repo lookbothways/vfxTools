@@ -12,7 +12,32 @@ import ftrack
 Improvements to make:
     
 * Check that project is set to the same location as the file!!! (or standins get saved elsewhere)
+* OR AUTO SET PROJECT? Or ask? ? 
 * Get file-path, split and put /standin/directory there (in /animation/v001 etc)
+* add a 'with shaders / without' dialogue
+
+Mask info:
+
+Get the correct mask value using these constants:
+
+    AI_NODE_UNDEFINED   0x0000
+    AI_NODE_OPTIONS     0x0001
+    AI_NODE_CAMERA      0x0002
+    AI_NODE_LIGHT       0x0004
+    AI_NODE_SHAPE       0x0008
+    AI_NODE_SHADER      0x0010
+    AI_NODE_OVERRIDE    0x0020
+    AI_NODE_DRIVER      0x0040
+    AI_NODE_FILTER      0x0080
+    AI_NODE_ALL         0xFFFF
+
+
+mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+print mask
+
+mask=173 mesh no shaders, but tse on.
+
+mask=253 export all the things
 
 """
 
@@ -84,7 +109,8 @@ def exportGeo():
     
     #Exports Arnold sequence of selected geo
     #mask=253 should export all the things
-    cmds.arnoldExportAss(f=export_file,fsh=True,s=True,startFrame=fStart,endFrame=fEnd,frameStep=1,mask=253,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
+    #mask=173 mesh no shaders, but tse on.
+    cmds.arnoldExportAss(f=export_file,fsh=True,s=True,startFrame=fStart,endFrame=fEnd,frameStep=1,mask=173,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
     
     #Cleans up selection set
     cmds.delete("selectedGeo")
@@ -129,5 +155,4 @@ def doSomething():
         cmds.error( "Nothing is selected! Select geo to export as .ass" )
         
 
-        
- 
+     
