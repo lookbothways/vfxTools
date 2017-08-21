@@ -7,6 +7,7 @@ MB
 
 import maya.cmds as cmds
 
+
 # all the nodes without the upstreamNodeName 
 doesntContain = []
 
@@ -17,11 +18,10 @@ excludedNodeName = "rubble"
 
 #Loops through the things and appends them to the doesn't contain list
 for node in nodes:
-    print node
-    inputs = cmds.listConnections(node)
-    print inputs
-    if filter(lambda x: excludedNodeName in x, things):
+    inputs = cmds.ls(*cmds.listHistory (node))
+    if not filter(lambda x: excludedNodeName in x, inputs):
         doesntContain.append(node)
+
 
 # puts all the nodes without the connection into a set
 sel = cmds.ls(doesntContain, r=True)
@@ -33,3 +33,20 @@ sel = cmds.ls(doesntContain, r=True)
     
 for node in sel:
     cmds.setAttr('%s.gamma' % (node), 1,1,1)
+    
+""" 
+Sandbox   
+
+cmds.select(nodes)
+
+ = cmds.ls("*" + upstreamNodeName + "*", r=True)   
+   
+    
+excludedNodeName='rubble'
+things = ['a thing', 'otherTi1ng', 'rubblething', 'rubble']
+print filter(lambda x: excludedNodeName in x, node)
+
+
+import itertools
+excludedNodeName in itertools.chain(*things)
+"""
