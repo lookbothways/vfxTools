@@ -1,0 +1,79 @@
+
+"""
+Exports all selected objects as standins, creates empty container and reloads the standin
+With a dialoge and 'reimport' export only' buttons
+
+"""
+
+import maya.cmds as cmds
+
+
+# Export all selected as individual standins to specified path
+
+"""
+Get the correct mask value using these constants:
+    AI_NODE_UNDEFINED   0x0000
+    AI_NODE_OPTIONS     0x0001
+    AI_NODE_CAMERA      0x0002
+    AI_NODE_LIGHT       0x0004
+    AI_NODE_SHAPE       0x0008
+    AI_NODE_SHADER      0x0010
+    AI_NODE_OVERRIDE    0x0020
+    AI_NODE_DRIVER      0x0040
+    AI_NODE_FILTER      0x0080
+    AI_NODE_ALL         0xFFFF
+    
+    
+No shaders:
+mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+
+Everything:
+mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_ALL
+
+"""
+
+
+# Specify path here CHANGE THIS:
+export_dir = "/mnt/projects/aft/publish/assets/forest/maya/cache/standin/"
+
+
+mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_ALL
+print mask
+
+selected = cmds.ls(sl=True)
+
+#Some options to choose from:
+option=""
+option=cmds.confirmDialog(title='Export selected as standIns',message="Export selected as standins",button=['Export and reimport', 'Export only','Cancel'],defaultButton='Export and reimport',cancelButton='Cancel',dismissString='Cancel')
+
+#empties reimport:
+reimport = ""
+
+if option == 'Export and reimport':
+    reimport = True
+else:
+    reimport = False
+
+
+
+
+for sel in selected: 
+    #noUnicode = sel[3:-2]   
+    #groupname = (noUnicode)
+    print "Exporting {}".format(sel)
+    export_file = export_dir+sel+'.ass'
+    cmds.select(sel)
+    cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=0, shadowLinks=0, selected=True)
+    
+    #reimports exported standin (reimport / export_only)
+    
+    if reimport == True:
+        cmds.file( export_file, i=True )
+        cmds.setAttr( "ArnoldStandInShape.deferStandinLoad", 0)
+        imported = cmds.ls( 'ArnoldStandIn*', sl=False )
+        
+        #selects and renames the standin
+        swapOutName = ( sel+"_standIn" )
+        cmds.rename( imported[0], swapOutName)
+        cmds.select( sel, swapOutName )
+
