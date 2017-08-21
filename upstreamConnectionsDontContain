@@ -20,8 +20,8 @@ for node in nodes:
     print node
     inputs = cmds.listConnections(node)
     print inputs
-    if excludedNodeName not in " ".join(inputs):
-      doesntContain.append(node)
+    if filter(lambda x: excludedNodeName in x, things):
+        doesntContain.append(node)
 
 # puts all the nodes without the connection into a set
 sel = cmds.ls(doesntContain, r=True)
