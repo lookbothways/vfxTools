@@ -1,0 +1,70 @@
+# randomise selected standin paths by contents of a folder:
+
+import os
+
+# The source path, remember to include the last slash '/'
+dir = '/mnt/projects/aft/publish/assets/environment/booleanwalls/maya/cache/standin/wallSet/rotated/'
+
+items = os.listdir(dir)
+numberOfStandins = 1
+assList = []
+
+for names in items:
+    if names.endswith(".ass"):
+        assList.append(names)
+
+print assList
+
+# a randomiser that shuffles things (to reduce likelyhood of repetition) 
+
+
+import random
+import math
+
+def sean_shuffle(list_to_pick_from, number_of_picks_needed):
+
+    #Sean Danischevsky 2017
+    #shuffles a list, then reshuffles as many times as needed to fulfil the number of picks needed.
+    #returns a shuffled list.
+    #e.g. sean_shuffle(range(3), 30)
+    #will return 5 blocks of [0,1,2], shuffled each time
+    #[2, 0, 1, 2, 1, 0, 1, 2, 0, 1, 0, 2, 2, 1, 0, 2, 1, 0, 2, 0, 1, 2, 0, 1, 0, 1, 2, 0, 2, 1]
+    #ensures that you get maximum use from all your elements.
+    #i.e. they are all used, equally (or very nearly)
+    #and minimises probability of 2 elements repeating next to each other.
+    #you could further shuffle the result if needed, i.e.
+    # newlist= sean_shuffle(range(3), 30)
+    # print newlist
+    # random.shuffle(newlist)
+    # print newlist
+
+
+    multiplier= int(math.ceil(number_of_picks_needed/ float(len(list_to_pick_from))))
+    shuffled_list= []
+    
+    for i in range(multiplier):
+        random.shuffle(list_to_pick_from)
+        shuffled_list.extend(list_to_pick_from)
+        return shuffled_list[:number_of_picks_needed]
+    
+# construct random selection path and assign standin path
+
+import pymel.core as pm
+
+path = []
+selection = cmds.ls( selection=True )
+randomObject = sean_shuffle(assList, len(selection))
+    
+for i, j in enumerate(selection):
+    print i, j
+    
+    path = dir+ randomObject[i]
+    print path 
+        
+    valueOld =  pm.getAttr( '{}.dso'.format(j) )
+    valueNew = path
+    pm.setAttr( '{}.dso'.format(j), valueNew) 
+
+
+
+
