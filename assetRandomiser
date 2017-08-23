@@ -45,7 +45,7 @@ def sean_shuffle(list_to_pick_from, number_of_picks_needed):
     for i in range(multiplier):
         random.shuffle(list_to_pick_from)
         shuffled_list.extend(list_to_pick_from)
-        return shuffled_list[:number_of_picks_needed]
+    return shuffled_list[:number_of_picks_needed]
     
 # construct random selection path and assign standin path
 
