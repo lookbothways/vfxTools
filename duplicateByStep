@@ -1,0 +1,13 @@
+# Duplicate by frame-step
+
+import maya.cmds as cmds
+
+step = 18
+    
+cmds.duplicate( 'motionPathCube' )
+
+timeNow = cmds.currentTime( query=True )
+print timeNow
+nextStep = timeNow+step
+cmds.currentTime( nextStep, update=True, edit=True )
+timeNow = cmds.currentTime( query=True )
