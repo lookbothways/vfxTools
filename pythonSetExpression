@@ -1,0 +1,26 @@
+
+
+#python to set an expression on multiple objects
+#Note the use of \n and \t for newLine and tab
+
+#"Hider" is a locator's tY that drives the visibility of a load of architraves' visibility
+
+import maya.cmds as cmds
+
+selected = cmds.ls(sl=True)
+
+exp = []
+i = []
+    
+for i in selected:
+    
+    print i
+    #exp = """if (hider.translateY > rand({}.translateY-100,{}.translateY+100))	{}.visibility = 0;else 	{	{}.visibility = 1;	}""".format(i,i,i,i)
+    
+        
+    exp = "if (hider.translateY > rand("+i+".translateY-100,"+i+".translateY+100)) "+i+".visibility = 0;else{"+i+".visibility = 1;}"
+    setExpression = "( o='"+i+"', s='visibility = "+exp+";' )"
+
+    
+    cmds.expression( o=i, s='if (hider.translateY > rand('+i+'.translateY-100,'+i+'.translateY+50))\n\n\t'+i+'.visibility = 1;\n\n\nelse\n\n\t{\n\t'+i+'.visibility = 0;\n\t}')
+    print "Expression set on "+i
