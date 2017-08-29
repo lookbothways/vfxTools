@@ -1,4 +1,4 @@
-# scale selected, rotate selected
+# Random scale selected, rotate selected
 
 import maya.cmds as cmds
 import random
