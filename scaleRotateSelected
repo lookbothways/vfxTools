@@ -1,0 +1,17 @@
+# scale selected, rotate selected
+
+import maya.cmds as cmds
+import random
+
+selected = cmds.ls(sl=True)
+
+i = []
+
+    
+for i in selected:
+    rand = random.random()*.6            
+    randRot = random.random()*-25
+    cmds.setAttr( i+'.scale', 1, 1, rand)
+    cmds.setAttr( i+'.rotate', randRot, 0, 0)
+    
+    
