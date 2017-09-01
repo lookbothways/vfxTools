@@ -1,0 +1,49 @@
+"""
+Creates shaderKeeper.ma
+
+Select geo you want shaders-on-spheres exported as a .ma shaderKeeper group
+MB 010917
+"""
+
+import maya.cmds as cmds
+import sets
+
+
+objects = cmds.ls(sl=True)
+objectName = str(cmds.ls(sl=True))
+skSpheres = []
+
+#name = cmds.polySphere( r=1, name=objectName[3:-2] +"_shaderKeeper" )
+
+for i in objects:
+   
+    object = str(i)
+   
+    # Gets the shader attached to the object
+    shaders = cmds.listConnections(cmds.listHistory(i,f=1),type='shadingEngine')
+    print shaders
+    #remove duplicates using sets.Set
+    removeDuplicates = sets.Set(shaders)
+   
+   
+    for each in removeDuplicates:
+ 
+        # Makes a sphere with the name of the selected object and assigns i's shader
+        shading_engine,polysphere = cmds.polySphere( r=1, name=object+"_"+each+"_shaderKeeper" )
+        skSpheres.append(shading_engine)
+        cmds.select(shading_engine)
+       
+        cmds.hyperShade( assign=each )
+   
+
+
+cmds.select(skSpheres)
+shaderKeeperGroup = cmds.group(n='shaderKeepers' )
+
+multipleFilters = "Maya ASCII (*.ma)"
+filename = cmds.fileDialog2(fileFilter=multipleFilters, dialogStyle=2)
+cmds.file( rename=filename[0] )
+cmds.file( es=True, sh=True, type='mayaAscii')
+
+
+
