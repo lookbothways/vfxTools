@@ -44,12 +44,18 @@ def addHSV(shader):
     cmds.connectAttr( newHsvNode+".outColor", surfaceDiffuse  )
 
 
+"""
+# To go on the shelf
+import addRemapHSV
+reload(addRemapHSV)
 
 selectedShaders = cmds.ls(sl=True)
 
 for i in selectedShaders:
-    #i=[i]
     addHSV(i)
+
+"""
+
     
 """
 # This works on individual nodes.
