@@ -1,0 +1,100 @@
+import maya.cmds as cmds
+
+def addHSV(shader):
+    # Adds a remapHSV between diffuseColor and whatever is plugged into it.
+    # node = alShader node
+    
+    
+    diffuseUpstream = []
+
+    
+    def findDiffuseUpstream(connections):
+       
+        for i,x in enumerate(connections):
+            if x == surfaceDiffuse:
+                diffuseUpstream = connections[i+1]
+                return diffuseUpstream
+              
+    
+       
+    print "Shader "+ str(shader)
+    # if alshader
+    surfaceDiffuse = '%s.diffuseColor' % shader
+    connections = cmds.listConnections(shader, connections=True, p=True)
+    
+    #get position of diffuse colour
+    diffusePosition = [i for i,x in enumerate(connections) if x == surfaceDiffuse]
+    
+    #get the name of the upstream node (if alshader '.diffuseColor' plug)
+    diffuseUpstream = findDiffuseUpstream(connections)
+    
+    #nodename
+    nodeName = str(shader[0])+"_remapHSV"
+       
+    #disconnect attributes
+    print "Adding remap HSV between "+str(diffuseUpstream)+" and "+str(surfaceDiffuse)
+    cmds.disconnectAttr(diffuseUpstream, surfaceDiffuse)
+        
+    # creates hsv node
+    
+    newHsvNode = cmds.shadingNode('remapHsv', asShader=True, n=nodeName)
+         
+    # Hooks them all up   
+    cmds.connectAttr( diffuseUpstream, newHsvNode+".color" )
+    cmds.connectAttr( newHsvNode+".outColor", surfaceDiffuse  )
+
+
+
+selectedShaders = cmds.ls(sl=True)
+
+for i in selectedShaders:
+    #i=[i]
+    addHSV(i)
+    
+"""
+# This works on individual nodes.
+
+diffuseUpstream = []
+shader = cmds.ls(sl=True)
+
+
+
+def findDiffuseUpstream(connections):
+   
+    for i,x in enumerate(connections):
+        if x == surfaceDiffuse:
+            diffuseUpstream = connections[i+1]
+            return diffuseUpstream
+          
+
+   
+print "Shader "+ str(shader)
+# if alshader
+surfaceDiffuse = '%s.diffuseColor' % shader[0]
+connections = cmds.listConnections(shader, connections=True, p=True)
+
+#get position of diffuse colour
+diffusePosition = [i for i,x in enumerate(connections) if x == surfaceDiffuse]
+
+#get the name of the upstream node (if alshader '.diffuseColor' plug)
+diffuseUpstream = findDiffuseUpstream(connections)
+
+#nodename
+nodeName = str(shader[0])+"_remapHSV"
+   
+#disconnect attributes
+print "Adding remap HSV between "+str(diffuseUpstream)+" and "+str(surfaceDiffuse)
+cmds.disconnectAttr(diffuseUpstream, surfaceDiffuse)
+    
+# creates hsv node
+
+newHsvNode = cmds.shadingNode('remapHsv', asShader=True, n=nodeName)
+     
+# Hooks them all up   
+cmds.connectAttr( diffuseUpstream, newHsvNode+".color" )
+cmds.connectAttr( newHsvNode+".outColor", surfaceDiffuse  )
+
+
+
+
+"""
