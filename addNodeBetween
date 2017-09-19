@@ -1,10 +1,11 @@
 import maya.cmds as cmds
+# Adds either a remapHSV of a gamma between diffuseColor and whatever is plugged into it.
+# node = alShader node
 
-def addHSV(shader):
-    # Adds a remapHSV between diffuseColor and whatever is plugged into it.
-    # node = alShader node
-    
-    
+def addNodeBetween(shader):
+
+    chooseNode = cmds.confirmDialog( title='Insert node', message='Choose node type', button=['HSV','Gamma', 'Cancel'], defaultButton='Yes', cancelButton='Cancel', dismissString='No' )
+ 
     diffuseUpstream = []
 
     
@@ -29,19 +30,30 @@ def addHSV(shader):
     diffuseUpstream = findDiffuseUpstream(connections)
     
     #nodename
-    nodeName = str(shader[0])+"_remapHSV"
+    if chooseNode == 'HSV':
+        nodeName = str(shader)+"_remapHSV"
+        newNode = cmds.shadingNode('remapHsv', asShader=True, n=nodeName)
+        
+    if chooseNode == 'Gamma':
+        nodeName = str(shader)+"_gamma"
+        newNode = cmds.shadingNode('gammaCorrect', asShader=True, n=nodeName)
+                
        
     #disconnect attributes
-    print "Adding remap HSV between "+str(diffuseUpstream)+" and "+str(surfaceDiffuse)
+    print "Adding node between "+str(diffuseUpstream)+" and "+str(surfaceDiffuse)
     cmds.disconnectAttr(diffuseUpstream, surfaceDiffuse)
-        
-    # creates hsv node
     
-    newHsvNode = cmds.shadingNode('remapHsv', asShader=True, n=nodeName)
-         
-    # Hooks them all up   
-    cmds.connectAttr( diffuseUpstream, newHsvNode+".color" )
-    cmds.connectAttr( newHsvNode+".outColor", surfaceDiffuse  )
+    # Diconnects and reconnects 
+
+    if chooseNode == 'HSV':
+        cmds.connectAttr( diffuseUpstream, newNode+".color" )
+        cmds.connectAttr( newNode+".outColor", surfaceDiffuse  )
+        
+    if chooseNode == 'Gamma':
+        cmds.connectAttr( diffuseUpstream, newNode+".value" )
+        cmds.connectAttr( newNode+".outValue", surfaceDiffuse  )
+    
+
 
 
 """
@@ -52,13 +64,15 @@ reload(addRemapHSV)
 selectedShaders = cmds.ls(sl=True)
 
 for i in selectedShaders:
-    addHSV(i)
+    addNodeBetween(i)
 
 """
+
+
 
     
 """
-# This works on individual nodes.
+# Older version adds a HSV to individual nodes on a per-shader selection.
 
 diffuseUpstream = []
 shader = cmds.ls(sl=True)
