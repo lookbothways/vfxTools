@@ -61,12 +61,14 @@ def addNodeBetween(shader):
 import addNodeBetween
 reload(addNodeBetween)
 
+
 selectedShaders = cmds.ls(sl=True)
 
-for i in selectedShaders:
-    addNodeBetween(i)
+for shader in selectedShaders:
+    addNodeBetween.addNodeBetween(shader)
 
 """
+print addNodeBetween
 
 
 
@@ -115,6 +117,5 @@ cmds.connectAttr( diffuseUpstream, newHsvNode+".color" )
 cmds.connectAttr( newHsvNode+".outColor", surfaceDiffuse  )
 
 
-
-
 """
+
