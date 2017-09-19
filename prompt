@@ -1,0 +1,13 @@
+
+import maya.cmds as cmds
+
+result = cmds.promptDialog(
+		title='Rename Object',
+		message='Enter Name:',
+		button=['OK', 'Cancel'],
+		defaultButton='OK',
+		cancelButton='Cancel',
+		dismissString='Cancel')
+
+if result == 'OK':
+	text = cmds.promptDialog(query=True, text=True)
