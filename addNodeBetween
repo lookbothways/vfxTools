@@ -58,8 +58,8 @@ def addNodeBetween(shader):
 
 """
 # To go on the shelf
-import addRemapHSV
-reload(addRemapHSV)
+import addNodeBetween
+reload(addNodeBetween)
 
 selectedShaders = cmds.ls(sl=True)
 
