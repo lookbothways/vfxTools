@@ -1,3 +1,4 @@
+
 """
 Exports all selected objects as standins, creates empty container and reloads the standin
 With a dialoge and 'reimport' export only' buttons
@@ -32,8 +33,9 @@ mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_ALL
 """
 
 
-# Specify path here CHANGE THIS:
-export_dir = "/mnt/projects/aft/publish/assets/forest/maya/cache/standin/"
+# Save in this folder dialogue
+export_dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here')
+export_dir = export_dir[0]+"/"
 
 
 mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
@@ -74,4 +76,7 @@ for sel in selected:
         #selects and renames the standin
         swapOutName = ( sel+"_standIn" )
         cmds.rename( imported[0], swapOutName)
-cmds.select( sel, swapOutName )
+        cmds.select( sel, swapOutName )
+        
+        
+#end
