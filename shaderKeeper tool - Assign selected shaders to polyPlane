@@ -1,0 +1,16 @@
+# assigns selected shaders to a polyplane (for shaderkeeper)
+
+import maya.cmds as cmds
+import sets
+
+
+selected = cmds.ls(sl=True)
+
+i = []    
+
+for i in selected:
+    name = i
+    newPlane = cmds.polyPlane(n=name+"_skPlane", sx=1, sy=1)
+    cmds.select (newPlane[0],name)
+    cmds.hyperShade( assign=i )
+   
