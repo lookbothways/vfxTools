@@ -1,8 +1,7 @@
-"""
-MEL Brick wall generator from:
-https://www.highend3d.com/maya/script/brickwallbuilder-for-maya
+//MEL Brick wall generator from:
+//https://www.highend3d.com/maya/script/brickwallbuilder-for-maya
 
-"""
+
 // MEL  script quickly creates customizable BRICK WALL in polygons.
 // Just load the script and run.
 //Enter the number of bricks required along rows and columns and attributes for the brick.
