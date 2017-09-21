@@ -1,0 +1,75 @@
+"""
+MEL Brick wall generator from:
+https://www.highend3d.com/maya/script/brickwallbuilder-for-maya
+
+"""
+// MEL  script quickly creates customizable BRICK WALL in polygons.
+// Just load the script and run.
+//Enter the number of bricks required along rows and columns and attributes for the brick.
+// Author :Aishwarya k vishwanath.
+//Date:19/3/2016.
+
+if(`window -exists brickWallBuilder`)
+deleteUI brickWallBuilder;
+
+//creating a window
+window -rtf true - title "BrickWallBuilder" brickWallBuilder;
+ frameLayout -labelVisible false -marginWidth 5 -marginHeight 5;
+columnLayout;
+text -label "Enter the values and click on create";
+intSliderGrp -minValue 0 - maxValue 250- label "row" -field true value1;
+intSliderGrp -minValue 0 - maxValue 250- label "column" -field true value2;
+floatSliderGrp -minValue 0 - maxValue 1 - label "bevel" -field true value3;
+floatSliderGrp -minValue 0  -maxValue 0.4 - label "brick offset " -field true value7; 
+floatSliderGrp -minValue 0 - maxValue 20 -value 2- label "width" -field true value4;
+floatSliderGrp -minValue 0 - maxValue 20 -value 1- label "height" -field true value5;
+floatSliderGrp -minValue 0 - maxValue 20 -value 0.7- label "depth" -field true value6;
+button - c "createBricks" -label "create";
+showWindow brickWallBuilder;
+
+//creating the bricks and arranging
+proc createBricks()
+{
+float $offx;
+float $offy;
+float $offz;
+int $row=`intSliderGrp - q - value "value1"`;
+int $col=`intSliderGrp - q - value "value2"`;
+float $bevel=`floatSliderGrp - q - value "value3"`;
+float $width=`floatSliderGrp -q -value "value4"`;
+float $height=`floatSliderGrp -q -value "value5"`;
+float $depth=`floatSliderGrp -q -value "value6"`;
+float $offset=`floatSliderGrp -q -value "value7"`;
+for($i=0;$i<$row;$i++)
+    { 
+        for($j=0;$j<$col;$j++)
+        { 
+        polyCube -w $width -h $height -d $depth -sx 1 -sy 1 -sz 1 -ax 0 1 0 -n "brick 01";
+        polyBevel -offset $bevel -offsetAsFraction 1 -autoFit 1 -segments 2 -worldSpace 1 -uvAssignment 1 -fillNgons 1 -mergeVertices 1 -mergeVertexTolerance 0.0001 -smoothingAngle 30 -miteringAngle 180 -angleTolerance 180 ;
+        //extracting bounding box of the cube
+        float $minX = getAttr (".boundingBoxMinX");
+        float $minY = getAttr (".boundingBoxMinY");
+        float $minZ = getAttr (".boundingBoxMinZ");
+        float $maxX = getAttr (".boundingBoxMaxX");
+        float $maxY = getAttr (".boundingBoxMaxY");
+        float $maxZ = getAttr (".boundingBoxMaxZ");
+        float $off=($maxX - $minX)/2;
+        if($i%2==0)
+            {
+           $offx=($maxX - $minX)*$j;
+            $offy=($maxY - $minY)*$i;
+            move -r $offx $offy 0 ;
+            }
+            else
+            {
+          $offx=(($maxX - $minX)*$j)+$off;
+            $offy=($maxY - $minY)*$i;
+            move -r $offx $offy 0 ;
+            }
+            $offz=rand(0,.2);
+            move -r 0 0 $offz ;
+        }
+    }
+
+}
+//end of the script
