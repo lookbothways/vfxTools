@@ -1,9 +1,10 @@
 # randomise selected standin paths by contents of a folder:
-
+import maya.cmds as cmds
 import os
 
-# The source path, remember to include the last slash '/'
-dir = '/mnt/projects/aft/publish/assets/environment/booleanwalls/maya/cache/standin/wallSet/rotated/'
+# Save in this folder dialogue
+dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select .ass source location', okCaption='Select')
+dir = dir[0]+"/"
 
 items = os.listdir(dir)
 numberOfStandins = 1
@@ -64,7 +65,3 @@ for i, j in enumerate(selection):
     valueOld =  pm.getAttr( '{}.dso'.format(j) )
     valueNew = path
     pm.setAttr( '{}.dso'.format(j), valueNew) 
-
-
-
-
