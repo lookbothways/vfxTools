@@ -1,10 +1,13 @@
 # randomise selected standin paths by contents of a folder:
 import maya.cmds as cmds
 import os
+import random
 
 # Save in this folder dialogue
 dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select .ass source location', okCaption='Select')
 dir = dir[0]+"/"
+
+
 
 items = os.listdir(dir)
 numberOfStandins = 1
@@ -21,6 +24,13 @@ print assList
 
 import random
 import math
+
+randY = False
+randomRotation = cmds.confirmDialog( title='randY', message='Randomise Y rotation?', button=['Yes','No'], defaultButton='Yes', cancelButton='No', dismissString='No' )
+
+if randomRotation == "Yes":
+    randY = True
+    print "Randomising Y axis"
 
 def sean_shuffle(list_to_pick_from, number_of_picks_needed):
 
@@ -47,7 +57,7 @@ def sean_shuffle(list_to_pick_from, number_of_picks_needed):
         random.shuffle(list_to_pick_from)
         shuffled_list.extend(list_to_pick_from)
     return shuffled_list[:number_of_picks_needed]
-    
+        
 # construct random selection path and assign standin path
 
 import pymel.core as pm
@@ -55,8 +65,10 @@ import pymel.core as pm
 path = []
 selection = cmds.ls( selection=True )
 randomObject = sean_shuffle(assList, len(selection))
-    
+        
 for i, j in enumerate(selection):
+    
+    
     print i, j
     
     path = dir+ randomObject[i]
@@ -65,3 +77,13 @@ for i, j in enumerate(selection):
     valueOld =  pm.getAttr( '{}.dso'.format(j) )
     valueNew = path
     pm.setAttr( '{}.dso'.format(j), valueNew) 
+    
+    #randomises y axis if True
+    if randY == True:
+        rotateBy = random.random()*360
+        cmds.setAttr(j+'.rotate', 0, rotateBy, 0, type="double3")
+
+    
+    
+    
+ 
