@@ -12,7 +12,7 @@ cmds.select( selected[0], selected[1] )
 motionPathName = cmds.pathAnimation(stu=1001, etu=1500, )
 cmds.keyTangent(motionPathName, itt='linear', ott='linear')
 
-step = 5
+step = 6
 thingsToRandomise = []
 thingsToRandomise = cmds.sets()
 #sets the time to 1001
@@ -31,4 +31,6 @@ while cmds.currentTime( query=True ) < 1500:
 cmds.sets( thingsToRandomise, q=True )
 cmds.select(thingsToRandomise)
 assetRandomiser.assetRandomiser()
-cmds.group()
+newGroup = cmds.group()
+cmds.setAttr(newGroup+'.translateY', 3500)
+
