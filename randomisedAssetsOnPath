@@ -1,0 +1,33 @@
+#Put standins on a path and duplicate them by a framestep
+#Source a directory to randomise the objects + rotation in
+
+
+#Select the curve, select the object:
+selected = cmds.ls(sl=True)
+cmds.select( selected[0], selected[1] )
+motionPathName = cmds.pathAnimation(stu=1001, etu=1500, )
+cmds.keyTangent(motionPathName, itt='linear', ott='linear')
+
+import maya.cmds as cmds
+
+step = 1
+thingsToRandomise = []
+    
+while cmds.currentTime( query=True ) < 1010:
+    newObject = cmds.duplicate( selected[1] )
+    timeNow = cmds.currentTime( query=True )
+    print timeNow
+    nextStep = timeNow+step
+    cmds.currentTime( nextStep, update=True, edit=True )
+    timeNow = cmds.currentTime( query=True )
+    #appends new object to list of things to randomise
+    thingsToRandomise.append(newObject)
+    
+import assetRandomiser
+reload(assetRandomiser)
+
+
+selectedShaders = cmds.ls(sl=True)
+
+for shader in selectedShaders:
+    addNodeBetween.addNodeBetween(shader)
