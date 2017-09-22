@@ -1,5 +1,8 @@
-//Updated defaults, fixed broken bevel section
 
+
+
+
+// MB notes: Fixed broken bevel, increase max-scale
 
 // MEL  script quickly creates customizable BRICK WALL in polygons.
 // Just load the script and run.
@@ -19,9 +22,9 @@ intSliderGrp -minValue 0 - maxValue 250 -value 5 - label "row" -field true value
 intSliderGrp -minValue 0 - maxValue 250 -value 5 - label "column" -field true value2;
 floatSliderGrp -minValue 0 - maxValue 1 - label "bevel" -field true value3;
 floatSliderGrp -minValue 0  -maxValue 0.4 - label "brick offset " -field true value7; 
-floatSliderGrp -minValue 0 - maxValue 20 -value 20 - label "width" -field true value4;
-floatSliderGrp -minValue 0 - maxValue 20 -value 10- label "height" -field true value5;
-floatSliderGrp -minValue 0 - maxValue 20 -value 7- label "depth" -field true value6;
+floatSliderGrp -minValue 0 - maxValue 200 -value 20 - label "width" -field true value4;
+floatSliderGrp -minValue 0 - maxValue 200 -value 10- label "height" -field true value5;
+floatSliderGrp -minValue 0 - maxValue 200 -value 7- label "depth" -field true value6;
 button - c "createBricks" -label "create";
 showWindow brickWallBuilder;
 
