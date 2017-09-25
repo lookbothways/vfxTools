@@ -4,7 +4,7 @@ import maya.cmds as cmds
 
 def addNodeBetween(shader):
 
-    chooseNode = cmds.confirmDialog( title='Insert node', message='Choose node type', button=['HSV','Gamma', 'Cancel'], defaultButton='Yes', cancelButton='Cancel', dismissString='No' )
+    chooseNode = cmds.confirmDialog( title='Insert node', message='Choose node type', button=['HSV','Gamma','Snow','Cancel'], defaultButton='Yes', cancelButton='Cancel', dismissString='No' )
  
     diffuseUpstream = []
 
@@ -37,6 +37,13 @@ def addNodeBetween(shader):
     if chooseNode == 'Gamma':
         nodeName = str(shader)+"_gamma"
         newNode = cmds.shadingNode('gammaCorrect', asShader=True, n=nodeName)
+        
+    if chooseNode == 'Snow':
+        nodeName = str(shader)+"_snow"
+        newNode = cmds.shadingNode('snow', asShader=True, n=nodeName)
+        cmds.setAttr(newNode+".depthDecay", 2.545)
+        cmds.setAttr(newNode+".threshold", 0.312)
+        cmds.setAttr(newNode+".thickness", 0.088)
                 
        
     #disconnect attributes
@@ -53,7 +60,9 @@ def addNodeBetween(shader):
         cmds.connectAttr( diffuseUpstream, newNode+".value" )
         cmds.connectAttr( newNode+".outValue", surfaceDiffuse  )
     
-
+    if chooseNode == 'Snow':
+        cmds.connectAttr( diffuseUpstream, newNode+".surfaceColor" )
+        cmds.connectAttr( newNode+".outColor", surfaceDiffuse  )
 
 
 """
@@ -69,7 +78,6 @@ for shader in selectedShaders:
 
 """
 print addNodeBetween
-
 
 
     
@@ -118,4 +126,3 @@ cmds.connectAttr( newHsvNode+".outColor", surfaceDiffuse  )
 
 
 """
-
