@@ -1,0 +1,1 @@
+find . -name '*.ass' -exec sed -i 's!E:/Sam/Documents/Freelance Work/Aftermath/Aftermath_Maya/textures/!/mnt/projects/aft/publish/assets/hamburg/textures/!g' '{}' \;
