@@ -1,0 +1,20 @@
+#Renames shader's shadingEngine to shader + SG
+
+shadingEngineName = []
+shader = cmds.ls(sl=True)
+
+
+def getShadingEngineName(connections):
+    for i,x in enumerate(connections):
+        if x == surfaceShader:
+            shadingEngineName = connections[i+1]
+            return shadingEngineName  
+
+
+surfaceShader = '%s.surfaceShader' % shader[0]
+connections = cmds.listConnections(shader, connections=True, t='shadingEngine')
+shadingEngine = connections[1]
+
+nodeName = str(shader[0])+"_SG"
+cmds.rename(shadingEngine, nodeName)
+
