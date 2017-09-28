@@ -24,3 +24,6 @@ for i in selected:
     
     cmds.expression( o=i, s='if (hider.translateY > rand('+i+'.translateY-100,'+i+'.translateY+50))\n\n\t'+i+'.visibility = 1;\n\n\nelse\n\n\t{\n\t'+i+'.visibility = 0;\n\t}')
     print "Expression set on "+i
+
+
+#end
