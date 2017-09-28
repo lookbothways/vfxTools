@@ -1,16 +1,6 @@
-
-"""
-Exports all selected objects as standins, creates empty container and reloads the standin
-With a dialoge and 'reimport' export only' buttons
-
+# Export all selected objects into standin by frame-step (for exporting walls)
 """
 
-import maya.cmds as cmds
-
-
-# Export all selected as individual standins to specified path
-
-"""
 Get the correct mask value using these constants:
     AI_NODE_UNDEFINED   0x0000
     AI_NODE_OPTIONS     0x0001
@@ -22,61 +12,51 @@ Get the correct mask value using these constants:
     AI_NODE_DRIVER      0x0040
     AI_NODE_FILTER      0x0080
     AI_NODE_ALL         0xFFFF
-    
-    
-No shaders:
 mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+print mask
+mask=173 mesh no shaders, but tse on.
+mask=253 export all the things
 
-Everything:
-mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_ALL
 
 """
 
 
-# Save in this folder dialogue
-export_dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here')
-export_dir = export_dir[0]+"/"
-
-
-mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
-print mask
+import maya.cmds as cmds
+#Set the frame-step here:
+step = 1
 
 selected = cmds.ls(sl=True)
 
-#Some options to choose from:
-option=""
-option=cmds.confirmDialog(title='Export selected as standIns',message="Export selected as standins",button=['Export and reimport', 'Export only','Cancel'],defaultButton='Export and reimport',cancelButton='Cancel',dismissString='Cancel')
 
-#empties reimport:
-reimport = ""
+# Save in this folder dialogue
+dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here')
+dir = dir[0]+"/"
 
-if option == 'Export and reimport':
-    reimport = True
-else:
-    reimport = False
+cmds.currentTime(1)
 
+while cmds.currentTime( query=True ) < 3:
+   
+   
+    frameNow = str(round(cmds.currentTime( query=True )))[0:-2]
+   
+    # CHANGE THIS to groupname
+    selectedName = str(selected)[3:-2]
+    name = str(selectedName)+"_"+frameNow
+   
+    timeNow = cmds.currentTime( query=True )
+    print timeNow
+    nextStep = timeNow+step
+    cmds.currentTime( nextStep, update=True, edit=True )
+    timeNow = cmds.currentTime( query=True )
+   
+    # export standin to this directory:
+   
+    #Makes the export path
+    export_file = "{}{}.ass".format(dir,name)
 
+    print "Exporting "+export_file
+       
+    # NAME IS THIS. Change this to the group you want to export per frame-step
 
-
-for sel in selected: 
-    #noUnicode = sel[3:-2]   
-    #groupname = (noUnicode)
-    print "Exporting {}".format(sel)
-    export_file = export_dir+sel+'.ass'
-    cmds.select(sel)
-    cmds.arnoldExportAss( f=export_file, fsh=True, mask=173, lightLinks=0, shadowLinks=0, selected=True)
-    
-    #reimports exported standin (reimport / export_only)
-    
-    if reimport == True:
-        cmds.file( export_file, i=True )
-        cmds.setAttr( "ArnoldStandInShape.deferStandinLoad", 0)
-        imported = cmds.ls( 'ArnoldStandIn*', sl=False )
-        
-        #selects and renames the standin
-        swapOutName = ( sel+"_standIn" )
-        cmds.rename( imported[0], swapOutName)
-        cmds.select( sel, swapOutName )
-        
-        
-#end
+    cmds.select( selected ) 
+    cmds.arnoldExportAss(f=export_file,fsh=True,s=True,frameStep=1,mask=173,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
