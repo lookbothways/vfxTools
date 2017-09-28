@@ -38,8 +38,7 @@ while cmds.currentTime( query=True ) < 3:
    
    
     frameNow = str(round(cmds.currentTime( query=True )))[0:-2]
-   
-    # CHANGE THIS to groupname
+
     selectedName = str(selected)[3:-2]
     name = str(selectedName)+"_"+frameNow
    
@@ -49,14 +48,13 @@ while cmds.currentTime( query=True ) < 3:
     cmds.currentTime( nextStep, update=True, edit=True )
     timeNow = cmds.currentTime( query=True )
    
-    # export standin to this directory:
    
     #Makes the export path
     export_file = "{}{}.ass".format(dir,name)
 
     print "Exporting "+export_file
        
-    # NAME IS THIS. Change this to the group you want to export per frame-step
-
-    cmds.select( selected ) 
+    cmds.select( selected, "joist_bent" ) 
     cmds.arnoldExportAss(f=export_file,fsh=True,s=True,frameStep=1,mask=173,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
+    cmds.select( clear=True )
+
