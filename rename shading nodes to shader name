@@ -1,0 +1,46 @@
+#Renames shader's shadingEngine to shader + SG
+
+def renameShadingEngine():
+        
+    shadingEngineName = []
+    shader = cmds.ls(sl=True)
+    
+    surfaceShader = '%s.surfaceShader' % shader[0]
+    connections = cmds.listConnections(shader, connections=True, t='shadingEngine')
+    shadingEngine = connections[1]
+    
+    nodeName = str(shader[0])+"_SG"
+    cmds.rename(shadingEngine, nodeName)
+
+
+def renameHistory():
+
+    for i in nodesToRename:
+        if i != shader:
+            
+            nodeName = shader+"_"+str(i)
+            print "Renaming to "+nodeName
+            cmds.rename(i, nodeName)
+    
+
+
+#----------------------
+
+shader = cmds.ls(sl=True)
+nodesToRename = cmds.listHistory()
+shader = shader[0]
+
+renameThings = cmds.confirmDialog( title='Rename nodes', message='Rename:', button=['shadingEngine','history only','both','Cancel'], defaultButton='both', cancelButton='Cancel', dismissString='No' )
+
+if renameThings == "both":
+    renameShadingEngine()
+    renameHistory()
+    
+if renameThings == "history only":
+    renameHistory()
+
+if renameThings == "shadingEngine":
+    renameShadingEngine()
+
+
+
