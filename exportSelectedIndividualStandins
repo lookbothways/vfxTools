@@ -58,3 +58,4 @@ while cmds.currentTime( query=True ) < 3:
     cmds.arnoldExportAss(f=export_file,fsh=True,s=True,frameStep=1,mask=173,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
     cmds.select( clear=True )
 
+#end
