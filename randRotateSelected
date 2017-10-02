@@ -1,0 +1,21 @@
+# Random scale selected, rotate selected
+
+import maya.cmds as cmds
+import random
+
+selected = cmds.ls(sl=True)
+
+i = []
+
+
+    
+for i in selected:
+    randX = random.random()*10.5         
+    randY = random.random()*10.5 
+    randZ = random.random()*10.5 
+    randRotX = (cmds.getAttr( i+'.rotateX')*randX)
+    randRotY = (cmds.getAttr( i+'.rotateX')*randY)               
+    randRotZ = (cmds.getAttr( i+'.rotateX')*randZ)
+    cmds.setAttr( i+'.rotate', randRotX, randRotY, randRotZ)
+
+#end
