@@ -1,3 +1,5 @@
+#randomisedAssetsOnPath
+
 #Put standins on a path and duplicate them by a framestep
 #Sources a directory to randomise the standin source + rotation
 
@@ -34,3 +36,4 @@ assetRandomiser.assetRandomiser()
 newGroup = cmds.group()
 cmds.setAttr(newGroup+'.translateY', 3500)
 
+#end
