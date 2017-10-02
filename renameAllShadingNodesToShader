@@ -1,5 +1,8 @@
 #Renames shader's shadingEngine to shader + SG
 
+import maya.cmds as cmds
+
+
 def renameShadingEngine():
         
     shadingEngineName = []
