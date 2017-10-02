@@ -81,7 +81,7 @@ for i, j in enumerate(selection):
     #randomises y axis if True
     if randY == True:
         rotateBy = random.random()*360
-    cmds.setAttr(j+'.rotate', 0, rotateBy, 0, type="double3")
+        cmds.setAttr(j+'.rotate', 0, rotateBy, 0, type="double3")
 
 
 #end
