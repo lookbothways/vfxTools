@@ -1,0 +1,774 @@
+global proc shelf_ldnPipeline () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import exportAnimStandins\nreload(exportAnimStandins)\n\nexportAnimStandins()" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import exportAnimStandins\nreload(exportAnimStandins)\n\nexportAnim..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "bake" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0.0131 0.3344 0.0131 1 
+        -image "bakeAnimation.png" 
+        -image1 "bakeAnimation.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import exportAnimStandins\nreload(exportAnimStandins)\n\nexportAnimStandins.doSomething()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import createMayaProjectDir\n#reload(createMayaProjectDir)\ncreateMayaProjectDir(dosomething)\n" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import createMayaProjectDir\n#reload(createMayaProjectDir)\ncreate..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "create" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0.0257 0.0772 0.0257 1 
+        -image "bakeParticles.png" 
+        -image1 "bakeParticles.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import createMayaProjectDir\n#reload(createMayaProjectDir)\ncreateMayaProjectDir(doSomething)\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Set project to current location" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.cmds as cmds\nimport maya.mel as mel\nimport os\nimport..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "setP" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "connect_NEX32.png" 
+        -image1 "connect_NEX32.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import setProjectHere\nreload(setProjectHere)\nsetProjectHere.setProjectHere()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Sets the shot frame-range based on camera keys" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "rev_set_res_and_range.mel" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Range" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 1 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import setRange\nreload(setRange)\nsetRange.setTimeline()\n\n\n\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import setupMayaLensDistortionOptions\nreload(setupMayaLensDistor..." 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import setupMayaLensDistortionOptions\nreload(setupMayaLensDistor..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "LENS" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 1 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import setupMayaLensDistortionOptions\nreload(setupMayaLensDistortionOptions)\nsetupMayaLensDistortionOptions.doSomething()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "#separator" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "#separator" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "/mnt/resources/maya/scripts/pipeline/customIcons/separator.png" 
+        -image1 "/mnt/resources/maya/scripts/pipeline/customIcons/separator.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "#separator" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "from convertBackplates import convertBackplatesPng\nreload(convertBackplatesPng)\nconvertBackplatesPng.convertBackplates()" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "from convertBackplates import convertBackplatesPng\nreload(conver..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "pngBP" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "from convertBackplates import convertBackplatesPng\nreload(convertBackplatesPng)\nconvertBackplatesPng.convertBackplates()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Convert backplates to linear exrs" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "\nfrom convertBackplates import convertBackplates\nreload(convertB..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "exrBP" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "\nfrom convertBackplates import convertBackplates\nreload(convertBackplates)\nconvertBackplates.convertBackplates()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Sets selected geo as the shadowCatching inMesh" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "\n\nsceneGeo = cmds.ls( selection=True )\nprint sceneGeo\n\n#Freeze t..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "sCatch" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "render_surfaceLuminance.png" 
+        -image1 "render_surfaceLuminance.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import setGeoToShadowCatcher\nreload(setGeoToShadowCatcher)\nsetGeoToShadowCatcher.setGeo()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "apply alShader light groups to all lights" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "proc addLightGroupParameter(){\n  \n\n        //string $sel[]=`ls -..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "lgtGp" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "light.png" 
+        -image1 "light.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "proc addLightGroupParameter(){\n  \n\n        //string $sel[]=`ls -sl -l -lights`; // NOTE this will not catch arnold light types\n\n        // ----------------------- just do all the lights - this might need categories added for other arnold lights --------------\n        string $sel[]=`ls -l -lights`;\n        string $skyDomes[]=`ls -l -typ \"aiSkyDomeLight\"`;\n        string $areaLight[]=`ls -l -typ \"aiAreaLight\"`; // arnold light type - there are others\n        $sel=stringArrayCatenate($sel,$skyDomes);\n        $sel=stringArrayCatenate($sel,$areaLight);\n        // -------------------------------------------------------------------------------------------------------------------------\n    // this is the bit you need ....\n        for($x in $sel){\n                if(!`attributeExists \"mtoa_constant_lightGroup\" $x`){\n                        addAttr -ln \"mtoa_constant_lightGroup\"  -at long -dv 1 $x;\n                        setAttr -e-keyable true ($x+\".mtoa_constant_lightGroup\");\n                }\n        }\n}\n\naddLightGroupParameter();\nprint \"Added constant lightGroup to lights - see shape node Extra Attributes for details.\";" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Export selected Locators as FBX" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "#Run any python file\nimport maya.cmds as cmds\nimport sys\nimport ..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "expLoc" 
+        -overlayLabelColor 1 1 1 
+        -overlayLabelBackColor 0.647 0.1869 0 0.5 
+        -image "commandButton.png" 
+        -image1 "commandButton.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import locatorFBXExport\nreload(locatorFBXExport)\n\nlocatorFBXExport.exportlocs()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "shows assistants" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "\n#shows the lightRigAssistant chromeBall and greyBall (anything ..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "shAsts" 
+        -overlayLabelColor 1 1 1 
+        -overlayLabelBackColor 0.528042 0.362343 0.528042 0.5 
+        -image "sphere.png" 
+        -image1 "sphere.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import showAssistants\nreload(showAssistants)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "swapOut" 
+        -enableBackground 1
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "\n\nimport maya.cmds as cmds\nimport arnold\nimport pymel.core as py..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "swap" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0.173545 0.173545 0.173545 0.9 
+        -image "/mnt/resources/maya/scripts/pipeline/customIcons/swap.png" 
+        -image1 "/mnt/resources/maya/scripts/pipeline/customIcons/swap.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import swapOut\nreload(swapOut)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Makes a mov for fTrack" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "#Makes a .mov for fTrack from playblasts of the scene \n\nimport o..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "to mov" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "batchRender.png" 
+        -image1 "batchRender.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import playblastToMov\nreload(playblastToMov)\n\n#Location: /mnt/resources/atk_deploy/resources/app/maya/scripts" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Open Arnold Render View" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import mtoa.ui.arnoldmenu as arnoldmenu; arnoldmenu.arnoldMtoARe..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "rView" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0.100691 0.100691 0.100691 0.8 
+        -image "/mnt/resources/maya/scripts/pipeline/customIcons/arnold_A.png" 
+        -image1 "/mnt/resources/maya/scripts/pipeline/customIcons/arnold_A.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import mtoa.ui.arnoldmenu as arnoldmenu; arnoldmenu.arnoldMtoARenderView()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "FlushCaches" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.cmds as cmds;cmds.arnoldFlushCache(flushall=True)" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "flush" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.6 
+        -image "/mnt/resources/maya/scripts/pipeline/customIcons/arnold_A.png" 
+        -image1 "/mnt/resources/maya/scripts/pipeline/customIcons/arnold_A.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import maya.cmds as cmds;cmds.arnoldFlushCache(flushall=True)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Deadline Pre Render Checks" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.cmds as cmds\nimport maya.mel as mel\nimport sys\nimpor..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "PRC" 
+        -overlayLabelColor 1 1 1 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "/mnt/deadlinerepository/submission/Maya/Main/Submit.png" 
+        -image1 "/mnt/deadlinerepository/submission/Maya/Main/Submit.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "from sanityChecks import sanityChecks\nreload(sanityChecks)\nsanityChecks.executeThis()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "copy stepped frames" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import copySteppedFrames\nreload(copySteppedFrames)\ncopySteppedFr..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "cpStep" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.9 
+        -image "copySkinWeight.png" 
+        -image1 "copySkinWeight.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import copySteppedFrames\ncopySteppedFrames" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "#separator" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "#separator" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "/mnt/resources/maya/scripts/pipeline/customIcons/separator.png" 
+        -image1 "/mnt/resources/maya/scripts/pipeline/customIcons/separator.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "#separator" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "TT: Attach Tentacle to path" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import tt_attachTentacleToPath\nreload(tt_attachTentacleToPath)" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "attPth" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0.1622 0.6862 0.8 
+        -image "bezWeightedSelect.png" 
+        -image1 "bezWeightedSelect.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import tt_attachTentacleToPath\nreload(tt_attachTentacleToPath)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Bake texture sequence (Mental Ray)" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import bakeTextureSequence\nreload(bakeTextureSequence)" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "bakeTx" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0.1622 0.6862 0.9 
+        -image "bakeParticles.png" 
+        -image1 "bakeParticles.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import bakeTextureSequence\nreload(bakeTextureSequence)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Connect / Disconnect weaponised tentacle" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import attach_weapons\nimport maya.cmds as cmds\n\ndef getOption():..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "conTen" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 1 0.5 
+        -image "bendNLD.png" 
+        -image1 "bendNLD.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import attach_weapons\nimport maya.cmds as cmds\n\ndef getOption():\n    \n    option=cmds.confirmDialog( \n        title='Weaponised Tentacle',\n        message='Connect weaponised tentacle',\n        button=['Connect','Disconnect','Cancel'],\n        defaultButton='Connect',\n        cancelButton='Cancel',\n        dismissString='Cancel'\n        )\n\n    return option\n\ndef doSomething():\n\n    option=getOption()\n\n    if option=='Cancel':\n        return\n\n    if option=='Connect':\n        attach_weapons.connect()\n        print \"Attempting to connect tentacle\"\n\n    if option=='Disconnect':\n        attach_weapons.disconnect()\n        print \"Attempting to disconnect tentacle\"\n\ndoSomething()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 23
+        -height 23
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import addNodeBetween\nreload(addNodeBetween)\n\n\nselectedShaders = cmds.ls(sl=True)\n\nfor shader in selectedShaders:\n    addNodeBetween.addNodeBetween(shader)" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import addNodeBetween\nreload(addNodeBetween)\n\n\nselectedShaders =..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "addBtw" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "invertSelection.png" 
+        -image1 "invertSelection.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import addNodeBetween\nreload(addNodeBetween)\n\n\nselectedShaders = cmds.ls(sl=True)\n\nfor shader in selectedShaders:\n    addNodeBetween.addNodeBetween(shader)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 23
+        -height 23
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import renameShadingNodes\nreload(renameShadingNodes)\n" 
+        -enableBackground 0
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import renameShadingNodes\nreload(renameShadingNodes)\n" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "rnmShd" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "ShadowsDown.png" 
+        -image1 "ShadowsDown.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import renameShadingNodes\nreload(renameShadingNodes)\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+
+} 
