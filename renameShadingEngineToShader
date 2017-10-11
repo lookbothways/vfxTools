@@ -1,12 +1,18 @@
 #Renames shader's shadingEngine to shader + SG
 
-shadingEngineName = []
+import maya.cmds as cmds
+
 shader = cmds.ls(sl=True)
 
-surfaceShader = '%s.surfaceShader' % shader[0]
-connections = cmds.listConnections(shader, connections=True, t='shadingEngine')
-shadingEngine = connections[1]
+for i in shader:
 
-nodeName = str(shader[0])+"_SG"
-cmds.rename(shadingEngine, nodeName)
-
+    shadingEngineName = []
+    
+    
+    surfaceShader = '%s.surfaceShader' % i
+    connections = cmds.listConnections(i, connections=True, t='shadingEngine')
+    shadingEngine = connections[1]
+    
+    nodeName = str(i)+"_SG"
+    cmds.rename(shadingEngine, nodeName)
+    
