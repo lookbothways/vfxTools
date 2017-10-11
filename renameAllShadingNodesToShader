@@ -1,3 +1,6 @@
+
+    
+    
 #Renames shader's shadingEngine to shader + SG
 
 import maya.cmds as cmds
@@ -22,16 +25,21 @@ def renameShadingNodes():
 
 
     def renameShadingEngine():
-            
+
+
+        #for i in nodesToRename:
+
         shadingEngineName = []
-        shader = cmds.ls(sl=True)
         
-        surfaceShader = '%s.surfaceShader' % shader[0]
-        connections = cmds.listConnections(shader, connections=True, t='shadingEngine')
+        
+        surfaceShader = '%s.surfaceShader' % i
+        connections = cmds.listConnections(i, connections=True, t='shadingEngine')
         shadingEngine = connections[1]
         
-        nodeName = str(shader[0])+"_SG"
+        nodeName = str(i)+"_SG"
         cmds.rename(shadingEngine, nodeName)
+            
+    
 
 
     def renameHistory():
@@ -52,7 +60,7 @@ def renameShadingNodes():
         shader = i
         nodesToRename = cmds.listHistory(i)
         print nodesToRename
-        #shader = shader[0]
+
         
         if renameThings == "both":
             renameShadingEngine()
@@ -63,6 +71,18 @@ def renameShadingNodes():
         
         if renameThings == "shadingEngine":
             renameShadingEngine()
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
