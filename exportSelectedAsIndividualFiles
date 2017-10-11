@@ -48,26 +48,34 @@ selected = cmds.ls(sl=True)
 
 #Some options to choose from:
 option=""
-option=cmds.confirmDialog(title='Export selected as standIns',message="Export selected as standins",button=['Export and reimport', 'Export only','Cancel'],defaultButton='Export and reimport',cancelButton='Cancel',dismissString='Cancel')
+option=cmds.confirmDialog(title='Export selected',message="Export selected as standins",button=['Export and reimport .ass', 'Export .ass only', 'Export OBJs', 'Cancel'],defaultButton='Export and reimport',cancelButton='Cancel',dismissString='Cancel')
 
 #empties reimport:
 reimport = ""
 
-if option == 'Export and reimport':
+if option == 'Export and reimport .ass':
     reimport = True
 else:
     reimport = False
 
-
+if option == 'Export OBJs':
+    suffix = ".obj"
+else:
+    suffix = ".ass"
 
 
 for sel in selected: 
     #noUnicode = sel[3:-2]   
     #groupname = (noUnicode)
     print "Exporting {}".format(sel)
-    export_file = export_dir+sel+'.ass'
+    export_file = export_dir+sel+suffix
     cmds.select(sel)
-    cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=0, shadowLinks=0, selected=True)
+    
+    if option == 'Export OBJs':
+        cmds.file(export_file,pr=1,typ="OBJexport",es=1,op="groups=0; ptgroups=0; materials=0; smoothing=0; normals=0")
+    else:
+        cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=0, shadowLinks=0, selected=True)
+    
     
     #reimports exported standin (reimport / export_only)
     
@@ -83,3 +91,5 @@ for sel in selected:
         
         
 #end
+
+
