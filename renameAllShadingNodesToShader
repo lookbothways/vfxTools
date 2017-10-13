@@ -1,5 +1,5 @@
 
-    
+  
     
 #Renames shader's shadingEngine to shader + SG
 
@@ -21,9 +21,6 @@ renameShadingNodes.renameShadingNodes()
 
 def renameShadingNodes():
 
-
-
-
     def renameShadingEngine():
 
 
@@ -39,22 +36,29 @@ def renameShadingNodes():
         nodeName = str(i)+"_SG"
         cmds.rename(shadingEngine, nodeName)
             
-    
-
-
     def renameHistory():
-
+        incNodeType = ""
+        nodeName = ""
+        
         for i in nodesToRename:
             if i != shader:
                 
-                nodeName = shader+"_"+str(i)
+                if includeNodeType == 'Existing name + type':
+                    incNodeType = "_"+cmds.nodeType( i )
+                    print "Adding nodeType "+incNodeType
+                    nodeName = shader+"_"+str(i)+incNodeType
+
+                if includeNodeType == 'Shader name + type only':
+                    incNodeType = "_"+cmds.nodeType( i )
+                    print "Adding nodeType "+incNodeType 
+                    nodeName = shader+incNodeType                   
+                
                 print "Renaming to "+nodeName
                 cmds.rename(i, nodeName)
 
-
     selected = cmds.ls(sl=True)
     renameThings = cmds.confirmDialog( title='Rename nodes', message='Rename:', button=['shadingEngine','history only','both','Cancel'], defaultButton='both', cancelButton='Cancel', dismissString='No' )
-
+    includeNodeType = cmds.confirmDialog( title='Include nodeType', message='Include nodeType in name?', button=['Existing name + type','Shader name + type only','No'], defaultButton='Yes', cancelButton='Cancel', dismissString='No' )
 
     for i in selected:
         shader = i
@@ -71,29 +75,7 @@ def renameShadingNodes():
         
         if renameThings == "shadingEngine":
             renameShadingEngine()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#end
 
 
 
