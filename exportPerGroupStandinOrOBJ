@@ -1,10 +1,10 @@
 """
-exportSelectedIndividualStandins
+export per-group standins / OBJs
 
-Exports all selected objects as standins, creates empty container and reloads the standin
-With a dialoge and 'reimport' export only' buttons
+Exports all selected groups as separate standins or OBJ files. Filename is group name.
+Creates empty container and reloads the standin if required.
 
-Check the mask value is what you want (no shaders / everything)
+If standins: Check the mask value is what you want (no shaders / everything)
 
 """
 
@@ -90,6 +90,22 @@ for sel in selected:
         cmds.select( sel, swapOutName )
         
         
-#end
+#MB end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
