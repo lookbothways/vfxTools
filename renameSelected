@@ -1,0 +1,21 @@
+
+"""
+Renames selected objects via a prompt, numbers them
+"""
+
+import maya.cmds as cmds
+# import maya.mel as mel
+
+selected_objects = cmds.ls(selection=True)
+
+
+# specify new name here
+result = cmds.promptDialog(title='Rename Object',message='Enter Name:',button=['OK', 'Cancel'],defaultButton='OK',dismissString='Cancel')
+
+if result == 'OK':
+    newname = cmds.promptDialog(query=True, text=True)+"_"
+
+for number, object in enumerate(selected_objects):
+    cmds.rename(object, ('%s%02d' % (newname, number)))
+
+#end
