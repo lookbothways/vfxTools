@@ -31,7 +31,7 @@ diffusePosition = [i for i,x in enumerate(connections) if x == surfaceDiffuse]
 diffuseUpstream = findDiffuseUpstream(connections)
 
 #nodename
-nodeName = str(shader[0])+"_bump"
+nodeName = str(shader[0])+"_bump2d"
    
 #disconnect attributes
 print "Adding bump to "+str(diffuseUpstream)+" using "+str(surfaceDiffuse)
