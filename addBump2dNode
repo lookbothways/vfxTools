@@ -1,8 +1,8 @@
 """
 easyBump
-aka addBump2dNode
 
-Gets the diffuse of the selected shader, creates a bump node and connects the green channel (Y) to bump value
+Gets the diffuse of the selected shader, creates a bump node and connects the green channel (to bump value.
+Works on nodes with outColorG and outValueY.
 
 """
 
@@ -35,10 +35,15 @@ nodeName = str(shader[0])+"_bump"
    
 #disconnect attributes
 print "Adding bump to "+str(diffuseUpstream)+" using "+str(surfaceDiffuse)
-
 newBumpNode = cmds.shadingNode('bump2d', asShader=True, n=nodeName)
      
-# Hooks them all up   
-cmds.connectAttr( diffuseUpstream+".outColorG", newBumpNode+".bumpValue" )
+# Hooks them all up - maybe it's a gamma, so tries outValueY also
+try:
+    cmds.connectAttr( diffuseUpstream+".outValueY", newBumpNode+".bumpValue")
+except RuntimeError:
+    cmds.connectAttr( diffuseUpstream+".outColorG", newBumpNode+".bumpValue" )
+
+    
 cmds.connectAttr( newBumpNode+".outNormal", shader[0]+".normalCamera"  )
 
+#end MSB171017
