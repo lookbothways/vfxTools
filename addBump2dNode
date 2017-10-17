@@ -1,0 +1,44 @@
+"""
+easyBump
+aka addBump2dNode
+
+Gets the diffuse of the selected shader, creates a bump node and connects the green channel (Y) to bump value
+
+"""
+
+
+diffuseUpstream = []
+shader = cmds.ls(sl=True)
+
+def findDiffuseUpstream(connections):
+   
+    for i,x in enumerate(connections):
+        if x == surfaceDiffuse:
+            diffuseUpstream = connections[i+1]
+            return diffuseUpstream
+          
+
+   
+print "Shader "+ str(shader)
+# if alshader
+surfaceDiffuse = '%s.diffuseColor' % shader[0]
+connections = cmds.listConnections(shader, connections=True, p=True)
+
+#get position of diffuse colour
+diffusePosition = [i for i,x in enumerate(connections) if x == surfaceDiffuse]
+
+#get the name of the upstream node (if alshader '.diffuseColor' plug)
+diffuseUpstream = findDiffuseUpstream(connections)
+
+#nodename
+nodeName = str(shader[0])+"_bump"
+   
+#disconnect attributes
+print "Adding bump to "+str(diffuseUpstream)+" using "+str(surfaceDiffuse)
+
+newBumpNode = cmds.shadingNode('bump2d', asShader=True, n=nodeName)
+     
+# Hooks them all up   
+cmds.connectAttr( diffuseUpstream+".outColorG", newBumpNode+".bumpValue" )
+cmds.connectAttr( newBumpNode+".outNormal", shader[0]+".normalCamera"  )
+
