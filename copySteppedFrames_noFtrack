@@ -2,11 +2,9 @@
 standalone framestep (stripped fTrack dependency)
 
 """
-
-
-
-#fTStart = 940
-#fTEnd = 1416
+import maya.cmds as cmds
+import re
+import string
 
 fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
 fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
