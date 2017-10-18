@@ -1,15 +1,15 @@
 """
 standalone framestep (stripped fTrack dependency)
-ToDo:
-Dialogue to enter custom range
 
 """
 
-fTStart = 940
-fTEnd = 1416
 
-fStart = 940
-fEnd = 1416
+
+#fTStart = 940
+#fTEnd = 1416
+
+fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
+fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
 
 matchStart = ""
 matchEnd = ""
@@ -19,13 +19,30 @@ alert = ""
 option=cmds.confirmDialog( 
 	title='frameSteps to copyBuffer',
 	message="Create stepped frame range list: {} - {} ?\n\n".format(fStart, fEnd),
-	button=['Tenths','Fill gaps','Cancel'],
+	button=['Tenths','Fill gaps','Custom range','Cancel'],
 	defaultButton='Copy',
 	cancelButton='Cancel',
 	dismissString='Cancel'
 	)
 	
-	
+if option == "Custom range":
+    print "Enter custom range:"	
+    result = cmds.promptDialog(title='Enter custom range:',message='start-end',button=['OK', 'Cancel'],defaultButton='OK',dismissString='Cancel')
+    if result == 'OK':
+        output = cmds.promptDialog(query=True, text=True).split("-")
+        fStart = int(output[0])
+        fEnd = int(output[1])
+        
+        option=cmds.confirmDialog( 
+        	title='frameSteps to copyBuffer',
+        	message="Create stepped frame range list: {} - {} ?\n\n".format(fStart, fEnd),
+        	button=['Tenths','Fill gaps','Cancel'],
+        	defaultButton='Copy',
+        	cancelButton='Cancel',
+        	dismissString='Cancel'
+        	)
+        	
+
 
 if option == 'Tenths':
 
@@ -72,3 +89,8 @@ if option == 'Fill gaps':
 	clipboard= QtGui.QApplication.clipboard()
 	clipboard.setText(frameSplit) # set clipboard
 	print "Range copied: {}".format(clipboard.text()) 
+	
+	
+	
+	
+#end MB181017
