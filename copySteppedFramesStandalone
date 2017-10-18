@@ -85,7 +85,7 @@ if option == 'Fill gaps':
 	
 	from PySide import QtGui
 	clipboard= QtGui.QApplication.clipboard()
-	clipboard.setText(frameSplit) # set clipboard
+	clipboard.setText(frameSplit[1:-1]) # set clipboard
 	print "Range copied: {}".format(clipboard.text()) 
 	
 	
