@@ -6,89 +6,91 @@ import maya.cmds as cmds
 import re
 import string
 
-fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
-fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
+def copySteppedFramesStandalone():
 
-matchStart = ""
-matchEnd = ""
-alert = ""
+	fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
+	fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
 
-
-option=cmds.confirmDialog( 
-	title='frameSteps to copyBuffer',
-	message="Create stepped frame range list: {} - {} ?\n\n".format(fStart, fEnd),
-	button=['Tenths','Fill gaps','Custom range','Cancel'],
-	defaultButton='Copy',
-	cancelButton='Cancel',
-	dismissString='Cancel'
-	)
-	
-if option == "Custom range":
-    print "Enter custom range:"	
-    result = cmds.promptDialog(title='Enter custom range:',message='start-end',button=['OK', 'Cancel'],defaultButton='OK',dismissString='Cancel')
-    if result == 'OK':
-        output = cmds.promptDialog(query=True, text=True).split("-")
-        fStart = int(output[0])
-        fEnd = int(output[1])
-        
-        option=cmds.confirmDialog( 
-        	title='frameSteps to copyBuffer',
-        	message="Create stepped frame range list: {} - {} ?\n\n".format(fStart, fEnd),
-        	button=['Tenths','Fill gaps','Cancel'],
-        	defaultButton='Copy',
-        	cancelButton='Cancel',
-        	dismissString='Cancel'
-        	)
-        	
+	matchStart = ""
+	matchEnd = ""
+	alert = ""
 
 
-if option == 'Tenths':
+	option=cmds.confirmDialog( 
+		title='frameSteps to copyBuffer',
+		message="Create stepped frame range list: {} - {} ?\n\n".format(fStart, fEnd),
+		button=['Tenths','Fill gaps','Custom range','Cancel'],
+		defaultButton='Copy',
+		cancelButton='Cancel',
+		dismissString='Cancel'
+		)
+	
+	if option == "Custom range":
+		print "Enter custom range:"	
+		result = cmds.promptDialog(title='Enter custom range:',message='start-end',button=['OK', 'Cancel'],defaultButton='OK',dismissString='Cancel')
+		if result == 'OK':
+		    output = cmds.promptDialog(query=True, text=True).split("-")
+		    fStart = int(output[0])
+		    fEnd = int(output[1])
+		    
+		    option=cmds.confirmDialog( 
+		    	title='frameSteps to copyBuffer',
+		    	message="Create stepped frame range list: {} - {} ?\n\n".format(fStart, fEnd),
+		    	button=['Tenths','Fill gaps','Cancel'],
+		    	defaultButton='Copy',
+		    	cancelButton='Cancel',
+		    	dismissString='Cancel'
+		    	)
+		    	
+
+
+	if option == 'Tenths':
 
 	
-	# Create stepped string
+		# Create stepped string
 
-	renderOrder = [fStart,fEnd]
-	renderme= set(range(fStart,fEnd+1))
-	renderTenths=range(fStart, fEnd, 10)
-	renderOrder+= renderTenths[1:]
-	rest=list(renderme-set(renderOrder))
-	renderOrder+=sorted(rest)
+		renderOrder = [fStart,fEnd]
+		renderme= set(range(fStart,fEnd+1))
+		renderTenths=range(fStart, fEnd, 10)
+		renderOrder+= renderTenths[1:]
+		rest=list(renderme-set(renderOrder))
+		renderOrder+=sorted(rest)
 	
-	frameSplit = ",".join([str(i) for i in renderOrder])
+		frameSplit = ",".join([str(i) for i in renderOrder])
 	
-	# puts frameSplit in the copybuffer
+		# puts frameSplit in the copybuffer
 	
-	from PySide import QtGui
-	clipboard= QtGui.QApplication.clipboard()
-	clipboard.setText(frameSplit) # set clipboard
-	print "Range copied: {}".format(clipboard.text()) 
+		from PySide import QtGui
+		clipboard= QtGui.QApplication.clipboard()
+		clipboard.setText(frameSplit) # set clipboard
+		print "Range copied: {}".format(clipboard.text()) 
 	
 
-if option == 'Fill gaps': 
+	if option == 'Fill gaps': 
 	
-	# Evenly Distributed frames
+		# Evenly Distributed frames
 	
-	framelist= [fStart, fEnd]
-	gaps= True #go into loop
-	while gaps:
-	    a= list(sorted(framelist))
-	    print "sorted framelist", a
-	    #gaps= [x+ (y- x)// 2 for x, y in zip(list(a)[:-1], list(a)[1:]) if x+ (y- x)// 2 not in a]
-	    gaps= [x+ (y- x)// 2 for x, y in zip(list(a)[:-1], list(a)[1:]) if x+ (y- x)// 2 not in a]
-	    print "gaps", gaps
-	    framelist+= gaps
-	            
-	frameSplit = "".join(str(framelist))
-	    
+		framelist= [fStart, fEnd]
+		gaps= True #go into loop
+		while gaps:
+			a= list(sorted(framelist))
+			print "sorted framelist", a
+			#gaps= [x+ (y- x)// 2 for x, y in zip(list(a)[:-1], list(a)[1:]) if x+ (y- x)// 2 not in a]
+			gaps= [x+ (y- x)// 2 for x, y in zip(list(a)[:-1], list(a)[1:]) if x+ (y- x)// 2 not in a]
+			print "gaps", gaps
+			framelist+= gaps
+			        
+		frameSplit = "".join(str(framelist))
+			
 	
-	# puts frameSplit in the copybuffer
+		# puts frameSplit in the copybuffer
 	
-	from PySide import QtGui
-	clipboard= QtGui.QApplication.clipboard()
-	clipboard.setText(frameSplit[1:-1]) # set clipboard
-	print "Range copied: {}".format(clipboard.text()) 
-	
-	
+		from PySide import QtGui
+		clipboard= QtGui.QApplication.clipboard()
+		clipboard.setText(frameSplit[1:-1]) # set clipboard
+		print "Range copied: {}".format(clipboard.text()) 
 	
 	
-#end MB181017
+	
+	
+	#end MB181017
