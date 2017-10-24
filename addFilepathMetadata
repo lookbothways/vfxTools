@@ -1,0 +1,48 @@
+def addFilePathMetaData():
+    
+    # Adds metaData of saved name to the mayaFile metaData slot 
+    
+    
+    nodeName = "defaultArnoldDriver.customAttributes"
+    filePath = cmds.file(q=1,sn=1)
+    mayaFile = {"type":"STRING","name":"mayaFile","value": filePath}
+    
+    
+    def addAttribute(nodeName, value):
+        #add an attribute
+        nextIndex = 0
+        if cmds.getAttr(nodeName, multiIndices= True):
+            nextIndex = cmds.getAttr(nodeName, multiIndices= True)[-1] + 1
+        cmds.setAttr(nodeName+'['+str(nextIndex)+']', "%s %s %s" % (value["type"],value["name"],value["value"]), type="string")
+    
+    def changeAttribute(nodename, value):
+        for nodeNameIndex,i in enumerate(pymel.core.getAttr(nodeName)):
+            j= i.split(" ")
+            if len(j)>1:
+                if j[1] == 'mayaFile':
+                    cmds.setAttr(nodeName+'['+str(nodeNameIndex)+']', "%s %s %s" % (value["type"],value["name"],value["value"]), type="string")
+                    break
+    
+    attributes=[]
+    for i in pymel.core.getAttr(nodeName):
+        j= i.split(" ")
+        if len(j)>1:
+            attributes.append( j[1])
+        
+        
+    if "mayaFile" in attributes:
+        metaDataAction = "mayaFile attribute existed, overwrote with new filename."
+        #change the attribute
+        changeAttribute(nodeName,mayaFile)
+    
+                
+    else:
+        #add an attribute
+        metaDataAction = "mayaFile attribute did not exist. Added it for you."
+        addAttribute(nodeName,mayaFile)
+     
+    print "Added metaData"
+    #sys.stdout.write("metaData status: %s\n" %metaDataAction)
+
+
+#end
