@@ -1,3 +1,5 @@
+#Select objects, run this: 
+
 # Random scale selected, rotate selected
 
 import maya.cmds as cmds
@@ -19,6 +21,10 @@ def randomiseObjects():
         randRotZ = (cmds.getAttr( i+'.rotateX')*randZ)
         cmds.setAttr( i+'.rotate', randRotX, randRotY, randRotZ)
 
+
+# THEN rewind the scene to frame 1, set the step and number of frames and number of frames.
+
+step = 1
 
 
 """
@@ -58,8 +64,6 @@ mask=253 export all the things
 """
 
 
-import maya.cmds as cmds
-step = 1
 
 #directory is this. INCLUDE THE SLASH
 dir = "/mnt/projects/aft/publish/assets/hamburg/geo/newGirders/"
@@ -71,7 +75,7 @@ while cmds.currentTime( query=True ) < 5:
     frameNow = str(round(cmds.currentTime( query=True )))[0:-2]
    
     # CHANGE THIS to groupname
-    name = "tw07_front_"+frameNow
+    name = "allGirds_"+frameNow
    
     timeNow = cmds.currentTime( query=True )
     print timeNow
