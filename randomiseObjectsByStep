@@ -1,0 +1,95 @@
+# Random scale selected, rotate selected
+
+import maya.cmds as cmds
+import random
+import time
+
+randomiseThese = cmds.ls(sl=True)
+
+def randomiseObjects():
+
+    i = []
+        
+    for i in randomiseThese:
+        randX = random.random()*100.5         
+        randY = random.random()*100.5 
+        randZ = random.random()*100.5 
+        randRotX = (cmds.getAttr( i+'.rotateX')*randX)
+        randRotY = (cmds.getAttr( i+'.rotateX')*randY)               
+        randRotZ = (cmds.getAttr( i+'.rotateX')*randZ)
+        cmds.setAttr( i+'.rotate', randRotX, randRotY, randRotZ)
+
+
+
+"""
+#frame advance by step
+
+step = 1
+timeNow = cmds.currentTime( query=True )
+print timeNow
+nextStep = timeNow+step
+cmds.currentTime( nextStep, update=True, edit=True )
+timeNow = cmds.currentTime( query=True )
+
+"""
+
+#end of part 1
+
+# Export all selected objects into standin by frame-step (for exporting walls)
+"""
+
+Get the correct mask value using these constants:
+    AI_NODE_UNDEFINED   0x0000
+    AI_NODE_OPTIONS     0x0001
+    AI_NODE_CAMERA      0x0002
+    AI_NODE_LIGHT       0x0004
+    AI_NODE_SHAPE       0x0008
+    AI_NODE_SHADER      0x0010
+    AI_NODE_OVERRIDE    0x0020
+    AI_NODE_DRIVER      0x0040
+    AI_NODE_FILTER      0x0080
+    AI_NODE_ALL         0xFFFF
+mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+print mask
+mask=173 mesh no shaders, but tse on.
+mask=253 export all the things
+
+
+"""
+
+
+import maya.cmds as cmds
+step = 1
+
+#directory is this. INCLUDE THE SLASH
+dir = "/mnt/projects/aft/publish/assets/hamburg/geo/newGirders/"
+
+
+while cmds.currentTime( query=True ) < 5:
+   
+   
+    frameNow = str(round(cmds.currentTime( query=True )))[0:-2]
+   
+    # CHANGE THIS to groupname
+    name = "tw07_front_"+frameNow
+   
+    timeNow = cmds.currentTime( query=True )
+    print timeNow
+    nextStep = timeNow+step
+    cmds.currentTime( nextStep, update=True, edit=True )
+    timeNow = cmds.currentTime( query=True )
+   
+    # export standin to this directory:
+   
+    #Makes the export path
+    export_file = "{}{}.ass".format(dir,name)
+
+    print "Exporting "+export_file
+       
+    # NAME IS THIS. Change this to the group you want to export per frame-step
+
+    cmds.select( 'allGirds' ) 
+    cmds.arnoldExportAss(f=export_file,fsh=True,s=True,frameStep=1,mask=253,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
+    randomiseObjects()
+
+#end
