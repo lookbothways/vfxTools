@@ -1,6 +1,4 @@
-#Select objects, run this: 
-
-# Random scale selected, rotate selected
+# Random scale selected, rotate selected - THIS SCRIPT IS NOT FINISHED. Though it works.
 
 import maya.cmds as cmds
 import random
@@ -21,10 +19,6 @@ def randomiseObjects():
         randRotZ = (cmds.getAttr( i+'.rotateX')*randZ)
         cmds.setAttr( i+'.rotate', randRotX, randRotY, randRotZ)
 
-
-# THEN rewind the scene to frame 1, set the step and number of frames and number of frames.
-
-step = 1
 
 
 """
@@ -64,6 +58,7 @@ mask=253 export all the things
 """
 
 
+step = 1
 
 #directory is this. INCLUDE THE SLASH
 dir = "/mnt/projects/aft/publish/assets/hamburg/geo/newGirders/"
