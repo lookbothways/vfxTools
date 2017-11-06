@@ -35,5 +35,6 @@ cmds.select(thingsToRandomise)
 assetRandomiser.assetRandomiser()
 newGroup = cmds.group()
 cmds.setAttr(newGroup+'.translateY', 3500)
+cmds.delete(motionPathName)
 
 #end
