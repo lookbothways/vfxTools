@@ -31,7 +31,6 @@ mask=253 export all the things
 
 """
 
-
 randomiseThese = cmds.ls(sl=True)
 
 def randomiseObjects():
@@ -52,121 +51,26 @@ def randomiseObjects():
 step = 1
 numberOfThingsToExport = 5
 
+
 cmds.currentTime( 1 )
 
 # Choose output directory
 dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here')
-dir = export_dir[0]+"/"
+dir = dir[0]+"/"
+print dir
 
 while cmds.currentTime( query=True ) < numberOfThingsToExport+1:
+    
     randomiseObjects()
     frameNow = str(round(cmds.currentTime( query=True )))[0:-2]
-    
-    name = randomiseThese+"_"+frameNow
-
+    name = "brick_"+frameNow
     timeNow = cmds.currentTime( query=True )
     print timeNow
     nextStep = timeNow+step
     cmds.currentTime( nextStep, update=True, edit=True )
-    timeNow = cmds.currentTime( query=True )
-    
+    timeNow = cmds.currentTime( query=True )    
     export_file = "{}{}.ass".format(dir,name)
-    print "Exporting "+export_file
-    
+    print "Exporting "+export_file    
     cmds.arnoldExportAss(f=export_file,fsh=True,s=True,frameStep=1,mask=173,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
 
-#---------------------
-
-
-
-"""Set up these three things first and create the output directory"""
-
-
-# names of things to export
-side = "rotate" #This must be the same name as the group
-shape = "rotateMidRangeSideDoor" # the subfolder name
-joists = "joist_bent" # geo group for joists
-girders = "allGirds" # geo group for girders / roofs
-
-
-# frameStep value
-
-
-
-
-
-
-
-"""Then run this:"""
-
-# export directory INCLUDE THE SLASH
-dir = "/mnt/projects/aft/publish/assets/environment/booleanwalls/maya/cache/standin/wallSet_02/"+side+"/"+shape+"/"
-
-# Makes the directory if it doesn't exist
-if not os.path.isdir( dir ):
-    os.makedirs( dir )
-
-
-# list comprehension of joistRand wihtout Shape
-wordIn = "joistRand"
-sel = cmds.ls("*" + wordIn + "*", r=True)
-noShapeNodes = [i for i in sel if "Shape" not in i]
-
-wordIn = "girder"
-selGirder = cmds.ls("*" + wordIn + "*", r=True)
-noShapeNodesGirder = [i for i in selGirder if "Shape" not in i]
-
-cmds.currentTime( 1 )
-
-while cmds.currentTime( query=True ) < numberOfThingsToExport+1:
-
-    #Rand scale/rotate all the joists
-
-    for i in noShapeNodes:
-        rand = random.random()*.13
-        randRot = random.random()*-25
-        cmds.setAttr( i+'.scale', 1, 1, rand)
-        cmds.setAttr( i+'.rotate', randRot, 0, 0)
-
-    frameNow = str(round(cmds.currentTime( query=True )))[0:-2]
-
-    #Rand rotate all the girders
-
-    for i in noShapeNodesGirder:
-        rand = random.random()*.6
-        randRot = random.random()*300
-        #cmds.setAttr( i+'.scale', 1, 1, rand)
-        cmds.setAttr( i+'.rotate', randRot, randRot, randRot)
-
-    frameNow = str(round(cmds.currentTime( query=True )))[0:-2]
-
-    # CHANGE THIS to groupname
-    name = side+"_"+frameNow
-
-    timeNow = cmds.currentTime( query=True )
-    print timeNow
-    nextStep = timeNow+step
-    cmds.currentTime( nextStep, update=True, edit=True )
-    timeNow = cmds.currentTime( query=True )
-
-    # export standin to this directory:
-
-    #Makes the export path
-    export_file = "{}{}.ass".format(dir,name)
-
-    print "Exporting "+export_file
-
-    # NAME IS THIS. Change this to the group + objects you want to export per frame-step
-
-    #cmds.select( side, "joist_bent", "allGirds" )
-    
-    if side == "rotate":
-        cmds.select( side )
-    else:
-        cmds.select( side, "joist_bent", )
-    
-    cmds.arnoldExportAss(f=export_file,fsh=True,s=True,frameStep=1,mask=173,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
-    
-    
-    
-    
+#end
