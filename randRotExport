@@ -32,6 +32,7 @@ mask=253 export all the things
 """
 
 randomiseThese = cmds.ls(sl=True)
+outputName = "brick"
 
 def randomiseObjects():
 
@@ -49,7 +50,7 @@ def randomiseObjects():
 
 
 step = 1
-numberOfThingsToExport = 5
+numberOfThingsToExport = 15
 
 
 cmds.currentTime( 1 )
@@ -63,7 +64,7 @@ while cmds.currentTime( query=True ) < numberOfThingsToExport+1:
     
     randomiseObjects()
     frameNow = str(round(cmds.currentTime( query=True )))[0:-2]
-    name = "brick_"+frameNow
+    name = outputName+"_"+frameNow
     timeNow = cmds.currentTime( query=True )
     print timeNow
     nextStep = timeNow+step
@@ -71,6 +72,6 @@ while cmds.currentTime( query=True ) < numberOfThingsToExport+1:
     timeNow = cmds.currentTime( query=True )    
     export_file = "{}{}.ass".format(dir,name)
     print "Exporting "+export_file    
-    cmds.arnoldExportAss(f=export_file,fsh=True,s=True,frameStep=1,mask=173,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
+    cmds.arnoldExportAss(f=export_file,fsh=True,s=True,frameStep=1,mask=253,lightLinks=0,shadowLinks=0,selected=True,boundingBox=True)
 
 #end
