@@ -1,0 +1,19 @@
+import maya.cmds as cmds
+
+wordIn = "aiAOV"
+sel = cmds.ls("*" + wordIn + "*", r=True)
+print sel
+cmds.select(sel)
+
+aovOn = []
+aovOff = []
+for x in sel:    
+    if cmds.attributeQuery( 'enabled', node=x, ex=True ) == True:
+        value = cmds.getAttr( x+'.enabled')
+        if value == True:
+            aovOn.append(x)
+        else:
+            aovOff.append(x)
+
+print str(aovOn)+" are on"
+print str(aovOff)+" are off"
