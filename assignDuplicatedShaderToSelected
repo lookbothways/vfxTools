@@ -1,0 +1,16 @@
+
+# assignDuplicatedShaderToSelected
+
+import pymel.core as pm
+
+
+objects = cmds.ls(sl=True)
+
+for object in objects:
+    newShader = pm.duplicate( 'population_person_01', un=True )
+    print newShader[0]
+
+    pm.select(object)
+    pm.hyperShade(assign = newShader[0] )
+    
+#end
