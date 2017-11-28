@@ -1,0 +1,62 @@
+# randomise selected standin paths by contents of a folder:
+import maya.cmds as cmds
+import os
+import random
+
+# Save in this folder dialogue
+dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select .ass source location', okCaption='Select')
+dir = dir[0]+"/"
+
+
+
+items = os.listdir(dir)
+numberOfStandins = 1
+assList = []
+
+for names in items:
+    if names.endswith(".jpg"):
+        assList.append(names)
+
+print assList
+
+# a randomiser that shuffles things (to reduce likelyhood of repetition) 
+
+
+import random
+import math
+
+
+def sean_shuffle(list_to_pick_from, number_of_picks_needed):
+
+
+    multiplier= int(math.ceil(number_of_picks_needed/ float(len(list_to_pick_from))))
+    shuffled_list= []
+    
+    for i in range(multiplier):
+        random.shuffle(list_to_pick_from)
+        shuffled_list.extend(list_to_pick_from)
+    return shuffled_list[:number_of_picks_needed]
+        
+# construct random selection path and assign standin path
+
+import pymel.core as pm
+
+path = []
+selection = cmds.ls( selection=True )
+randomObject = sean_shuffle(assList, len(selection))
+        
+for i, j in enumerate(selection):
+    
+    
+    print i, j
+    
+    path = dir+ randomObject[i]
+    print path 
+
+    valueOld =  pm.getAttr( '{}.fileTextureName'.format(j) )
+    
+    valueNew = path
+    pm.setAttr( '{}.fileTextureName'.format(j), valueNew) 
+
+
+#end
