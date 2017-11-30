@@ -1,0 +1,22 @@
+import maya.cmds as cmds
+import maya.mel as mel
+
+if cmds.window('utility', exists = True):
+    cmds.deleteUI('utility')
+    
+def stopAllTheThings():
+    if cmds.window('utility', exists = True):
+        cmds.deleteUI('utility')
+        print "Stopped the things"
+        break
+
+window = cmds.window('utility', widthHeight = (200, 500), title = 'Stop Button', resizeToFitChildren=1, sizeable = False)
+cmds.setParent(menu=True)
+mainLayout = cmds.columnLayout(w = 200, h = 200, cw = 10, rs = 8, co = ['both',2])
+btnDoSelected = cmds.button(label = 'Stop loop', width = 200, height = 40, c = stopAllTheThings())
+
+cmds.showWindow(window)
+
+
+
+#end
