@@ -1,0 +1,42 @@
+   
+import breakLoop
+reload(breakLoop)
+
+breakLoop.breakLoopSetup()
+breakLoop.breakLoop()
+
+#demo loop to prove it works:
+
+c=0
+while c<1000000:
+    c+= 1
+    print c
+    if breakLoop.breakLoop():
+        break
+
+
+#Save this in the scripts dir:
+"""
+
+print "Setting up breakLoop functions. Call breakLoop.breakLoopSetup to create file in /tmp for breaking while loops."
+
+def breakLoopSetup(loopStopperPath = "/tmp/deleteMeToStop"):
+    
+    # creates a file in /tmp/ called 'deleteMeToStop' 
+    # breakLoop() checks this file exists, if it doesn't the while / loop is broken
+         
+    a= open(loopStopperPath, 'w')
+    a.close()
+    print "Created tmp/deleteMeToStop - delete this file to break the loop"
+        
+
+
+def breakLoop(loopStopperPath = "/tmp/deleteMeToStop"):
+    import os
+    if os.path.exists(loopStopperPath):
+        return False
+    else:
+        return True
+
+"""
+   
