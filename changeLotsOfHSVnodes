@@ -1,0 +1,23 @@
+
+#change lots of HSV nodes at once
+
+import pymel.core as pm
+import maya.cmds as cmds
+change = []
+
+selected = cmds.ls(sl=True)
+for i in selected:
+    change = cmds.setAttr(i+ ".saturation[1].saturation_FloatValue", 0.5)
+    
+
+
+
+
+
+
+
+
+
+
+
+
