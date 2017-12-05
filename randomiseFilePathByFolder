@@ -1,10 +1,10 @@
-# randomise selected standin paths by contents of a folder:
+# randomise selected jpg paths by contents of a folder:
 import maya.cmds as cmds
 import os
 import random
 
 # Save in this folder dialogue
-dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select .ass source location', okCaption='Select')
+dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select .jpg source location', okCaption='Select')
 dir = dir[0]+"/"
 
 
