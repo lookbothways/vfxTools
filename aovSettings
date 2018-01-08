@@ -1,0 +1,191 @@
+
+"""
+Put this on the shelf:
+    
+import aovSettings
+reload(aovSettings)
+
+aovSettings.aovSettings()
+"""
+
+import maya.cmds as cmds
+
+def aovSettings(): 
+    
+    allAOVs = []
+    allAOVnames = []
+    AOV_SettingsExists = []
+    
+    def loadSettings():
+        # Check if AOV Settings are in scene already, and create them if not
+        if cmds.objExists("AOV_Settings"):
+            print "Existing AOV_Settings found in scene..."
+            AOV_SettingsExists = True
+        else:
+            cmds.spaceLocator(n="AOV_Settings") # "Locator"
+            print "No AOV_Settings found in the scene... created some for you."
+            AOV_SettingsExists = False
+    
+    def saveCurrentState():
+        cmds.select("AOV_Settings")
+        if cmds.listAttr(ud = True):
+            print "Updating the attributes..."
+            # The Locator alrerady has some saved settings
+            
+            settingsExist()
+        else:
+            print "No custom attributes found. Creating them..."
+            # The Locator doesn't have any saved settings
+            settingsNew()
+    
+        print "These were the AOVs previously switched on: ", aovOn
+        print "These were the AOVs previously switched off: ", aovOff
+    
+    def settingsNew():
+        # The Locator doesn't have any saved settings
+        allAOVnames = cmds.ls("*aiAOV_*")
+        for x in allAOVnames:
+            allAOVs.append(x)
+            AOVenabled = cmds.getAttr( x + ".enabled")
+    
+            if AOVenabled == True:
+               #aovOn.append(x)
+               cmds.select("AOV_Settings")
+               cmds.addAttr("AOV_Settings", ln= x, at="bool", defaultValue= 1)
+    
+            else:
+               #aovOff.append(x)
+               cmds.select("AOV_Settings")
+               cmds.addAttr("AOV_Settings", ln= x, at="bool", defaultValue= 0)
+    
+    
+    
+    def settingsExist():
+        # The Locator already has some saved settings
+        allAOVnames = cmds.ls("*aiAOV_*")
+           
+        for aov in allAOVnames:
+            if cmds.getAttr( aov + ".enabled") == True:
+                cmds.setAttr("AOV_Settings."+aov, 1) 
+            
+            
+        for aov in allAOVnames:
+            if cmds.getAttr( aov + ".enabled") == False:
+                cmds.setAttr("AOV_Settings."+aov, 0) 
+
+    #### START HERE ########################
+    loadSettings()
+    
+    choose = cmds.confirmDialog( title='Change AOV Settings', message='Select one of the following options...', button=['ALL OFF','ALL ON','Restore','Save State', 'Cancel'], defaultButton='ALL OFF', cancelButton='Cancel', dismissString='No' )
+    
+    # GETS CURRENT AOV STATES
+    aovOff = []
+    aovOn = []
+    
+    allAOVnames = cmds.ls("*aiAOV_*")
+    
+    def getCurrentState(allAOVnames): 
+        for each in allAOVnames:
+            if cmds.getAttr( each + ".enabled") == True:
+                aovOn.append(each)  
+            
+        for each in allAOVnames:
+            if cmds.getAttr( each + ".enabled") == False:
+                aovOff.append(each)
+        return
+    
+    getCurrentState(allAOVnames)        
+    
+    
+    ############
+    
+    # GETS CURRENT AOV STATES
+    aovOff = []
+    aovOn = []
+    
+    allAOVnames = cmds.ls("*aiAOV_*")
+    
+    def getAovStates(allAOVnames): 
+        for each in allAOVnames:
+            if cmds.getAttr( each + ".enabled") == True:
+                aovOn.append(each) 
+            
+        for each in allAOVnames:
+            if cmds.getAttr( each + ".enabled") == False:
+                aovOff.append(each)
+        return
+    
+    getAovStates(allAOVnames)
+    print aovOn
+    print aovOff
+        
+    
+    
+    #### ALL OFF ###########################
+    if choose == 'ALL OFF':
+        saveCurrentState()
+    
+        for y in aovOn:
+            y = str(y)
+            cmds.setAttr(y + ".enabled", 0)
+            
+        print "All AOVs have now been turned OFF!",
+    
+    #### ALL ON ############################
+    elif choose == 'ALL ON':
+        saveCurrentState()
+    
+     
+        for x in aovOff:
+            x = str(x)
+            cmds.setAttr(x + ".enabled", 1)
+            
+        print "All AOVs have now been turned ON!",
+    
+    #### RESTORE ###########################
+    # Load the last saved settings from the Locator
+    elif choose == 'Restore':
+    
+        restoreOn = []
+        restoreOff = []
+    
+        cmds.select("AOV_Settings")
+        allSceneAOV = (cmds.listAttr(ud= True))                 # All user-defined attributes stored in the Locator
+    
+        if allSceneAOV == False:
+            print "Error - no previous set-up found in the Locator",# If there are no user attributes on Locator
+    
+        else:
+            for each in allSceneAOV:                          # For each user-defined Locator
+               each = str(each)
+               attrName = "AOV_Settings." + each
+               fullName = each + ".enabled"                    # Convert unicode to string and add .enabled
+               getState = cmds.getAttr(attrName)                # Get state (0 or 1)
+               if getState == 1:                            # If the attribute has a value of 1 (it was previously on)
+                  print "This was ON: ", each
+                  restoreOn.append(each)                     # Add to restoreOn list
+                  cmds.setAttr(fullName, 1)                   # Turn them on
+               else:                                      # If the attribute has a value of 0 (it was previously off)
+                  print "This was OFF: ", each
+                  restoreOff.append(each)                    # Add to restoreOff list
+                  cmds.setAttr(fullName, 0)                   # Turn them off
+    
+        #print "These AOVs have been switched on: ", restoreOn
+        #print "These AOVs have been switched off: ", restoreOff
+        print "All AOVs have been restored to their last-d state.",
+    
+    
+    #### SAVE ################################
+    elif choose == 'Save State':
+        saveCurrentState()
+        print "Current AOV state saved! Use 'Restore' to revert any subsequent changes.",
+    
+    
+    #### CANCEL ##############################
+    else:
+        print "AOV Settings cancelled. Nothing was changed.",
+    
+    #### Toby Sanderson 2018, tweaked by MB #################
+    
+    # END #
+    
