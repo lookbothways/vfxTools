@@ -1,0 +1,102 @@
+"""
+easyBump
+
+Gets the diffuse of the selected shader, creates a bump node and connects the green channel (Y) to bump value
+
+For shelf:
+
+import easyBump
+reload(easyBump)
+
+easyBump.easyBump()
+
+"""
+# Determine what type of shader (alShader, aiStandard)
+
+import maya.cmds as cmds
+
+def easyBump():
+
+    shaderType = []
+    diffuseUpstream = []
+
+
+    def findDiffuseUpstream(connections):
+       
+        for i,x in enumerate(connections):
+            if x == surfaceDiffuse:
+                diffuseUpstream = connections[i+1]
+                return diffuseUpstream
+                
+        for i,x in enumerate(connections):
+            if x == "color":
+                diffuseUpstream = connections[i+1]
+                return diffuseUpstream          
+
+    shader = cmds.ls(sl=True)
+    selected = cmds.select(shader)
+
+    # get selected nodeType
+    if cmds.ls(type='aiStandard', sl=True):
+        print "Shader is aiStandard"
+        shaderType = "aiStandard"
+        surfaceDiffuse = '%s.color' % shader[0]
+
+    if cmds.ls(type='alSurface', sl=True):
+        print "Shader is alSurface"
+        shaderType = "alSurface"
+        surfaceDiffuse = '%s.diffuseColor' % shader[0]
+
+
+    # Hooks up all the bits:    
+    connections = cmds.listConnections(shader, connections=True, p=True)
+
+    #get position of diffuse colour
+    diffusePosition = [i for i,x in enumerate(connections) if x == surfaceDiffuse]
+
+    #get the name of the upstream node 
+    diffuseUpstream = findDiffuseUpstream(connections)
+
+    #disconnect attributes
+    print "Adding bump to "+str(diffuseUpstream)+" using "+str(surfaceDiffuse)
+
+    nodeName = str(shader[0])+"_bump2d"
+    newBumpNode = cmds.shadingNode('bump2d', asShader=True, n=nodeName)
+         
+    # Hooks them all up - maybe it's a gamma, so tries outValueY also
+
+    try:
+        cmds.connectAttr( diffuseUpstream+".outValueY", newBumpNode+".bumpValue")
+    except RuntimeError:
+        cmds.connectAttr( diffuseUpstream+".outColorG", newBumpNode+".bumpValue" )
+        
+    cmds.connectAttr( newBumpNode+".outNormal", shader[0]+".normalCamera"  )
+
+
+#end mb 090118
+
+
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+
+
