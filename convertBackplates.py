@@ -13,7 +13,7 @@ chooseFormat.chooseFormat()
 def chooseFormat():
 
             
-    chooseNode = cmds.confirmDialog( title='Convert DPX backplates to:', message='Choose format', button=['Jpg','Png','Exr','Cancel'], defaultButton='Exr', cancelButton='Cancel', dismissString='No' )       
+    chooseNode = cmds.confirmDialog( title='Convert DPX backplates', message='Choose format:', button=['Jpg','Png','Exr','Cancel'], defaultButton='Exr', cancelButton='Cancel', dismissString='No' )       
 
     if chooseNode == 'Jpg':
         from convertBackplates import convertBackplatesJpg
