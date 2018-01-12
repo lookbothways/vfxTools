@@ -1,6 +1,19 @@
 import maya.cmds as cmds
-# Adds either a remapHSV of a gamma between diffuseColor and whatever is plugged into it.
-# node = alShader node
+# Adds either a remapHSV or a gamma between baseColor and whatever is plugged in.
+# Updated for Arnold 5 mb120118
+
+def checkShaderType():
+       
+    if cmds.ls(type='aiStandardSurface', sl=True):
+        print "Shader is aiStandardSurface"
+        shaderType = "aiStandardSurface"
+        surfaceDiffuse = '%s.baseColor' % shader[0]
+        addNodeBetween(shader)
+        
+    else:
+        cmds.warning( "Add node between only works on Arnold Standard Surface nodes" )
+
+
 
 def addNodeBetween(shader):
 
@@ -20,7 +33,7 @@ def addNodeBetween(shader):
        
     print "Shader "+ str(shader)
     # if alshader
-    surfaceDiffuse = '%s.diffuseColor' % shader
+    surfaceDiffuse = '%s.baseColor' % shader
     connections = cmds.listConnections(shader, connections=True, p=True)
     
     #get position of diffuse colour
@@ -65,64 +78,4 @@ def addNodeBetween(shader):
         cmds.connectAttr( newNode+".outColor", surfaceDiffuse  )
 
 
-"""
-# To go on the shelf
-import addNodeBetween
-reload(addNodeBetween)
 
-
-selectedShaders = cmds.ls(sl=True)
-
-for shader in selectedShaders:
-    addNodeBetween.addNodeBetween(shader)
-
-"""
-print addNodeBetween
-
-
-    
-"""
-# Older version adds a HSV to individual nodes on a per-shader selection.
-
-diffuseUpstream = []
-shader = cmds.ls(sl=True)
-
-
-
-def findDiffuseUpstream(connections):
-   
-    for i,x in enumerate(connections):
-        if x == surfaceDiffuse:
-            diffuseUpstream = connections[i+1]
-            return diffuseUpstream
-          
-
-   
-print "Shader "+ str(shader)
-# if alshader
-surfaceDiffuse = '%s.diffuseColor' % shader[0]
-connections = cmds.listConnections(shader, connections=True, p=True)
-
-#get position of diffuse colour
-diffusePosition = [i for i,x in enumerate(connections) if x == surfaceDiffuse]
-
-#get the name of the upstream node (if alshader '.diffuseColor' plug)
-diffuseUpstream = findDiffuseUpstream(connections)
-
-#nodename
-nodeName = str(shader[0])+"_remapHSV"
-   
-#disconnect attributes
-print "Adding remap HSV between "+str(diffuseUpstream)+" and "+str(surfaceDiffuse)
-cmds.disconnectAttr(diffuseUpstream, surfaceDiffuse)
-    
-# creates hsv node
-
-newHsvNode = cmds.shadingNode('remapHsv', asShader=True, n=nodeName)
-     
-# Hooks them all up   
-cmds.connectAttr( diffuseUpstream, newHsvNode+".color" )
-cmds.connectAttr( newHsvNode+".outColor", surfaceDiffuse  )
-
-
-"""
