@@ -1,3 +1,39 @@
+import maya.cmds as cmds
+
+"""
+For shelf: 
+
+from convertBackplates import chooseFormat
+reload(chooseFormat)
+chooseFormat.chooseFormat()
+
+"""
+
+
+def chooseFormat():
+
+            
+    chooseNode = cmds.confirmDialog( title='Convert DPX backplates to:', message='Choose format', button=['Jpg','Png','Exr','Cancel'], defaultButton='Exr', cancelButton='Cancel', dismissString='No' )       
+
+    if chooseNode == 'Jpg':
+        from convertBackplates import convertBackplatesJpg
+        reload(convertBackplatesJpg)
+        convertBackplatesJpg.convertBackplates()
+
+    if chooseNode == 'Png':
+        from convertBackplates import convertBackplatesPng
+        reload(convertBackplatesPng)
+        convertBackplatesPng.convertBackplates()
+        
+    if chooseNode == 'Exr':
+        from convertBackplates import convertBackplatesExr
+        reload(convertBackplatesExr)
+        convertBackplatesExr.convertBackplates()
+
+
+"""
+#Example exporter
+
 import os.path
 import glob
 import maya.cmds as cmds
@@ -35,3 +71,8 @@ def dpxSeq():
 
 def convertBackplates():
     subprocess.Popen(dpxSeq(), shell=True)
+    
+    
+    
+"""   
+#end
