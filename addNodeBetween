@@ -1,81 +1,95 @@
 import maya.cmds as cmds
-# Adds either a remapHSV or a gamma between baseColor and whatever is plugged in.
+"""
+For Shelf:
+    
+import addNodeBetween
+reload(addNodeBetween)
+
+
+selectedShaders = cmds.ls(sl=True)
+
+for shader in selectedShaders:
+    addNodeBetween.addNodeBetween(shader)
+
+"""
+
+# Adds either a remapHSV of a gamma between diffuseColor and whatever is plugged into it.
 # Updated for Arnold 5 mb120118
-
-def checkShaderType():
-       
-    if cmds.ls(type='aiStandardSurface', sl=True):
-        print "Shader is aiStandardSurface"
-        shaderType = "aiStandardSurface"
-        surfaceDiffuse = '%s.baseColor' % shader[0]
-        addNodeBetween(shader)
         
-    else:
-        cmds.warning( "Add node between only works on Arnold Standard Surface nodes" )
-
 
 
 def addNodeBetween(shader):
 
-    chooseNode = cmds.confirmDialog( title='Insert node', message='Choose node type', button=['HSV','Gamma','Snow','Cancel'], defaultButton='Yes', cancelButton='Cancel', dismissString='No' )
- 
-    diffuseUpstream = []
-
+    isaiss = []
+    cmds.select(shader)
+    isaiss = cmds.ls(type='aiStandardSurface', sl=True)
     
-    def findDiffuseUpstream(connections):
-       
-        for i,x in enumerate(connections):
-            if x == surfaceDiffuse:
-                diffuseUpstream = connections[i+1]
-                return diffuseUpstream
-              
-    
-       
-    print "Shader "+ str(shader)
-    # if alshader
-    surfaceDiffuse = '%s.baseColor' % shader
-    connections = cmds.listConnections(shader, connections=True, p=True)
-    
-    #get position of diffuse colour
-    diffusePosition = [i for i,x in enumerate(connections) if x == surfaceDiffuse]
-    
-    #get the name of the upstream node (if alshader '.diffuseColor' plug)
-    diffuseUpstream = findDiffuseUpstream(connections)
-    
-    #nodename
-    if chooseNode == 'HSV':
-        nodeName = str(shader)+"_remapHSV"
-        newNode = cmds.shadingNode('remapHsv', asShader=True, n=nodeName)
+    if cmds.ls(type='aiStandardSurface', sl=True):
+        print "Shader is aiStandardSurface"
+        shaderType = "aiStandardSurface"
+        surfaceDiffuse = '%s.baseColor' % shader[0]
         
-    if chooseNode == 'Gamma':
-        nodeName = str(shader)+"_gamma"
-        newNode = cmds.shadingNode('gammaCorrect', asShader=True, n=nodeName)
-        
-    if chooseNode == 'Snow':
-        nodeName = str(shader)+"_snow"
-        newNode = cmds.shadingNode('snow', asShader=True, n=nodeName)
-        cmds.setAttr(newNode+".depthDecay", 2.545)
-        cmds.setAttr(newNode+".threshold", 0.312)
-        cmds.setAttr(newNode+".thickness", 0.088)
                 
-       
-    #disconnect attributes
-    print "Adding node between "+str(diffuseUpstream)+" and "+str(surfaceDiffuse)
-    cmds.disconnectAttr(diffuseUpstream, surfaceDiffuse)
+        chooseNode = cmds.confirmDialog( title='Insert node', message='Choose node type', button=['HSV','Gamma','Snow','Cancel'], defaultButton='Yes', cancelButton='Cancel', dismissString='No' )
+     
+        diffuseUpstream = []
     
-    # Diconnects and reconnects 
-
-    if chooseNode == 'HSV':
-        cmds.connectAttr( diffuseUpstream, newNode+".color" )
-        cmds.connectAttr( newNode+".outColor", surfaceDiffuse  )
         
-    if chooseNode == 'Gamma':
-        cmds.connectAttr( diffuseUpstream, newNode+".value" )
-        cmds.connectAttr( newNode+".outValue", surfaceDiffuse  )
+        def findDiffuseUpstream(connections):
+           
+            for i,x in enumerate(connections):
+                if x == surfaceDiffuse:
+                    diffuseUpstream = connections[i+1]
+                    return diffuseUpstream
+                  
+        
+           
+        print "Shader "+ str(shader)
+        # if alshader
+        surfaceDiffuse = '%s.baseColor' % shader
+        connections = cmds.listConnections(shader, connections=True, p=True)
+        
+        #get position of diffuse colour
+        diffusePosition = [i for i,x in enumerate(connections) if x == surfaceDiffuse]
+        
+        #get the name of the upstream node (if alshader '.diffuseColor' plug)
+        diffuseUpstream = findDiffuseUpstream(connections)
+        
+        #nodename
+        if chooseNode == 'HSV':
+            nodeName = str(shader)+"_remapHSV"
+            newNode = cmds.shadingNode('remapHsv', asShader=True, n=nodeName)
+            
+        if chooseNode == 'Gamma':
+            nodeName = str(shader)+"_gamma"
+            newNode = cmds.shadingNode('gammaCorrect', asShader=True, n=nodeName)
+            
+        if chooseNode == 'Snow':
+            nodeName = str(shader)+"_snow"
+            newNode = cmds.shadingNode('snow', asShader=True, n=nodeName)
+            cmds.setAttr(newNode+".depthDecay", 2.545)
+            cmds.setAttr(newNode+".threshold", 0.312)
+            cmds.setAttr(newNode+".thickness", 0.088)
+                    
+           
+        #disconnect attributes
+        print "Adding node between "+str(diffuseUpstream)+" and "+str(surfaceDiffuse)
+        cmds.disconnectAttr(diffuseUpstream, surfaceDiffuse)
+        
+        # Diconnects and reconnects 
     
-    if chooseNode == 'Snow':
-        cmds.connectAttr( diffuseUpstream, newNode+".surfaceColor" )
-        cmds.connectAttr( newNode+".outColor", surfaceDiffuse  )
-
+        if chooseNode == 'HSV':
+            cmds.connectAttr( diffuseUpstream, newNode+".color" )
+            cmds.connectAttr( newNode+".outColor", surfaceDiffuse  )
+            
+        if chooseNode == 'Gamma':
+            cmds.connectAttr( diffuseUpstream, newNode+".value" )
+            cmds.connectAttr( newNode+".outValue", surfaceDiffuse  )
+        
+        if chooseNode == 'Snow':
+            cmds.connectAttr( diffuseUpstream, newNode+".surfaceColor" )
+            cmds.connectAttr( newNode+".outColor", surfaceDiffuse  )
+    else:
+        cmds.warning( "Add node between only works on Arnold Standard Surface nodes" )
 
 
