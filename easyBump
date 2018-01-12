@@ -10,6 +10,8 @@ reload(easyBump)
 
 easyBump.easyBump()
 
+Now supports Arnold 5 Standard Surface
+
 """
 # Determine what type of shader (alShader, aiStandard)
 
@@ -41,6 +43,11 @@ def easyBump():
         print "Shader is aiStandard"
         shaderType = "aiStandard"
         surfaceDiffuse = '%s.color' % shader[0]
+       
+    if cmds.ls(type='aiStandardSurface', sl=True):
+        print "Shader is aiStandardSurface"
+        shaderType = "aiStandardSurface"
+        surfaceDiffuse = '%s.baseColor' % shader[0]
 
     if cmds.ls(type='alSurface', sl=True):
         print "Shader is alSurface"
@@ -71,32 +78,3 @@ def easyBump():
         cmds.connectAttr( diffuseUpstream+".outColorG", newBumpNode+".bumpValue" )
         
     cmds.connectAttr( newBumpNode+".outNormal", shader[0]+".normalCamera"  )
-
-
-#end mb 090118
-
-
-        
-        
-        
-        
-        
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-
-
