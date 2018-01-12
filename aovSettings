@@ -1,4 +1,5 @@
 
+
 """
 Put this on the shelf:
     
@@ -6,9 +7,18 @@ import aovSettings
 reload(aovSettings)
 
 aovSettings.aovSettings()
+
+To do:
+Make it support AOVs with namespaces.
+Fails because the character ':' can't be added into the extra attributes in AOV_settings.
+
+    
+
 """
 
 import maya.cmds as cmds
+
+
 
 def aovSettings(): 
     
@@ -16,6 +26,8 @@ def aovSettings():
     allAOVnames = []
     AOV_SettingsExists = []
     
+    wordIn = "aiAOV"
+
     def loadSettings():
         # Check if AOV Settings are in scene already, and create them if not
         if cmds.objExists("AOV_Settings"):
@@ -43,7 +55,7 @@ def aovSettings():
     
     def settingsNew():
         # The Locator doesn't have any saved settings
-        allAOVnames = cmds.ls("*aiAOV_*")
+        allAOVnames = cmds.ls("*" + wordIn + "*")
         for x in allAOVnames:
             allAOVs.append(x)
             AOVenabled = cmds.getAttr( x + ".enabled")
@@ -74,6 +86,17 @@ def aovSettings():
                 cmds.setAttr("AOV_Settings."+aov, 0) 
 
     #### START HERE ########################
+    
+    aovNamespaces = []
+    wordIn = "aiAOV"
+    aovNamespaces = cmds.ls("*" + wordIn + "*", r=True)
+    aovNamespaces = [i for i in aovNamespaces if ":" in i]
+    if aovNamespaces:
+        print "Warning, these aovs have namespaces :"+ str(aovNamespaces)
+
+
+    
+    
     loadSettings()
     
     choose = cmds.confirmDialog( title='Change AOV Settings', message='Select one of the following options...', button=['ALL OFF','ALL ON','Restore','Save State', 'Cancel'], defaultButton='ALL OFF', cancelButton='Cancel', dismissString='No' )
@@ -82,7 +105,7 @@ def aovSettings():
     aovOff = []
     aovOn = []
     
-    allAOVnames = cmds.ls("*aiAOV_*")
+    allAOVnames = cmds.ls("*" + wordIn + "*", r=True)
     
     def getCurrentState(allAOVnames): 
         for each in allAOVnames:
@@ -103,7 +126,7 @@ def aovSettings():
     aovOff = []
     aovOn = []
     
-    allAOVnames = cmds.ls("*aiAOV_*")
+    allAOVnames = cmds.ls("*" + wordIn + "*", r=True)
     
     def getAovStates(allAOVnames): 
         for each in allAOVnames:
@@ -124,6 +147,7 @@ def aovSettings():
     #### ALL OFF ###########################
     if choose == 'ALL OFF':
         saveCurrentState()
+        
     
         for y in aovOn:
             y = str(y)
@@ -135,7 +159,7 @@ def aovSettings():
     elif choose == 'ALL ON':
         saveCurrentState()
     
-     
+   
         for x in aovOff:
             x = str(x)
             cmds.setAttr(x + ".enabled", 1)
@@ -146,6 +170,10 @@ def aovSettings():
     # Load the last saved settings from the Locator
     elif choose == 'Restore':
     
+        if aovNamespaces:
+            cmds.warning( "Warning, these aovs have namespaces :"+ str(aovNamespaces) )  
+            cmds.confirmDialog( title='Restore failure', message='aiAOVs with namespaces are not restorable.\nPlease configure manually.', button=['OK'], defaultButton='OK', cancelButton='No', dismissString='No' )
+            
         restoreOn = []
         restoreOff = []
     
@@ -170,8 +198,6 @@ def aovSettings():
                   restoreOff.append(each)                    # Add to restoreOff list
                   cmds.setAttr(fullName, 0)                   # Turn them off
     
-        #print "These AOVs have been switched on: ", restoreOn
-        #print "These AOVs have been switched off: ", restoreOff
         print "All AOVs have been restored to their last-d state.",
     
     
@@ -185,7 +211,8 @@ def aovSettings():
     else:
         print "AOV Settings cancelled. Nothing was changed.",
     
-    #### Toby Sanderson 2018, tweaked by MB #################
+    #### Toby Sanderson 2018 #################
     
     # END #
     
+
