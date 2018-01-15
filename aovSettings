@@ -26,7 +26,7 @@ def aovSettings():
     allAOVnames = []
     AOV_SettingsExists = []
     
-    wordIn = "aiAOV"
+    wordIn = "aiAOV_"
 
     def loadSettings():
         # Check if AOV Settings are in scene already, and create them if not
@@ -88,7 +88,7 @@ def aovSettings():
     #### START HERE ########################
     
     aovNamespaces = []
-    wordIn = "aiAOV"
+    wordIn = "aiAOV_"
     aovNamespaces = cmds.ls("*" + wordIn + "*", r=True)
     aovNamespaces = [i for i in aovNamespaces if ":" in i]
     if aovNamespaces:
@@ -211,8 +211,7 @@ def aovSettings():
     else:
         print "AOV Settings cancelled. Nothing was changed.",
     
-    #### Toby Sanderson 2018 #################
+    #### Toby Sanderson 2018, tweaked by mb 150117 #################
     
     # END #
     
-
