@@ -16,7 +16,6 @@ for shader in selectedShaders:
 # Adds either a remapHSV of a gamma between diffuseColor and whatever is plugged into it.
 # Updated for Arnold 5 mb120118
 
-# PROBLEM! If cancelled, it will break the shaders connections still!! Fix this. 
         
 
 
