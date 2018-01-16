@@ -1,5 +1,4 @@
 
-  
     
 #Renames shader's shadingEngine to shader + SG
 
@@ -58,29 +57,29 @@ def renameShadingNodes():
 
     selected = cmds.ls(sl=True)
     renameThings = cmds.confirmDialog( title='Rename nodes', message='Rename:', button=['shadingEngine','history only','both','Cancel'], defaultButton='both', cancelButton='Cancel', dismissString='No' )
-    includeNodeType = cmds.confirmDialog( title='Include nodeType', message='Include nodeType in name?', button=['Existing name + type','Shader name + type only','No'], defaultButton='Yes', cancelButton='Cancel', dismissString='No' )
-
-    for i in selected:
-        shader = i
-        nodesToRename = cmds.listHistory(i)
-        print nodesToRename
-
+    
+    if renameThings != "Cancel":
+        includeNodeType = cmds.confirmDialog( title='Include nodeType', message='Include nodeType in name?', button=['Existing name + type','Shader name + type only','No'], defaultButton='Yes', cancelButton='Cancel', dismissString='No' )
         
-        if renameThings == "both":
-            renameShadingEngine()
-            renameHistory()
+        
+        for i in selected:
+            shader = i
+            nodesToRename = cmds.listHistory(i)
+            print nodesToRename
+    
             
-        if renameThings == "history only":
-            renameHistory()
+            if renameThings == "both":
+                renameShadingEngine()
+                renameHistory()
+                
+            if renameThings == "history only":
+                renameHistory()
+            
+            if renameThings == "shadingEngine":
+                renameShadingEngine()
+
+    else:
+        print "Operation cancelled."
         
-        if renameThings == "shadingEngine":
-            renameShadingEngine()
-#end
 
-
-
-
-
-
-
-
+#end mb150118
