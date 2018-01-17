@@ -1,13 +1,21 @@
 """
 standalone framestep (stripped fTrack dependency)
+Updated for PySide2 (QApplication is now QGuiApplication)
 
 """
 import maya.cmds as cmds
 import re
 import string
 
+import PySide2.QtCore
+import PySide2.QtGui
+import PySide2.QtWidgets
+
+
+
 def copySteppedFramesStandalone():
 
+    
 	fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
 	fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
 
@@ -60,8 +68,9 @@ def copySteppedFramesStandalone():
 	
 		# puts frameSplit in the copybuffer
 	
-		from PySide import QtGui
-		clipboard= QtGui.QApplication.clipboard()
+		from PySide2 import QtGui
+        
+		clipboard= QtGui.QGuiApplication.clipboard()
 		clipboard.setText(frameSplit) # set clipboard
 		print "Range copied: {}".format(clipboard.text()) 
 	
@@ -85,8 +94,8 @@ def copySteppedFramesStandalone():
 	
 		# puts frameSplit in the copybuffer
 	
-		from PySide import QtGui
-		clipboard= QtGui.QApplication.clipboard()
+		from PySide2 import QtGui
+		clipboard= QtGui.QGuiApplication.clipboard()
 		clipboard.setText(frameSplit[1:-1]) # set clipboard
 		print "Range copied: {}".format(clipboard.text()) 
 	
