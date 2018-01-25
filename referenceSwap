@@ -1,0 +1,16 @@
+
+import maya.cmds as cmds
+
+path= "/mnt/projects/shr/sequences/000/002/ANM/work/maya/cube.ma"
+mayaFileType = "mayaAscii"
+referenceNode= "sphereRN"
+
+def loadReference(path):
+
+	imported=cmds.file(path,r=True,type=mayaFileType,ignoreVersion=True,mergeNamespacesOnClash=False,options='v=0')
+	return imported
+
+
+
+cmds.file(path,loadReference=referenceNode,type=mayaFileType,options='v=0')
+
