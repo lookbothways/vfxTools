@@ -1,16 +1,94 @@
-
 import maya.cmds as cmds
+import re
+import string
+import PySide2.QtCore
+import PySide2.QtGui
+import PySide2.QtWidgets
+import pymel.core as pm
 
-path= "/mnt/projects/shr/sequences/000/002/ANM/work/maya/cube.ma"
+
+
+def swapRefs():   
+
+    option=cmds.confirmDialog(title='Swap references',message="Choose rig to swap to:",button=['Proxy','Cache','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
+   
+    if option == 'Proxy':
+        
+        print "Switching to Proxy rig..."
+    	      
+        if "proxy" not in referencePath:
+            newPath = proxyPath
+            cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
+        else:
+            print "Reference is already Proxy."
+    
+   
+    if option == 'Cache':
+        
+        print "Switching to Cache rig..."
+    	      
+        if "cache" not in referencePath:
+            newPath = cachePath
+            cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
+        else:
+            print "Reference is already Cache."
+    
+   
+    if option == 'Render':
+        
+        print "Switching to Render rig..."
+    	      
+        if "render" not in referencePath:
+            newPath = renderPath
+            cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
+        else:
+            print "Reference is already Render."
+    
+
+
+#---------------------
+newPath = ""
+referenceNode= pm.referenceQuery( referenceNode, referenceNode=True )
 mayaFileType = "mayaAscii"
-referenceNode= "sphereRN"
-
-def loadReference(path):
-
-	imported=cmds.file(path,r=True,type=mayaFileType,ignoreVersion=True,mergeNamespacesOnClash=False,options='v=0')
-	return imported
-
+currentState = ""
+#set paths (shotgun.path here):
+proxyPath = "/mnt/projects/shr/sequences/000/002/ANM/work/maya/proxyCube.ma"
+cachePath = "/mnt/projects/shr/sequences/000/002/ANM/work/maya/cacheCube.ma"
+renderPath = "/mnt/projects/shr/sequences/000/002/ANM/work/maya/renderCube.ma"
 
 
-cmds.file(path,loadReference=referenceNode,type=mayaFileType,options='v=0')
+
+
+referencePath = pm.referenceQuery( referenceNode,filename=True )
+print referencePath
+
+
+# Determines current state:
+if "proxy" in referencePath:
+    currentState = "Proxy"
+        
+if "cache" in referencePath:
+    currentState = "Cache"
+    
+if "render" in referencePath:
+    currentState = "Render"
+
+print "Current reference is: "+ currentState
+
+
+
+swapRefs()
+
+
+#end
+
+
+
+
+
+
+
+
+
+
 
