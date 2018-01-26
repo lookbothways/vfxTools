@@ -15,12 +15,67 @@ ToDo:
 """
 
 def swapRefs():   
+
+
+
+    #set up the things
+    newPath = ""
+    currentState = ""
+    mayaFileType = "mayaAscii"
+        
+    #Gets the list of objects to hide in renderRig
+    objectList = ['bodyResult_geo','mouthShapes_geo','bodyHighExtra_geo','bodyShapes_geo','bodyBreathing_geo','body_twistedTubes_geo']
+    
+    
+    
+    # get the wobbleDog main CTRL namespace:
+    wordIn = "MAIN_Ctrl"
+    sel = cmds.ls("*" + wordIn + "*", r=True)
+    cmds.select(sel[0]) # selects only the first one it comes across for now
+    
+    
+    # gets reference info of selected node
+    nameSpace = pm.selected()[0].namespace()
+    print nameSpace
+    
+    referenceNode = pm.selected()[0].namespace()[:-1]+"RN"
+    print referenceNode
+    
+    referencePath = pm.referenceQuery( nameSpace+'wobbleDog_MAIN_Ctrl',filename=True )
+    print referencePath
+    
+    
+    #set paths (shotgun.path here, eventually):
+    proxyPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_proxy_v005.ma"
+    cachePath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_cache_v005.ma"
+    renderPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_render_v005.ma"
+    
+    dogExists = pm.listNamespaces(recursive=False, internal=False)
+    if "Dog" in str(dogExists):
+        print dogExists
+        print "FOUND A DOG."
+    
+    
+    # Determines current state:
+    if "proxy" in referencePath:
+        currentState = "Proxy"
+            
+    if "cache" in referencePath:
+        currentState = "Cache"
+        
+    if "render" in referencePath:
+        currentState = "Render"
+    
+    print "Current reference is: "+ currentState
+   
+    
+    
     if currentState == 'Render':
-        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="{} rig:\n\nChoose rig to swap to:".format(currentState),button=['Proxy','Cache','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
+        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="Currently {}.\n\nChoose rig to swap to:".format(currentState),button=['Proxy','Cache','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
     if currentState == 'Proxy':
-        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="{} rig:\n\nChoose rig to swap to:".format(currentState),button=['Cache','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
+        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="Currently {}.\n\nChoose rig to swap to:".format(currentState),button=['Cache','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
     if currentState == 'Cache':
-        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="{} rig:\n\nChoose rig to swap to:".format(currentState),button=['Proxy','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
+        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="Currently {}.\n\nChoose rig to swap to:".format(currentState),button=['Proxy','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
    
     if option == 'Proxy':
         
@@ -72,63 +127,11 @@ def hideRigExtras():
    
     
     
-  
-#---------------------start_here
-#def swapChooser():
-#set up the things
-newPath = ""
-currentState = ""
-mayaFileType = "mayaAscii"
-
-#Gets the list of objects to hide in renderRig
-objectList = ['bodyResult_geo','mouthShapes_geo','bodyHighExtra_geo','bodyShapes_geo','bodyBreathing_geo','body_twistedTubes_geo']
 
 
-# get the wobbleDog main CTRL namespace:
-wordIn = "MAIN_Ctrl"
-sel = cmds.ls("*" + wordIn + "*", r=True)
-cmds.select(sel[0]) # selects only the first one it comes across for now
-
-
-# gets reference info of selected node
-nameSpace = pm.selected()[0].namespace()
-print nameSpace
-
-referenceNode = pm.selected()[0].namespace()[:-1]+"RN"
-print referenceNode
-
-referencePath = pm.referenceQuery( nameSpace+'wobbleDog_MAIN_Ctrl',filename=True )
-print referencePath
-
-
-#set paths (shotgun.path here, eventually):
-proxyPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_proxy_v005.ma"
-cachePath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_cache_v005.ma"
-renderPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_render_v005.ma"
-
-dogExists = pm.listNamespaces(recursive=False, internal=False)
-if "Dog" in str(dogExists):
-    print dogExists
-    print "FOUND A DOG."
-
-
-# Determines current state:
-if "proxy" in referencePath:
-    currentState = "Proxy"
-        
-if "cache" in referencePath:
-    currentState = "Cache"
-    
-if "render" in referencePath:
-    currentState = "Render"
-
-print "Current reference is: "+ currentState
-
-
-
-
-swapRefs()
-
-
-  
 #end
+
+
+
+
+
