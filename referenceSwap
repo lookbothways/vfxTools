@@ -1,12 +1,15 @@
 import maya.cmds as cmds
-import re
-import string
-import PySide2.QtCore
-import PySide2.QtGui
-import PySide2.QtWidgets
 import pymel.core as pm
 
+"""
+Reference swap:
+    
+ToDo: 
+* Make it work for multiple creatures
+* Choose asset (so is works on multiple projects) 
+* Get full path from Shotgun
 
+"""
 
 def swapRefs():   
 
@@ -17,7 +20,8 @@ def swapRefs():
         print "Switching to Proxy rig..."
     	      
         if "proxy" not in referencePath:
-            newPath = proxyPath
+            newPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_proxy_v005.ma"
+            print "Switching to "+ newPath
             cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
         else:
             print "Reference is already Proxy."
@@ -28,7 +32,8 @@ def swapRefs():
         print "Switching to Cache rig..."
     	      
         if "cache" not in referencePath:
-            newPath = cachePath
+            newPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_cache_v005.ma"
+            print "Switching to "+ newPath
             cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
         else:
             print "Reference is already Cache."
@@ -39,28 +44,63 @@ def swapRefs():
         print "Switching to Render rig..."
     	      
         if "render" not in referencePath:
-            newPath = renderPath
+            newPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_render_v005.ma"
+            print "Switching to "+ newPath
             cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
+            hideRenderRigExtras()
+            
         else:
             print "Reference is already Render."
+
     
 
+def hideRenderRigExtras():
+    
+    print "Hiding "+ str(objectList)
+    
+    for each in objectList:
+        cmds.setAttr( nameSpace+each+'.visibility', 0)
+   
+    
+    
+  
+#---------------------start_here
 
-#---------------------
+#set up the things
 newPath = ""
-referenceNode= pm.referenceQuery( referenceNode, referenceNode=True )
-mayaFileType = "mayaAscii"
 currentState = ""
-#set paths (shotgun.path here):
-proxyPath = "/mnt/projects/shr/sequences/000/002/ANM/work/maya/proxyCube.ma"
-cachePath = "/mnt/projects/shr/sequences/000/002/ANM/work/maya/cacheCube.ma"
-renderPath = "/mnt/projects/shr/sequences/000/002/ANM/work/maya/renderCube.ma"
+mayaFileType = "mayaAscii"
+
+#Gets the list of objects to hide in renderRig
+objectList = ['bodyResult_geo','mouthShapes_geo','bodyHighExtra_geo','bodyShapes_geo','bodyBreathing_geo','body_twistedTubes_geo']
 
 
+# get the wobbleDog main CTRL namespace:
+wordIn = "MAIN_Ctrl"
+sel = cmds.ls("*" + wordIn + "*", r=True)
+cmds.select(sel[0]) # selects only the first one it comes across for now
 
 
-referencePath = pm.referenceQuery( referenceNode,filename=True )
+# gets reference info of selected node
+nameSpace = pm.selected()[0].namespace()
+print nameSpace
+
+referenceNode = pm.selected()[0].namespace()[:-1]+"RN"
+print referenceNode
+
+referencePath = pm.referenceQuery( nameSpace+'wobbleDog_MAIN_Ctrl',filename=True )
 print referencePath
+
+
+#set paths (shotgun.path here, eventually):
+proxyPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_proxy_v005.ma"
+cachePath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_cache_v005.ma"
+renderPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_render_v005.ma"
+
+dogExists = pm.listNamespaces(recursive=False, internal=False)
+if "Dog" in str(dogExists):
+    print dogExists
+    print "FOUND A DOG."
 
 
 # Determines current state:
@@ -77,17 +117,12 @@ print "Current reference is: "+ currentState
 
 
 
+
 swapRefs()
 
 
+  
 #end
-
-
-
-
-
-
-
 
 
 
