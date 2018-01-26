@@ -12,8 +12,12 @@ ToDo:
 """
 
 def swapRefs():   
-
-    option=cmds.confirmDialog(title='Swap references',message="Choose rig to swap to:",button=['Proxy','Cache','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
+    if currentState == 'Render':
+        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="{} rig:\n\nChoose rig to swap to:".format(currentState),button=['Proxy','Cache','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
+    if currentState == 'Proxy':
+        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="{} rig:\n\nChoose rig to swap to:".format(currentState),button=['Cache','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
+    if currentState == 'Cache':
+        option=cmds.confirmDialog(title='Swap '+currentState+' rig',message="{} rig:\n\nChoose rig to swap to:".format(currentState),button=['Proxy','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')
    
     if option == 'Proxy':
         
@@ -23,6 +27,7 @@ def swapRefs():
             newPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_proxy_v005.ma"
             print "Switching to "+ newPath
             cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
+            hideRigExtras()
         else:
             print "Reference is already Proxy."
     
@@ -35,6 +40,7 @@ def swapRefs():
             newPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_cache_v005.ma"
             print "Switching to "+ newPath
             cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
+            hideRigExtras()
         else:
             print "Reference is already Cache."
     
@@ -47,14 +53,14 @@ def swapRefs():
             newPath = "/mnt/projects/shr/assets/Character/wobbleDog_A/RIG/publish/maya/wobbleDog_A_RIG_render_v005.ma"
             print "Switching to "+ newPath
             cmds.file(newPath,loadReference=referenceNode,type=mayaFileType,options='v=0')
-            hideRenderRigExtras()
+            hideRigExtras()
             
         else:
             print "Reference is already Render."
 
     
 
-def hideRenderRigExtras():
+def hideRigExtras():
     
     print "Hiding "+ str(objectList)
     
@@ -123,6 +129,13 @@ swapRefs()
 
   
 #end
+
+
+
+
+
+
+
 
 
 
