@@ -94,7 +94,7 @@ def swapRefs():
 	maya_file_path_name = ""
 
 	# get the wobbleDog main CTRL namespace:
-	wordIn = "MAIN_Ctrl"
+	wordIn = "MAIN_CtrlShape"
 	sel = cmds.ls("*" + wordIn + "*", r=True)
 	cmds.select(sel[0]) # selects only the first one it comes across for now
 
