@@ -29,11 +29,11 @@ for i in objects:
     for each in removeDuplicates:
  
         # Makes a Cube with the name of the selected object and assigns i's shader
-        shading_engine,polyCube = cmds.polyCube( sx=0, sy=0, sz=0, name=object+"_"+each+"_shaderKeeper" )
+        shading_engine,polyCube = cmds.polyCube(w=0.0001, d=0.0001, h=0.0001, sx=0, sy=0, sz=0, name=object+"_"+each+"_shaderKeeper" )
         skCubes.append(shading_engine)
         cmds.select(shading_engine)
-       
         cmds.hyperShade( assign=each )
+        
    
 
 
@@ -45,3 +45,5 @@ filename = cmds.fileDialog2(fileFilter=multipleFilters, dialogStyle=2)
 cmds.file( rename=filename[0] )
 cmds.file( es=True, sh=True, type='mayaAscii')
 
+print "Saved "+ str(filename)
+#end
