@@ -1,0 +1,44 @@
+""" Image plane on alembic camera script 
+
+* Get published backplate .jpg path from shotgun
+* Create image plane on imported camera (From render globals?) 
+* Connect. Set frame-range and set to load frames
+
+
+"""
+
+import maya.cmds as cmds
+import sets
+
+# Get all geo called claws
+
+shaderNames = []
+selected = cmds.ls(sl=True)
+
+shaderNames = []
+noNC = ""
+
+for i in selected:
+   
+    object = str(i)
+   
+    # Gets the shader attached to the object
+    shaders = cmds.listConnections(cmds.listHistory(i,f=1),type='shadingEngine')
+    print shaders
+    #remove duplicates using sets.Set
+    removeDuplicates = sets.Set(shaders)
+    
+    
+    
+import renameShadingNodes
+reload(renameShadingNodes)
+
+renameShadingNodes.renameShadingNodes()
+
+
+for x in selectedShaders:
+    if "_aiStandardSurface" in x and "SG" :
+        noNC = str(x).split(':', 1)[-1]
+        shaderNames.append(noNC)
+
+print shaderNames
