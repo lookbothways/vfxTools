@@ -1,10 +1,7 @@
 #CURRENTLY UNFINISHED
 
-""" Image plane on alembic camera script 
+""" Attach shaders to alembic by matching geo to shaders (by name)
 
-* Get published backplate .jpg path from shotgun
-* Create image plane on imported camera (From render globals?) 
-* Connect. Set frame-range and set to load frames
 
 
 """
