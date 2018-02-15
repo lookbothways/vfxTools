@@ -139,7 +139,34 @@ def checkRenderCamera():
         return 0
     return 1
 
-      
+def renderSettingsAlwaysOn():
+    cmds.setAttr( 'defaultArnoldDriver.autocrop', 1)
+    cmds.setAttr( 'defaultArnoldRenderOptions.bucketScanning', 2)
+    cmds.setAttr( 'defaultArnoldRenderOptions.bucketSize', 32)    
+    cmds.setAttr( 'defaultArnoldRenderOptions.abortOnLicenseFail', 1)    
+    
+def setHQ():
+
+    #Turn on Disp + Subviv, blur
+    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreDisplacement', 0)
+    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreDisplacement', 0)
+        
+    cmds.setAttr( 'defaultArnoldRenderOptions.motion_blur_enable', 1)
+    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreBump', 0)
+    
+    #Arnold AA settings
+    cmds.setAttr( 'defaultArnoldRenderOptions.AASamples', 6 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseSamples', 4 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularSamples', 4 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionSamples', 4 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GISssSamples', 4 )    
+    cmds.setAttr( 'defaultArnoldRenderOptions.GIVolumeSamples', 0 )    
+    cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseDepth', 0 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularDepth', 1 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionDepth', 4 )        
+
+    #Low light threshold
+    cmds.setAttr( 'defaultArnoldRenderOptions.lowLightThreshold', 0.015 )
 
 
 
@@ -147,8 +174,10 @@ def checkRenderCamera():
 
 
 def executeThis():
+
+
     #checks to see if distortion file exists:
-    distortionExists=True
+    distortionExists=False
     matching = []
         
     fileNodes=cmds.ls(typ='aiImage')
@@ -181,7 +210,7 @@ def executeThis():
                 cmds.deleteUI('utility')
 
             # create window
-            self.window = cmds.window('utility', widthHeight = (200, 500), title = 'Pre-render checks', resizeToFitChildren=1, sizeable = False)
+            self.window = cmds.window('utility', widthHeight = (200, 220), title = 'Pre-render checks', resizeToFitChildren=1, sizeable = True)
 
             cmds.setParent(menu=True)
 
@@ -191,10 +220,11 @@ def executeThis():
             # Control - which things to do
             
             self.AFPMDbox = cmds.checkBox('Add file path MetaData', value=True)
-            self.setProjectbox = cmds.checkBox('Set Project Here', value=True)
+            #self.setProjectbox = cmds.checkBox('Set Project Here', value=True)
             self.deleteAllImagePlanesbox = cmds.checkBox('Delete imagePlanes', value=True)
-            self.hideAssbox = cmds.checkBox('Hide Assistants', value=False)
+            self.hideAssbox = cmds.checkBox('Hide Assistants', value=True)
             self.distortion = cmds.checkBox('Setup distortion', value=distortionExists)
+            self.hqRender = cmds.checkBox('HQ render', value=False)
 
             # Buttons that do things
             btnDoSelected = cmds.button(label = 'Do Selected', width = 200, height = 40, c = self.GetSelectedNodes)
@@ -208,9 +238,10 @@ def executeThis():
                 
             hideAss = cmds.checkBox(self.hideAssbox,q = True, v = True)
             AFPMD = cmds.checkBox(self.AFPMDbox,q = True, v = True)
-            setProject = cmds.checkBox(self.setProjectbox,q = True, v = True)
+            #setProject = cmds.checkBox(self.setProjectbox,q = True, v = True)
             deleteAllImagePlanes = cmds.checkBox(self.deleteAllImagePlanesbox,q = True, v = True)
             distortion = cmds.checkBox(self.distortion,q = True, v = True)
+            hqRenderSettings = cmds.checkBox(self.hqRender,q = True, v = True)
             
             print hideAss
             if hideAss == True:
@@ -224,15 +255,20 @@ def executeThis():
             if deleteAllImagePlanes == True:
                 delAllImagePlanes()
 
-            print setProject
-            if setProject == True:
-                setProjectHere()
+            #print setProject
+            #if setProject == True:
+            #    setProjectHere()
                 
             print distortion
             if distortion == True:
                 import setupMayaLensDistortionOptions
                 reload(setupMayaLensDistortionOptions)
                 setupMayaLensDistortionOptions.doSomething()
+
+            print hqRenderSettings
+            if hqRenderSettings == True:
+                renderSettingsAlwaysOn()
+                setHQ()
 
             if cmds.window('utility', exists = True):
                 cmds.deleteUI('utility')
