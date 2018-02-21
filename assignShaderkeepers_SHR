@@ -37,7 +37,10 @@ for x in nameSpacedGeo:
         
     if "shaderkeeper" in x:
         shaderKeeperNS = x
-        print "Found shaderkeeper "+ shaderKeeperNS       
+        print "Found shaderkeeper "+ shaderKeeperNS 
+        
+        
+          
         
 def setToShaderKeeper():
     cmds.sets(creatureNS+ ":body_geoShape", forceElement=shaderKeeperNS+ ':aiWDBody_SG')
@@ -74,20 +77,26 @@ def revertToScene():
 
 def assignShaderkeepers():
     
-    setShaderkeeper = cmds.confirmDialog( title='Set to shaderkeeper', message='Set shaders to shaderkeeper?', button=['Set','Revert','Cancel'], defaultButton='Set', cancelButton='Cancel', dismissString='Cancel' )
-
-    if setShaderkeeper == "Set":
-        setToShaderKeeper()
-        print "Set creature shaders to shaderkeeper asset." 
+    
+    if shaderKeeperNS:
         
-
-    if setShaderkeeper == "Revert":
-        revertToScene()
-        print "Reverted to original creature shaders."   
+        setShaderkeeper = cmds.confirmDialog( title='Set to shaderkeeper', message='Set shaders to shaderkeeper?', button=['Set','Revert','Cancel'], defaultButton='Set', cancelButton='Cancel', dismissString='Cancel' )
+    
+        if setShaderkeeper == "Set":
+            setToShaderKeeper()
+            print "Set creature shaders to shaderkeeper asset." 
+            
+    
+        if setShaderkeeper == "Revert":
+            revertToScene()
+            print "Reverted to original creature shaders."   
+            
+        if setShaderkeeper == "Cancel":
+            print "Setup cancelled, no changes made."
+    else:
+        print "No shaderkeeper found."
         
-    if setShaderkeeper == "Cancel":
-        print "Setup cancelled, no changes made."
-   	    
+            
 #end
 
 
