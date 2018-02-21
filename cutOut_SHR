@@ -1,0 +1,60 @@
+"""
+* assign rayswitches to all bits of geo
+* set opacity off on geo
+
+* get namespace ? currently forces namespaceq
+
+To do:
+Sync values between original and camera
+
+"""
+import maya.cmds as cmds
+import maya.mel as mel
+
+
+
+def cutoutOn():
+    
+    #sets opacity
+    cmds.setAttr( 'creature_adult_render:body_geoShape.aiOpaque', 0 )
+    cmds.setAttr( 'creature_adult_render:teeth_geoShape.aiOpaque', 0 )
+    cmds.setAttr( 'creature_adult_render:gums_geoShape.aiOpaque', 0 )
+    
+    # lazy assignments:
+    mel.eval( 'sets -e -forceElement creature_adult_render:aiWDBodyRayswitchSG;' )
+    mel.eval( 'sets -e -forceElement creature_adult_render:gums_aiRaySwitchSG;' )
+    mel.eval( 'sets -e -forceElement creature_adult_render:teeth_aiRaySwitchSG;' )
+
+
+def cutoutOff():
+
+    #sets opacity
+    cmds.setAttr( 'creature_adult_render:body_geoShape.aiOpaque', 1 )
+    cmds.setAttr( 'creature_adult_render:teeth_geoShape.aiOpaque', 1 )
+    #cmds.setAttr( 'creature_adult_render:gums_geoShape.aiOpaque', 0 ) # Is off in original delivery
+    
+    # lazy assignments:
+    mel.eval( 'sets -e -forceElement creature_adult_render:aiWDBodyRayswitchSG;' )
+    mel.eval( 'sets -e -forceElement creature_adult_render:gums_aiRaySwitchSG;' )
+    mel.eval( 'sets -e -forceElement creature_adult_render:teeth_aiRaySwitchSG;' )
+
+
+
+
+def doSomething():
+    
+    cutoutResult = cmds.confirmDialog( title='cutOut on/off', message='Turn on cutOut shaders?', button=['On','Off','Cancel'], defaultButton='Yes', cancelButton='No', dismissString='No' )
+
+    if cutoutResult == "On":
+        cutoutOn()
+        print "Turned on cutOut shaders." 
+        
+
+    if cutoutResult == "Off":
+        cutoutOff()
+        print "Turned off cutOut shaders."   
+        
+    if cutoutResult == "Cancel":
+        print "cutOut cancelled, no changes made."
+   	    
+doSomething()
