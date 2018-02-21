@@ -2,19 +2,25 @@
 * assign rayswitches to all bits of geo
 * set opacity off on geo
 
-* get namespace ? currently forces namespaceq
 
-To do:
-Sync values between original and camera
+for shelf:
+    
+from creatureScripts import cutOut
+reload(cutOut)
+cutOut.doSomething()
 
 """
 import maya.cmds as cmds
 import maya.mel as mel
 
+# gets creature namespace 
+# This won't work with multiple creatures!
+
 nameSpacedGeo=cmds.namespaceInfo(listOnlyNamespaces=True)
 creatureNS = ""
 
 for x in nameSpacedGeo:
+
     if "creature" in x:
         creatureNS = x
         print "Found "+ creatureNS
@@ -67,4 +73,3 @@ def doSomething():
     if cutoutResult == "Cancel":
         print "cutOut cancelled, no changes made."
    	    
-doSomething()
