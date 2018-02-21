@@ -11,32 +11,42 @@ Sync values between original and camera
 import maya.cmds as cmds
 import maya.mel as mel
 
+nameSpacedGeo=cmds.namespaceInfo(listOnlyNamespaces=True)
+creatureNS = ""
 
+for x in nameSpacedGeo:
+    if "creature" in x:
+        creatureNS = x
+        print "Found "+ creatureNS
+        
+        
+        
 
 def cutoutOn():
     
     #sets opacity
-    cmds.setAttr( 'creature_adult_render:body_geoShape.aiOpaque', 0 )
-    cmds.setAttr( 'creature_adult_render:teeth_geoShape.aiOpaque', 0 )
-    cmds.setAttr( 'creature_adult_render:gums_geoShape.aiOpaque', 0 )
+    cmds.setAttr( creatureNS+ ':body_geoShape.aiOpaque', 0 )
+    cmds.setAttr( creatureNS+ ':teeth_geoShape.aiOpaque', 0 )
+    cmds.setAttr( creatureNS+ ':gums_geoShape.aiOpaque', 0 )
     
-    # lazy assignments:
-    mel.eval( 'sets -e -forceElement creature_adult_render:aiWDBodyRayswitchSG;' )
-    mel.eval( 'sets -e -forceElement creature_adult_render:gums_aiRaySwitchSG;' )
-    mel.eval( 'sets -e -forceElement creature_adult_render:teeth_aiRaySwitchSG;' )
-
+    # namespace assignments:
+    cmds.sets(creatureNS+ ":body_geoShape", forceElement=creatureNS+ ':aiWDBodyRayswitchSG')
+    cmds.sets(creatureNS+ ":teeth_geoShape", forceElement=creatureNS+ ':teeth_aiRaySwitchSG')    
+    cmds.sets(creatureNS+ ":gums_geoShape", forceElement=creatureNS+ ':gums_aiRaySwitchSG')
+        
 
 def cutoutOff():
 
     #sets opacity
-    cmds.setAttr( 'creature_adult_render:body_geoShape.aiOpaque', 1 )
-    cmds.setAttr( 'creature_adult_render:teeth_geoShape.aiOpaque', 1 )
-    #cmds.setAttr( 'creature_adult_render:gums_geoShape.aiOpaque', 0 ) # Is off in original delivery
+    cmds.setAttr( creatureNS+ ':body_geoShape.aiOpaque', 1 )
+    cmds.setAttr( creatureNS+ ':teeth_geoShape.aiOpaque', 1 )
+    #cmds.setAttr( creatureNS+ ':gums_geoShape.aiOpaque', 0 ) # Is off in original delivery
     
-    # lazy assignments:
-    mel.eval( 'sets -e -forceElement creature_adult_render:aiWDBodyRayswitchSG;' )
-    mel.eval( 'sets -e -forceElement creature_adult_render:gums_aiRaySwitchSG;' )
-    mel.eval( 'sets -e -forceElement creature_adult_render:teeth_aiRaySwitchSG;' )
+    # namespace assignments:
+    cmds.sets(creatureNS+ ":body_geoShape", forceElement=creatureNS+ ':aiWDBody_SG' )
+    cmds.sets(creatureNS+ ":teeth_geoShape", forceElement=creatureNS+ ':aiWDTeeth_SG' )
+    cmds.sets(creatureNS+ ":gums_geoShape", forceElement=creatureNS+ ':aiWDGums_SG' )
+
 
 
 
