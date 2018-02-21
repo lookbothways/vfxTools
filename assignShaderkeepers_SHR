@@ -1,0 +1,96 @@
+""" 
+Sets or reverts shaders to / from scene to shaderKeeper version.
+
+Mel version
+proc applyWDShaders()
+{
+sets -e -forceElement creature_adult_shaderkeeper:aiWDBody_SG creature_adult_proxy:body_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDClaws_SG creature_adult_proxy:claws_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDTongue_SG creature_adult_proxy:tongue_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDGums_SG creature_adult_proxy:gums_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDMembranes_SG creature_adult_proxy:mouthMembranes_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDTeeth_SG creature_adult_proxy:teeth_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeMembrane_SG creature_adult_proxy:outerEyeMembrane_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDTearLine_SG creature_adult_proxy:tearLine_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDStaticEyeMembrane_SG creature_adult_proxy:eyeStaticMembrane_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDIris_SG creature_adult_proxy:iris_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDCornea_SG creature_adult_proxy:corneas_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDCataracts_SG creature_adult_proxy:cataracts_geo;
+sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeWhite_SG creature_adult_proxy:eyeWhite_geo;
+}
+applyWDShaders();
+"""
+
+import maya.cmds as cmds
+import maya.mel as mel
+
+
+nameSpacedGeo=cmds.namespaceInfo(listOnlyNamespaces=True)
+creatureNS = ""
+shaderKeeperNS = ""
+
+for x in nameSpacedGeo:
+
+    if "creature" in x and "shaderkeeper" not in x:
+        creatureNS = x
+        print "Found creature "+ creatureNS
+        
+    if "shaderkeeper" in x:
+        shaderKeeperNS = x
+        print "Found shaderkeeper "+ shaderKeeperNS       
+        
+def setToShaderKeeper():
+    cmds.sets(creatureNS+ ":body_geoShape", forceElement=shaderKeeperNS+ ':aiWDBody_SG')
+    cmds.sets(creatureNS+ ":claws_geo", forceElement=shaderKeeperNS+ ':aiWDClaws_SG')
+    cmds.sets(creatureNS+ ":tongue_geo", forceElement=shaderKeeperNS+ ':aiWDTongue_SG')
+    cmds.sets(creatureNS+ ":gums_geo", forceElement=shaderKeeperNS+ ':aiWDGums_SG')
+    cmds.sets(creatureNS+ ":mouthMembranes_geo", forceElement=shaderKeeperNS+ ':aiWDMembranes_SG')
+    cmds.sets(creatureNS+ ":teeth_geo", forceElement=shaderKeeperNS+ ':aiWDTeeth_SG')
+    cmds.sets(creatureNS+ ":outerEyeMembrane_geo", forceElement=shaderKeeperNS+ ':aiWDEyeMembrane_SG')
+    cmds.sets(creatureNS+ ":tearLine_geo", forceElement=shaderKeeperNS+ ':aiWDTearLine_SG')
+    cmds.sets(creatureNS+ ":eyeStaticMembrane_geo", forceElement=shaderKeeperNS+ ':aiWDStaticEyeMembrane_SG')
+    cmds.sets(creatureNS+ ":iris_geo", forceElement=shaderKeeperNS+ ':aiWDIris_SG')
+    cmds.sets(creatureNS+ ":corneas_geo", forceElement=shaderKeeperNS+ ':aiWDCornea_SG')
+    cmds.sets(creatureNS+ ":cataracts_geo", forceElement=shaderKeeperNS+ ':aiWDCataracts_SG')
+    cmds.sets(creatureNS+ ":eyeWhite_geo", forceElement=shaderKeeperNS+ ':aiWDEyeWhite_SG')
+
+
+
+def revertToScene():
+    cmds.sets(creatureNS+ ":body_geoShape", forceElement=creatureNS+ ':aiWDBody_SG')
+    cmds.sets(creatureNS+ ":claws_geo", forceElement=creatureNS+ ':aiWDClaws_SG')
+    cmds.sets(creatureNS+ ":tongue_geo", forceElement=creatureNS+ ':aiWDTongue_SG')
+    cmds.sets(creatureNS+ ":gums_geo", forceElement=creatureNS+ ':aiWDGums_SG')
+    cmds.sets(creatureNS+ ":mouthMembranes_geo", forceElement=creatureNS+ ':aiWDMembranes_SG')
+    cmds.sets(creatureNS+ ":teeth_geo", forceElement=creatureNS+ ':aiWDTeeth_SG')
+    cmds.sets(creatureNS+ ":outerEyeMembrane_geo", forceElement=creatureNS+ ':aiWDEyeMembrane_SG')
+    cmds.sets(creatureNS+ ":tearLine_geo", forceElement=creatureNS+ ':aiWDTearLine_SG')
+    cmds.sets(creatureNS+ ":eyeStaticMembrane_geo", forceElement=creatureNS+ ':aiWDStaticEyeMembrane_SG')
+    cmds.sets(creatureNS+ ":iris_geo", forceElement=creatureNS+ ':aiWDIris_SG')
+    cmds.sets(creatureNS+ ":corneas_geo", forceElement=creatureNS+ ':aiWDCornea_SG')
+    cmds.sets(creatureNS+ ":cataracts_geo", forceElement=creatureNS+ ':aiWDCataracts_SG')
+    cmds.sets(creatureNS+ ":eyeWhite_geo", forceElement=creatureNS+ ':aiWDEyeWhite_SG')    
+
+
+def assignShaderkeepers():
+    
+    setShaderkeeper = cmds.confirmDialog( title='Set to shaderkeeper', message='Set shaders to shaderkeeper?', button=['Set','Revert','Cancel'], defaultButton='Set', cancelButton='Cancel', dismissString='Cancel' )
+
+    if setShaderkeeper == "Set":
+        setToShaderKeeper()
+        print "Set creature shaders to shaderkeeper asset." 
+        
+
+    if setShaderkeeper == "Revert":
+        revertToScene()
+        print "Reverted to original creature shaders."   
+        
+    if setShaderkeeper == "Cancel":
+        print "Setup cancelled, no changes made."
+   	    
+#end
+
+
+
+
+
