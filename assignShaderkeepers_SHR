@@ -19,6 +19,14 @@ sets -e -forceElement creature_adult_shaderkeeper:aiWDCataracts_SG creature_adul
 sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeWhite_SG creature_adult_proxy:eyeWhite_geo;
 }
 applyWDShaders();
+
+For Shelf:
+    
+from creatureScripts import assignShaderkeeper
+reload(assignShaderkeeper)
+assignShaderkeeper.assignShaderkeepers()
+
+
 """
 
 import maya.cmds as cmds
