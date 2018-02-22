@@ -56,7 +56,7 @@ def cutoutOff():
 
 def doSomething():
     
-    cutoutResult = cmds.confirmDialog( title='cutOut on/off', message='Turn on cutOut shaders?', button=['On','Off','Cancel'], defaultButton='Yes', cancelButton='No', dismissString='No' )
+    cutoutResult = cmds.confirmDialog( title='cutOut on/off', message='Apply cutOut shaders?', button=['On','Off','Cancel'], defaultButton='Yes', cancelButton='No', dismissString='No' )
 
     if creatureNS:   	
         if cutoutResult == "On":
