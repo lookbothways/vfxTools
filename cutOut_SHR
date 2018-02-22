@@ -21,12 +21,11 @@ creatureNS = ""
 
 for x in nameSpacedGeo:
 
-    if "creature" in x:
+    if "creature_adult" in x:
         creatureNS = x
         print "Found "+ creatureNS
-        
-        
-        
+
+
 
 def cutoutOn():
     
@@ -55,21 +54,26 @@ def cutoutOff():
 
 
 
-
-
 def doSomething():
     
     cutoutResult = cmds.confirmDialog( title='cutOut on/off', message='Turn on cutOut shaders?', button=['On','Off','Cancel'], defaultButton='Yes', cancelButton='No', dismissString='No' )
 
-    if cutoutResult == "On":
-        cutoutOn()
-        print "Turned on cutOut shaders." 
-        
+    if creatureNS:   	
+        if cutoutResult == "On":
+            cutoutOn()
+            print "Turned on cutOut shaders." 
+            
+    
+        if cutoutResult == "Off":
+            cutoutOff()
+            print "Turned off cutOut shaders."   
+            
+        if cutoutResult == "Cancel":
+            print "cutOut cancelled, no changes made."
+       	    
+    else:
+        print "No creature_adult found."
+    
 
-    if cutoutResult == "Off":
-        cutoutOff()
-        print "Turned off cutOut shaders."   
-        
-    if cutoutResult == "Cancel":
-        print "cutOut cancelled, no changes made."
-   	    
+
+#END
