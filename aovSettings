@@ -1,5 +1,5 @@
-
 """
+
 Put this on the shelf:
     
 import aovSettings
@@ -7,10 +7,10 @@ reload(aovSettings)
 
 aovSettings.aovSettings()
 
+
 To do:
 Make it support AOVs with namespaces.
 Fails because the character ':' can't be added into the extra attributes in AOV_settings.
-
 """
 
 # Set the enabled AOVs to a particular list
@@ -24,7 +24,7 @@ def setupAOV():
     #### Define list of preferred AOVs with names *EXACTLY* as they appear in the Render Settings window...
     def setPref():
         global AOVpref
-        AOVpref = "N", "P", "UV", "Z", "background", "coat", "crypto_material", "crypto_object", "diffuse_albedo", "diffuse_direct", "emission", "motionvector", "shadow", "specular_direct", "specular_indirect", "sss", "volume"
+        AOVpref = "N", "P", "UV", "Z", "coat", "crypto_material", "crypto_object", "diffuse_albedo", "diffuse_direct", "diffuse_indirect", "emission", "motionvector", "shadow", "specular_direct", "specular_indirect", "sss", "volume", "L_hdr", "L_key", "L_rim", "L_fill"
 
     #### Turn all the current AOVs off...
     def allOff():
@@ -69,12 +69,64 @@ def setupAOV():
 
         else:
             print "Complete: The list of preferred AOVs has been turned on, and everything else switched off!",
+            
+    ### Create and connect the nodes needed for the UV AOV...
+    def createUV():
+        # Check if the nodes exist already
+        if cmds.objExists("green_ramp"):
+            try:
+                cmds.defaultNavigation(source="green_ramp", destination="aiAOV_UV.defaultValue", ce=True)
+                print "Complete! If this hasn't worked, delete the STMap nodes from the Node Editor and try again.",
+            except:
+                print "Looks like there's been an error. Try deleting the STMap nodes from the Node Editor and running again.",
+    
+        else:
+            # Create Green Ramp
+            cmds.shadingNode('ramp', name="green_ramp", asTexture=True)
+            cmds.shadingNode('place2dTexture', name="place2dTexture_Green", asUtility=True)
+            cmds.setAttr("green_ramp.colorEntryList[1].color", 0, 0, 0, type="double3")
+            cmds.setAttr("green_ramp.colorEntryList[2].color", 0, 1, 0, type="double3")
+            cmds.setAttr("green_ramp.colorEntryList[2].position", 1)
+            
+            # Create Red Ramp
+            cmds.shadingNode('ramp', name="red_ramp", asTexture=True)
+            cmds.shadingNode('place2dTexture', name="place2dTexture_Red", asUtility=True)
+            cmds.setAttr("red_ramp.colorEntryList[1].color", 0, 0, 0, type="double3")
+            cmds.setAttr("red_ramp.colorEntryList[2].color", 1, 0, 0, type="double3")
+            cmds.setAttr("red_ramp.colorEntryList[2].position", 1)
+            cmds.setAttr("place2dTexture_Red.rotateUV", 90)
+            
+            # Hook it up
+            cmds.connectAttr("place2dTexture_Green.outUV", "green_ramp.uvCoord")
+            cmds.connectAttr("place2dTexture_Green.outUvFilterSize", "green_ramp.uvFilterSize")
+            cmds.connectAttr("place2dTexture_Red.outUV", "red_ramp.uvCoord")
+            cmds.connectAttr("place2dTexture_Red.outUvFilterSize", "red_ramp.uvFilterSize")
+            cmds.connectAttr("red_ramp.outColor", "green_ramp.colorOffset", force=True)
+            
+            # Connect it to the UV AOV
+            cmds.defaultNavigation(source="green_ramp", destination="aiAOV_UV.defaultValue", ce=True)
+            
+            print "UV STmap setup complete!",
 
     #### Run the script
     setPref()
     allOff()
     prefOn()
+    createUV()
 
+    # Hook up the Cryptomatte AOVs
+    if not cmds.objExists("_aov_cryptomatte"):
+       cmds.shadingNode('cryptomatte', name="_aov_cryptomatte", asUtility=True)
+       cmds.shadingNode('aiAOV', name="aiAOV_crypto_object", asTexture=True)
+       cmds.shadingNode('aiAOV', name="aiAOV_crypto_material", asTexture=True)
+       cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_material.defaultValue')
+       cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_object.defaultValue')
+
+    # Hook up the lightGroup things
+    cmds.setAttr("aiAOV_L_key.lightPathExpression", "C.*<L.'key'>", type="string")
+    cmds.setAttr("aiAOV_L_rim.lightPathExpression", "C.*<L.'rim'>", type="string")
+    cmds.setAttr("aiAOV_L_hdr.lightPathExpression", "C.*<L.'hdr'>", type="string")
+    cmds.setAttr("aiAOV_L_fill.lightPathExpression", "C.*<L.'fill'>", type="string")
 
 def aovSettings(): 
     
@@ -150,53 +202,54 @@ def aovSettings():
 
     
     #### START HERE ########################
-    
+
     aovOn = []
     aovOff = []
     aovNamespaces = []
     aovNamespaces = cmds.ls("*aiAOV_*", r=True)
-    
+
     aovNamespaces = [i for i in aovNamespaces if ":" in i]
     if aovNamespaces:
         print "Warning, these AOVs have namespaces: "+ str(aovNamespaces)
 
     choose = cmds.confirmDialog( title='Change AOV Settings', message='Select one of the following options...', button=['Setup Defaults','ALL OFF','ALL ON','Save State','Restore','Cancel'], defaultButton='Setup Defaults', cancelButton='Cancel', dismissString='No' )
-    
+
     allAOVnames = cmds.ls("*aiAOV_*", r=True)
-    
+
     #### SETUP DEFAULTS ###################
     if choose == 'Setup Defaults':
         setupAOV()
+        print "Default AOVs created!",
 
     #### ALL OFF ###########################
     elif choose == 'ALL OFF':
         loadSettings()
         getCurrentState(allAOVnames)
         saveCurrentState()        
-    
+
         for y in aovOn:
             y = str(y)
             cmds.setAttr(y + ".enabled", 0)
             
         print "All AOVs have now been turned OFF!",
-    
+
     #### ALL ON ############################
     elif choose == 'ALL ON':
         loadSettings()
         getCurrentState(allAOVnames)
         saveCurrentState()
-    
-   
+
+
         for x in aovOff:
             x = str(x)
             cmds.setAttr(x + ".enabled", 1)
             
         print "All AOVs have now been turned ON!",
-    
+
     #### RESTORE ###########################
     # Load the last saved settings from the Locator
     elif choose == 'Restore':
-    
+
         loadSettings()
         getCurrentState(allAOVnames)
         
@@ -206,13 +259,13 @@ def aovSettings():
             
         restoreOn = []
         restoreOff = []
-    
+
         cmds.select("AOV_Settings")
         allSceneAOV = (cmds.listAttr(ud= True))                 # All user-defined attributes stored in the Locator
-    
+
         if allSceneAOV == False:
             print "Error - no previous set-up found in the Locator",# If there are no user attributes on Locator
-    
+
         else:
             for each in allSceneAOV:                          # For each user-defined Locator
                each = str(each)
@@ -227,22 +280,22 @@ def aovSettings():
                   print "This was OFF: ", each
                   restoreOff.append(each)                    # Add to restoreOff list
                   cmds.setAttr(fullName, 0)                   # Turn them off
-    
+
         print "All AOVs have been restored to their last saved state.",
-    
-    
+
+
     #### SAVE ################################
     elif choose == 'Save State':
         loadSettings()
         getCurrentState(allAOVnames)
         saveCurrentState()
         print "Current AOV state saved! Use 'Restore' to revert any subsequent changes.",
-    
-    
+
+
     #### CANCEL ##############################
     else:
         print "Cancelled: Nothing was changed.",
-    
+
 ############### Toby Sanderson and Mark Bailey 2018 ################# 
-    
+
 # END #
