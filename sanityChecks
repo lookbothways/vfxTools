@@ -150,8 +150,32 @@ def renderSettingsAlwaysOn():
     cmds.setAttr ("defaultRenderGlobals.putFrameBeforeExt", 1)
     cmds.setAttr ("defaultRenderGlobals.extensionPadding", 4)
     cmds.setAttr ("defaultRenderGlobals.periodInExt", 1)  
-    
+
+"""
+For shelf:
+from sanityChecks import sanityChecks
+
+reload(sanityChecks)
+sanityChecks.renderSettingsAlwaysOn()
+
+outputQuality = cmds.confirmDialog( title='Set render quality', message='HQ: 84440 subdiv 4\nLQ: 211110 subdiv 1', button=['HQ','LQ','Cancel'], defaultButton='HQ', cancelButton='Cancel', dismissString='Cancel' )
+
+if outputQuality == "HQ":
+    sanityChecks.setHQ()
+    print "Set HQ samples 844440, turned on Subdiv + Disp. Subdiv max = 4",
+
+if outputQuality == "LQ":
+    sanityChecks.setLQ()
+    print "Set LQ samples 211110, Subdiv max = 1",
+
+if outputQuality == "Cancel":
+    print "No settings changed.",
+""" 
 def setHQ():
+
+
+
+
 
     #Turn on Disp + Subviv, blur
     cmds.setAttr( 'defaultArnoldRenderOptions.maxSubdivisions', 4)
@@ -161,7 +185,7 @@ def setHQ():
     cmds.setAttr( 'defaultArnoldRenderOptions.ignoreBump', 0)
     
     #Arnold AA settings
-    cmds.setAttr( 'defaultArnoldRenderOptions.AASamples', 6 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.AASamples', 8 )
     cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseSamples', 4 )
     cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularSamples', 4 )
     cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionSamples', 4 )
@@ -321,8 +345,7 @@ def executeThis():
 
 
 
-
-
-
-
 #end
+
+
+
