@@ -142,15 +142,21 @@ def checkRenderCamera():
 def renderSettingsAlwaysOn():
     cmds.setAttr( 'defaultArnoldDriver.autocrop', 1)
     cmds.setAttr( 'defaultArnoldRenderOptions.bucketScanning', 2)
-    cmds.setAttr( 'defaultArnoldRenderOptions.bucketSize', 32)    
-    cmds.setAttr( 'defaultArnoldRenderOptions.abortOnLicenseFail', 1)    
+    cmds.setAttr( 'defaultArnoldRenderOptions.bucketSize', 32) 
+    cmds.setAttr( 'defaultArnoldRenderOptions.abortOnLicenseFail', 1)
+    cmds.setAttr ("defaultRenderGlobals.currentRenderer", "arnold", type="string")
+    cmds.setAttr ("defaultRenderGlobals.outFormatControl", 0)
+    cmds.setAttr ("defaultRenderGlobals.animation", 1)
+    cmds.setAttr ("defaultRenderGlobals.putFrameBeforeExt", 1)
+    cmds.setAttr ("defaultRenderGlobals.extensionPadding", 4)
+    cmds.setAttr ("defaultRenderGlobals.periodInExt", 1)  
     
 def setHQ():
 
     #Turn on Disp + Subviv, blur
-    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreDisplacement', 0)
-    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreDisplacement', 0)
-        
+    cmds.setAttr( 'defaultArnoldRenderOptions.maxSubdivisions', 4)
+    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreSubdivision', 0)
+    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreDisplacement', 0)        
     cmds.setAttr( 'defaultArnoldRenderOptions.motion_blur_enable', 1)
     cmds.setAttr( 'defaultArnoldRenderOptions.ignoreBump', 0)
     
@@ -168,13 +174,34 @@ def setHQ():
     #Low light threshold
     cmds.setAttr( 'defaultArnoldRenderOptions.lowLightThreshold', 0.015 )
 
+def setLQ():
+
+    #Turn on Disp + Subviv, blur
+    cmds.setAttr( 'defaultArnoldRenderOptions.maxSubdivisions', 1)
+    cmds.setAttr( 'defaultArnoldRenderOptions.motion_blur_enable', 1)
+    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreBump', 0)
+    
+    #Arnold AA settings
+    cmds.setAttr( 'defaultArnoldRenderOptions.AASamples', 2 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseSamples', 1 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularSamples', 1 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionSamples', 1 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GISssSamples', 1 )    
+    cmds.setAttr( 'defaultArnoldRenderOptions.GIVolumeSamples', 0 )    
+    cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseDepth', 0 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularDepth', 1 )
+    cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionDepth', 4 )        
+
+    #Low light threshold
+    cmds.setAttr( 'defaultArnoldRenderOptions.lowLightThreshold', 0.015 )
+
 
 
 #-------------------------------------------------------------------------------
 
 
 def executeThis():
-
+    renderSettingsAlwaysOn()
 
     #checks to see if distortion file exists:
     distortionExists=False
@@ -275,19 +302,20 @@ def executeThis():
             
             
             mel.eval('SubmitJobToDeadline')
-                
+        
+        
+               
         def noChangesMade(self,*args):
             cmds.deleteUI('utility')
             
             mel.eval('SubmitJobToDeadline')
             print "No changes made, proceeding to Deadline Submission."
 
-                
+  
 
     b_cls = createMyLayoutCls()  
     b_cls.show()
 
-executeThis()
 
 
 
@@ -297,4 +325,4 @@ executeThis()
 
 
 
-
+#end
