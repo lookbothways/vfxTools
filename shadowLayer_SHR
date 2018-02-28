@@ -1,0 +1,20 @@
+    
+    
+import mtoa.core as core
+import maya.cmds as cmds
+
+#Create shadow nodes
+shadowCatcherShader = core.createArnoldNode("aiShadowMatte", name="shadowLayer_aiShadowMatte")
+shadowCasterShader = core.createArnoldNode("aiStandardSurface", name="shadowLayer_standardSurface")
+cmds.setAttr( 'shadowLayer_standardSurface.specular', 0)
+cmds.setAttr( 'shadowLayer_standardSurface.base', 0)
+
+
+cmds.setAttr( 'shadowLayer_aiShadowMatte.background', 1)
+cmds.setAttr( 'shadowLayer_aiShadowMatte.diffuseIntensity', 0)
+
+cmds.setAttr( 'shadowLayer_aiShadowMatte.backgroundColor', 0, 0, 0, type="double3")
+cmds.setAttr( 'shadowLayer_aiShadowMatte.shadowColor', 1, 0, 0, type="double3")
+
+
+
