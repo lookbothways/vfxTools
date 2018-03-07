@@ -14,7 +14,7 @@ cmds.setAttr( 'shadowLayer_aiShadowMatte.background', 1)
 cmds.setAttr( 'shadowLayer_aiShadowMatte.diffuseIntensity', 0)
 
 cmds.setAttr( 'shadowLayer_aiShadowMatte.backgroundColor', 0, 0, 0, type="double3")
-cmds.setAttr( 'shadowLayer_aiShadowMatte.shadowColor', 1, 0, 0, type="double3")
+#cmds.setAttr( 'shadowLayer_aiShadowMatte.shadowColor', 1, 0, 0, type="double3")
 
 
 
