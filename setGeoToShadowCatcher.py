@@ -32,11 +32,12 @@ def setGeo():
 		if u'default_light_rig:defaultRenderLayer' in renderlayers:  
 		    renderlayers.remove(u'default_light_rig:defaultRenderLayer')
 		    print renderlayers
-		
+		"""
+		# for legacy render-layers setup
 		for layer in renderlayers:
 		    cmds.editRenderLayerGlobals( currentRenderLayer=layer )
 		    cmds.hide( newObjName )  
-
+		"""
 
 	#otherwise do just the one
 	else:
@@ -64,3 +65,4 @@ def setGeo():
 	mel.eval(sillyString)
 
 
+#end
