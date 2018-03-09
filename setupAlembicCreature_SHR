@@ -16,7 +16,7 @@ import maya.mel as mel
 import maya.cmds as cmds
 import pymel.core as pm
 
-# Force some things. This assumes creature alembic is imported and nothing has been done to it. 
+# Force some things. This assumes creature alembic is imported, shaderKeeper is referenced and nothing has been done to either:
 mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDBody_SG body_geo;")
 mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDClaws_SG claws_geo;")
 mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTongue_SG tongue_geo;")
@@ -33,7 +33,7 @@ mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeWhite_SG eyeW
 
 
 
-selected = cmds.ls(sl=True)
+selected = cmds.ls(sl=True, r=True)
 
 for geo in selected:
     pm.setAttr( '{}Shape.aiSubdivType'.format(geo), 1 )
@@ -47,27 +47,22 @@ for geo in selected:
     #Set share_SSS
     if geo in ["body_geo", "tongue_geo", "teeth_geo", "gums_geo", "mouthMembranes_geo"]:
         print "Setting share_SSS "+ geo
-        pm.setAttr( '{}Shape.aiSssSetname'.format(geo), "share_SSS" )
-        
-        
-        
+        pm.setAttr( '{}Shape.aiSssSetname'.format(geo), "share_SSS" ) 
+       
+#force namespace rename
+cmds.namespace( set=':' )
+cmds.namespace( add='creature_adult_alembic' )
 
-creatureGeo = cmds.select(selected)
+renamedList = []
 
+for geo in selected:
+    cmds.rename( str(geo), 'creature_adult_alembic:'+str(geo) )
+    renamedList.append("creature_adult_alembic:"+geo)
 
+wobbleDogGroup = cmds.group(renamedList, n='wobbleDog')
+cmds.rename( 'wobbleDog', 'creature_adult_alembic:wobbleDog' )
 
+    
+print "Setup alembic for lighting."
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#end
