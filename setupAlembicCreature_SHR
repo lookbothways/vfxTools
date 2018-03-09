@@ -51,7 +51,8 @@ for geo in selected:
        
 #force namespace rename
 cmds.namespace( set=':' )
-cmds.namespace( add='creature_adult_alembic' )
+if not 'creature_adult_alembic':
+    cmds.namespace( add='creature_adult_alembic' )
 
 renamedList = []
 
