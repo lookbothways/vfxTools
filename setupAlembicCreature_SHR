@@ -16,6 +16,11 @@ import maya.mel as mel
 import maya.cmds as cmds
 import pymel.core as pm
 
+# Check that there's a shaderKeeper 
+
+"""To do"""
+
+
 # Force some things. This assumes creature alembic is imported, shaderKeeper is referenced and nothing has been done to either:
 mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDBody_SG body_geo;")
 mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDClaws_SG claws_geo;")
@@ -54,11 +59,15 @@ cmds.namespace( set=':' )
 if not 'creature_adult_alembic':
     cmds.namespace( add='creature_adult_alembic' )
 
-renamedList = []
+creatureGeo = ["body_geo", "corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo", "tongue_geo", "teeth_geo", "cataracts_geo", "claws_geo", "eyeWhite_geo", "eyeStaticMembrane_geo" ]
 
-for geo in selected:
+cmds.select(creatureGeo)
+
+for geo in creatureGeo:
     cmds.rename( str(geo), 'creature_adult_alembic:'+str(geo) )
     renamedList.append("creature_adult_alembic:"+geo)
+
+selectRenamedList = cmds.select(renamedList, r=True)
 
 wobbleDogGroup = cmds.group(renamedList, n='wobbleDog')
 cmds.rename( 'wobbleDog', 'creature_adult_alembic:wobbleDog' )
