@@ -18,67 +18,55 @@ import pymel.core as pm
 
 # Check that there's a shaderKeeper 
 
-nameSpacedGeo = cmds.namespaceInfo(listOnlyNamespaces=True) 
+def setupAlembic():
 
-for x in nameSpacedGeo:
-
-    if "shaderkeeper" in x:
-        print "Found shaderkeeper"
-
-
-        # Force some things. This assumes creature alembic is imported, shaderKeeper is referenced and nothing has been done to either:
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDBody_SG body_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDClaws_SG claws_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTongue_SG tongue_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDGums_SG gums_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDMembranes_SG mouthMembranes_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTeeth_SG teeth_geo;")
-        # mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeMembrane_SG outerEyeMembrane_geo;") """Should be hidden in render rig"""
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTearLine_SG tearLine_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDStaticEyeMembrane_SG eyeStaticMembrane_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDIris_SG iris_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDCornea_SG corneas_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDCataracts_SG cataracts_geo;")
-        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeWhite_SG eyeWhite_geo;")
-
-    else:
-        print "No shaderkeeper namespace found. Reference a creature_adult_shaderkeeper first."
-
-
-#forces pipeline: properly named and exported creature geo:
-selected = ["body_geo", "corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo", "tongue_geo", "teeth_geo", "cataracts_geo", "claws_geo", "eyeWhite_geo", "eyeStaticMembrane_geo" ]
-
-for geo in selected:
-    pm.setAttr( '{}Shape.aiSubdivType'.format(geo), 1 )
-    pm.setAttr( '{}Shape.aiSubdivIterations'.format(geo), 4 )
-
-    #Set opacity    
-    if geo in ["corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo"]:
-        print "Turning off opacity for "+ geo
-        pm.setAttr( '{}Shape.aiOpaque'.format(geo), 0 )
-
-    #Set share_SSS
-    if geo in ["body_geo", "tongue_geo", "teeth_geo", "gums_geo", "mouthMembranes_geo"]:
-        print "Setting share_SSS "+ geo
-        pm.setAttr( '{}Shape.aiSssSetname'.format(geo), "share_SSS" ) 
-       
-#force namespace rename
-cmds.namespace( set=':' )
-if not 'creature_adult_alembic':
-    cmds.namespace( add='creature_adult_alembic' )
-
-cmds.select(selected)
-
-for geo in selected:
-    cmds.rename( str(geo), 'creature_adult_alembic:'+str(geo) )
-    renamedList.append("creature_adult_alembic:"+geo)
-
-selectRenamedList = cmds.select(renamedList, r=True)
-
-wobbleDogGroup = cmds.group(renamedList, n='wobbleDog')
-cmds.rename( 'wobbleDog', 'creature_adult_alembic:wobbleDog' )
-
-    
-print "Setup alembic for lighting."
+    nameSpacedGeo = cmds.namespaceInfo(listOnlyNamespaces=True)
+    renamedList = []
+    for x in nameSpacedGeo:
+        if "shaderkeeper" in x:
+            print "Found shaderkeeper"
+            # Force some things. This assumes creature alembic is imported, shaderKeeper is referenced and nothing has been done to either:
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDBody_SG body_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDClaws_SG claws_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTongue_SG tongue_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDGums_SG gums_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDMembranes_SG mouthMembranes_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTeeth_SG teeth_geo;")
+            # mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeMembrane_SG outerEyeMembrane_geo;") """Should be hidden in render rig"""
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTearLine_SG tearLine_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDStaticEyeMembrane_SG eyeStaticMembrane_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDIris_SG iris_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDCornea_SG corneas_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDCataracts_SG cataracts_geo;")
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeWhite_SG eyeWhite_geo;")
+        else:
+            print "No shaderkeeper namespace found. Reference a creature_adult_shaderkeeper first.",
+    #forces pipeline: properly named and exported creature geo:
+    selected = ["body_geo", "corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo", "tongue_geo", "teeth_geo", "cataracts_geo", "claws_geo", "eyeWhite_geo", "eyeStaticMembrane_geo" ]
+    for geo in selected:
+        pm.setAttr( '{}Shape.aiSubdivType'.format(geo), 1 )
+        pm.setAttr( '{}Shape.aiSubdivIterations'.format(geo), 4 )
+        #Set opacity    
+        if geo in ["corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo"]:
+            print "Turning off opacity for "+ geo
+            pm.setAttr( '{}Shape.aiOpaque'.format(geo), 0 )
+        #Set share_SSS
+        if geo in ["body_geo", "tongue_geo", "teeth_geo", "gums_geo", "mouthMembranes_geo"]:
+            print "Setting share_SSS "+ geo
+            pm.setAttr( '{}Shape.aiSssSetname'.format(geo), "share_SSS" ) 
+    #force namespace rename
+    cmds.namespace( set=':' )
+    #check namespace exists
+    alembicNS = cmds.namespace( exists='creature_adult_alembic' )
+    if alembicNS == False:
+        cmds.namespace( add='creature_adult_alembic' )
+    cmds.select(selected)
+    for geo in selected:
+        cmds.rename( str(geo), 'creature_adult_alembic:'+str(geo) )
+        renamedList.append("creature_adult_alembic:"+geo)
+    selectRenamedList = cmds.select(renamedList, r=True)
+    wobbleDogGroup = cmds.group(renamedList, n='wobbleDog')
+    cmds.rename( 'wobbleDog', 'creature_adult_alembic:wobbleDog' ) 
+    print "Setup alembic for lighting.",
 
 #end
