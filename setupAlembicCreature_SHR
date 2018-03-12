@@ -18,27 +18,35 @@ import pymel.core as pm
 
 # Check that there's a shaderKeeper 
 
-"""To do"""
+nameSpacedGeo = cmds.namespaceInfo(listOnlyNamespaces=True) 
+
+for x in nameSpacedGeo:
+
+    if "shaderkeeper" in x:
+        print "Found shaderkeeper"
 
 
-# Force some things. This assumes creature alembic is imported, shaderKeeper is referenced and nothing has been done to either:
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDBody_SG body_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDClaws_SG claws_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTongue_SG tongue_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDGums_SG gums_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDMembranes_SG mouthMembranes_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTeeth_SG teeth_geo;")
-# mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeMembrane_SG outerEyeMembrane_geo;") """Should be hidden in render rig"""
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTearLine_SG tearLine_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDStaticEyeMembrane_SG eyeStaticMembrane_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDIris_SG iris_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDCornea_SG corneas_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDCataracts_SG cataracts_geo;")
-mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeWhite_SG eyeWhite_geo;")
+        # Force some things. This assumes creature alembic is imported, shaderKeeper is referenced and nothing has been done to either:
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDBody_SG body_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDClaws_SG claws_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTongue_SG tongue_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDGums_SG gums_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDMembranes_SG mouthMembranes_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTeeth_SG teeth_geo;")
+        # mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeMembrane_SG outerEyeMembrane_geo;") """Should be hidden in render rig"""
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTearLine_SG tearLine_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDStaticEyeMembrane_SG eyeStaticMembrane_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDIris_SG iris_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDCornea_SG corneas_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDCataracts_SG cataracts_geo;")
+        mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeWhite_SG eyeWhite_geo;")
+
+    else:
+        print "No shaderkeeper namespace found. Reference a creature_adult_shaderkeeper first."
 
 
-
-selected = cmds.ls(sl=True, r=True)
+#forces pipeline: properly named and exported creature geo:
+selected = ["body_geo", "corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo", "tongue_geo", "teeth_geo", "cataracts_geo", "claws_geo", "eyeWhite_geo", "eyeStaticMembrane_geo" ]
 
 for geo in selected:
     pm.setAttr( '{}Shape.aiSubdivType'.format(geo), 1 )
@@ -59,11 +67,9 @@ cmds.namespace( set=':' )
 if not 'creature_adult_alembic':
     cmds.namespace( add='creature_adult_alembic' )
 
-creatureGeo = ["body_geo", "corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo", "tongue_geo", "teeth_geo", "cataracts_geo", "claws_geo", "eyeWhite_geo", "eyeStaticMembrane_geo" ]
+cmds.select(selected)
 
-cmds.select(creatureGeo)
-
-for geo in creatureGeo:
+for geo in selected:
     cmds.rename( str(geo), 'creature_adult_alembic:'+str(geo) )
     renamedList.append("creature_adult_alembic:"+geo)
 
