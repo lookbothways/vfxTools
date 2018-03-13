@@ -8,7 +8,7 @@ import maya.mel as mel
 #Makes group of selected nodes and renames it to the parent group name +_standin
 
 
-print "Exporting selected objects as .ass"
+print "Exporting selected objects as .ass - reimporting them.",
 
 
 """
@@ -27,9 +27,13 @@ Get the correct mask value using these constants:
 """
 
 
-mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
-print mask
+#173 = no shaders: 
+#mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+#65535 = all
+# 253 things including shaders
 
+mask = 253
+print mask
 
 selected = cmds.ls(sl=True)
 cmds.pickWalk (d='Up')
@@ -48,16 +52,19 @@ cmds.rename( groupname )
 
 #Sets the name of the ass file and path and exports the .ass
 #Change this path!
-export_dir = "/mnt/projects/revolt/publish/assets/character/spider/standins/spiderSwapOutStandins/"
-export_file = export_dir+groupname+'.ass'
+#export_dir = str(cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here'))
+export_dir = "/mnt/projects/shr/assets/Environment/sinkhole/SHD/work/maya/cache"
 
-output = cmds.arnoldExportAss( f=export_file, fsh=True, mask=173, lightLinks=0, shadowLinks=0, selected=True)
+export_file = export_dir+groupname+'.ass'
+print export_file
+
+output = cmds.arnoldExportAss( f=export_file, fsh=True, mask=253, lightLinks=0, shadowLinks=0, selected=True)
 
 
 #imports .ass container and fills it with export_file path
 
 cmds.file( export_file, i=True )
-cmds.setAttr( "ArnoldStandInShape.deferStandinLoad", 0)
+#cmds.setAttr( "ArnoldStandInShape.deferStandinLoad", 0) #No longer applicable in Arnold 5
 imported = cmds.ls( 'ArnoldStandIn*', sl=False )
 
 #selects and renames the standin
