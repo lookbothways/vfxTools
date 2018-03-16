@@ -32,7 +32,7 @@ def setupAlembic():
             mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDGums_SG gums_geo;")
             mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDMembranes_SG mouthMembranes_geo;")
             mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTeeth_SG teeth_geo;")
-            # mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeMembrane_SG outerEyeMembrane_geo;") """Should be hidden in render rig"""
+            mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDEyeMembrane_SG outerEyeMembrane_geo;")
             mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDTearLine_SG tearLine_geo;")
             mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDStaticEyeMembrane_SG eyeStaticMembrane_geo;")
             mel.eval("sets -e -forceElement creature_adult_shaderkeeper:aiWDIris_SG iris_geo;")
@@ -42,18 +42,21 @@ def setupAlembic():
         else:
             print "No shaderkeeper namespace found. Reference a creature_adult_shaderkeeper first.",
     #forces pipeline: properly named and exported creature geo:
-    selected = ["body_geo", "corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo", "tongue_geo", "teeth_geo", "cataracts_geo", "claws_geo", "eyeWhite_geo", "eyeStaticMembrane_geo" ]
+    selected = ["body_geo", "corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo", "tongue_geo", "teeth_geo", "cataracts_geo", "claws_geo", "eyeWhite_geo", "eyeStaticMembrane_geo", "outerEyeMembrane_geo", "outerEyeMembrane_geoBase" ]
     for geo in selected:
         pm.setAttr( '{}Shape.aiSubdivType'.format(geo), 1 )
         pm.setAttr( '{}Shape.aiSubdivIterations'.format(geo), 4 )
         #Set opacity    
-        if geo in ["corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo"]:
+        if geo in ["corneas_geo", "iris_geo", "tearLine_geo", "gums_geo", "mouthMembranes_geo", "outerEyeMembrane_geo"]:
             print "Turning off opacity for "+ geo
             pm.setAttr( '{}Shape.aiOpaque'.format(geo), 0 )
         #Set share_SSS
         if geo in ["body_geo", "tongue_geo", "teeth_geo", "gums_geo", "mouthMembranes_geo"]:
             print "Setting share_SSS "+ geo
             pm.setAttr( '{}Shape.aiSssSetname'.format(geo), "share_SSS" ) 
+        if geo in ["outerEyeMembrane_geoBase"]:
+            print "Hiding "+ geo
+            pm.setAttr( '{}.visibility'.format(geo), 0 ) 
     #force namespace rename
     cmds.namespace( set=':' )
     #check namespace exists
@@ -70,3 +73,7 @@ def setupAlembic():
     print "Setup alembic for lighting.",
 
 #end
+
+
+
+
