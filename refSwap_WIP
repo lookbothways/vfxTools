@@ -1,0 +1,115 @@
+
+import maya.cmds as cmds
+import pymel.core as pm
+"""
+Reference swap:
+ToDo: 
+* Make it work for multiple creatures
+* Choose asset (so is works on multiple projects) 
+  Have a dialogue with checkboxes for creatures to switch, switch on those. 
+* Get full path from Shotgun
+* remove 'twistedTubes' from hideRigExtras when changing to proxy (and any others)
+* update namespace to current setup
+"""
+#--------------------------Shotgun Query Highest Published Version
+def getShotgunInfo(step_name, entity_type_name, asset_shot_code):
+	import os, sys
+	sys.path.append(r"/mnt/pipeline/ATK_PIPELINE/atk-api")
+	from atk_shotgun.ShotgunTankAccess import CustomQuery
+	reload(CustomQuery)
+	custom_query_obj = CustomQuery.Custom_Query()
+	# Get file path name of the latest published Maya scene file
+	maya_file_path_name = custom_query_obj.get_latest_maya_scene_publish(step_name, entity_type_name, asset_shot_code)['path']['local_path_linux']
+	return maya_file_path_name		
+#--------------------------Swap out references
+def swapRefs(option, nameSpace, referenceNode, referencePath, currentState):       		        
+	if option != 'Cancel':        
+	    mayaFileType = "mayaAscii"		    
+	    if option == 'Render':
+	        step_name = "render"
+	        maya_file_path_name = getShotgunInfo(step_name, entity_type_name, asset_shot_code)
+	        cmds.file(maya_file_path_name,loadReference=referenceNode,type=mayaFileType,options='v=0')
+	        print "New reference path: "+ maya_file_path_name 
+	        objectList = ['bodyResult_geo','mouthShapes_geo','bodyHighExtra_geo','bodyShapes_geo','bodyBreathing_geo','body_twistedTubes_geo']
+	        hideRigExtras(objectList)                                        		        
+	    elif option == 'Proxy':
+	        step_name = "proxy"
+	        maya_file_path_name = getShotgunInfo(step_name, entity_type_name, asset_shot_code)  
+	        cmds.file(maya_file_path_name,loadReference=referenceNode,type=mayaFileType,options='v=0')
+	        print "New reference path: "+ maya_file_path_name 
+	        objectList = ['bodyResult_geo','mouthShapes_geo','bodyHighExtra_geo','bodyShapes_geo','bodyBreathing_geo']               
+	        hideRigExtras(objectList)		        
+	    elif option == 'Cache':
+	        step_name = "cache"
+	        maya_file_path_name = getShotgunInfo(step_name, entity_type_name, asset_shot_code)
+	        cmds.file(maya_file_path_name,loadReference=referenceNode,type=mayaFileType,options='v=0')                   
+	        print "New reference path: "+ maya_file_path_name      
+	        objectList = ['bodyResult_geo','mouthShapes_geo','bodyHighExtra_geo','bodyShapes_geo','bodyBreathing_geo','body_twistedTubes_geo']
+	        hideRigExtras(objectList)
+	else:
+	    print "Cancelled."		  
+#Hide the extras
+def hideRigExtras(objectList):		
+	print "Hiding: "+ str(objectList)    
+	for each in objectList:
+	    cmds.setAttr( nameSpace+each+'.visibility', 0)
+#---------------------------------- 
+#Start here
+maya_file_path_name = ""
+# get the wobbleDog main CTRL namespace:
+wordIn = "MAIN_CtrlShape"
+sel = cmds.ls("*" + wordIn + "*", r=True)
+option = ''
+numberOfDogs = ''
+dogExists = pm.listNamespaces(recursive=True, internal=False)
+
+#work out how many creatures
+wordIn = "wobbleDog_MAIN_Offset_CtrlShape"
+sel = cmds.ls("*" + wordIn + "*", r=True)
+
+if sel > 2:
+    print "More than one creature found"
+    #THIS IS WHERE YOU'RE UP TO
+
+if "creature_adult" in str(dogExists):
+    print dogExists
+    print "FOUND A CREATURE:"+ str(dogExists)
+    if currentState == 'Render':
+        option= cmds.confirmDialog(title='Swap '+currentState+' rig',message="Currently {}.\n\nChoose rig to swap to:".format(currentState),button=['Proxy','Cache','Cancel'],defaultButton='Proxy',cancelButton='Cancel',dismissString='Cancel')           		   
+    elif currentState == 'Proxy':
+        option= cmds.confirmDialog(title='Swap '+currentState+' rig',message="Currently {}.\n\nChoose rig to swap to:".format(currentState),button=['Cache','Render','Cancel'],defaultButton='Cache',cancelButton='Cancel',dismissString='Cancel')		                    
+    elif currentState == 'Cache':
+        option= cmds.confirmDialog(title='Swap '+currentState+' rig',message="Currently {}.\n\nChoose rig to swap to:".format(currentState),button=['Proxy','Render','Cancel'],defaultButton='Render',cancelButton='Cancel',dismissString='Cancel')       
+else:
+	print "Error: Couldn't find correctly named creature nodes." 
+
+for each in sel:
+    cmds.select(each)
+    # The list of objects to hide in renderRig
+    objectList = ""
+    # gets reference info of selected node
+    nameSpace = pm.selected()[0].namespace()
+    print nameSpace
+    referenceNode = pm.selected()[0].namespace()[:-1]+"RN"
+    print referenceNode
+    referencePath = pm.referenceQuery( nameSpace+'wobbleDog_MAIN_Ctrl',filename=True )
+    print "Current path: "+ referencePath
+    # Get latest version from Shotgun:		
+    # Determines current state and path:
+    if "proxy" in referencePath:
+    	currentState = "Proxy"		        
+    if "cache" in referencePath:
+    	currentState = "Cache"
+    if "render" in referencePath:
+    	currentState = "Render"    		    
+    print "Current reference is: "+ currentState
+    # pass into getShotgunInfo:
+    entity_type_name = "Asset"
+    asset_shot_code = "creature_adult"	 
+    swapRefs(option, nameSpace, referenceNode, referencePath, currentState)    
+#end
+
+
+
+
+
