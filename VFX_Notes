@@ -1,0 +1,10 @@
+"""
+Notes of things:
+
+Linux - Convert a file from forat to other format.
+
+mogrify  -format jpg -path thumbs -thumbnail 1024x512 *.hdr
+
+https://www.imagemagick.org/script/mogrify.php
+
+"""
