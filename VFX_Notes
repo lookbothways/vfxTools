@@ -7,4 +7,8 @@ mogrify  -format jpg -path thumbs -thumbnail 1024x512 *.hdr
 
 https://www.imagemagick.org/script/mogrify.php
 
+
+===Use 'Mogrify' to convert formats===
+* https://www.imagemagick.org/script/mogrify.php<br><br>For example:<br>cd /the/place/where/your/hdrs/are<br>mkdir thumbs<br>mogrify  -format jpg -path thumbs -thumbnail 1024x512 *.hdr<br>
+
 """
