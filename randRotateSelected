@@ -1,4 +1,5 @@
-# Random scale selected, rotate selected
+# Random scale selected, rotate selected - MULTIPLIES EXISTING ROTATION. 
+# Will do nothing if rot = 0.
 
 import maya.cmds as cmds
 import random
