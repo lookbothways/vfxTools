@@ -53,7 +53,6 @@ Output
 
 /mnt/pipeline/ATK_PIPELINE/maya/modules/2017x64/mtoa_3.0.0.2/bin/noice -patchradius 3 -searchradius 9 -variance 0.5 -aov L_fill -aov L_fill2 -aov L_hdr -aov L_key -aov L_neon -aov L_rim  -i /mnt/projects/global_sandbox/sequences/londonSeq/lonTestShot/LGT/work/maya/images/lonTestShot_LGT_arnoldFiveTest_v009/creature_adult_env/lonTestShot_LGT_arnoldFiveTest_v009.creature_adult_env.1001.exr  -output /mnt/projects/global_sandbox/sequences/londonSeq/lonTestShot/LGT/work/maya/images/lonTestShot_LGT_arnoldFiveTest_v009/creature_adult_env/lonTestShot_LGT_arnoldFiveTest_v009.creature_adult_env_denoiced.1001.exr
 
-
-
+Modified from: https://github.com/zpelgrims/noice_command_generation/blob/master/noice_command_generation.py
 
 """
