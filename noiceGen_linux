@@ -1,0 +1,45 @@
+import re
+
+# Modified to work on SHR + Linux
+
+# only change these variables
+filename_input = "/mnt/projects/shr/sequences/081/SHR_081_010/LGT/publish/images/SHR_081_010_LGT_lighting_v022/creature_adult_env/SHR_081_010_LGT_lighting_v022.creature_adult_env.beauty.####.exr"
+filename_output = "/mnt/projects/shr/sequences/081/SHR_081_010/LGT/publish/images/SHR_081_010_LGT_lighting_v022/creature_adult_env/SHR_081_010_LGT_lighting_v022.creature_adult_env_denoiced.beauty.####.exr"
+arnold_bin_path = "/mnt/pipeline/ATK_PIPELINE/maya/modules/2017x64/mtoa_3.0.0.2/bin"
+startframe = 1001
+endframe = 1001
+variance = 0.5
+pixel_search_radius = 9
+pixel_neighborhood_patch_radius = 3
+temporal_range = 6
+light_aov_names = []
+#light_aov_names = ["frontlight", "backlight"] # if no light aov denoising needed, just leave list empty: []
+
+
+
+filename_input_sequence_number = re.sub(r'#+',lambda m: r'{{:0{}d}}'.format(len(m.group(0))), filename_input)
+filename_output_sequence_number = re.sub(r'#+',lambda m: r'{{:0{}d}}'.format(len(m.group(0))), filename_output)
+
+for i in range (startframe, endframe + 1):
+    temporal_range_string = ""
+    light_aov_string = ""
+    for j in range(-temporal_range/2, temporal_range/2):
+        if (j==0) or (i+j < startframe) or (i+j > endframe):
+            continue
+        
+        temporal_range_string += "-i " + filename_input_sequence_number.format(i+j) + " "
+
+    for k in light_aov_names:
+        light_aov_string += "-aov " + str(k) + " "
+    
+    print arnold_bin_path + "/noice " \
+            + "-patchradius " + str(pixel_neighborhood_patch_radius) + " " \
+            + "-searchradius " + str(pixel_search_radius) + " " \
+            + "-variance " + str(variance) + " " \
+            + light_aov_string + " " \
+            + "-i " + filename_input_sequence_number.format(i) + " " \
+            + temporal_range_string + " " \
+            + "-output " + filename_output_sequence_number.format(i),
+            
+    if i is not endframe:
+      print " &&",
