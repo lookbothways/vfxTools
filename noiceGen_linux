@@ -1,18 +1,19 @@
 import re
-
-# Modified to work on SHR + Linux
-
+# /mnt/projects/global_sandbox/sequences/londonSeq/lonTestShot/LGT/work/maya/images/lonTestShot_LGT_arnoldFiveTest_v005/masterLayer
 # only change these variables
-filename_input = "/mnt/projects/shr/sequences/081/SHR_081_010/LGT/publish/images/SHR_081_010_LGT_lighting_v022/creature_adult_env/SHR_081_010_LGT_lighting_v022.creature_adult_env.beauty.####.exr"
-filename_output = "/mnt/projects/shr/sequences/081/SHR_081_010/LGT/publish/images/SHR_081_010_LGT_lighting_v022/creature_adult_env/SHR_081_010_LGT_lighting_v022.creature_adult_env_denoiced.beauty.####.exr"
+filename_input = "/mnt/projects/global_sandbox/sequences/londonSeq/lonTestShot/LGT/work/maya/images/lonTestShot_LGT_arnoldFiveTest_v010/creature_adult_env/lonTestShot_LGT_arnoldFiveTest_v010.creature_adult_env.####.exr"
+filename_output = "/mnt/projects/global_sandbox/sequences/londonSeq/lonTestShot/LGT/work/maya/images/lonTestShot_LGT_arnoldFiveTest_v010/creature_adult_env/lonTestShot_LGT_arnoldFiveTest_v010.creature_adult_env_denoiced.####.exr"
 arnold_bin_path = "/mnt/pipeline/ATK_PIPELINE/maya/modules/2017x64/mtoa_3.0.0.2/bin"
 startframe = 1001
-endframe = 1001
+endframe = 1003
 variance = 0.5
 pixel_search_radius = 9
 pixel_neighborhood_patch_radius = 3
 temporal_range = 6
-light_aov_names = []
+# NOT DENOICED: Z, motionvector, P, N, UV, crypto_mat, crypto_object, all albedo passes
+light_aov_names = ["AO", "coat", "diffuse_direct", "diffuse_indirect", "emission", "shadow_matte", "specular_direct", "specular_indirect", "sss", "transmission", "volume", "L_hdr", "L_key", "L_rim", "L_fill"]
+# Full AOV list (SHR) "AO", "N", "P", "UV", "Z", "coat", "crypto_material", "crypto_object", "diffuse_albedo", "diffuse_direct", "diffuse_indirect", "emission", "motionvector", "shadow_matte", "specular_direct", "specular_indirect", "sss", "transmission", "volume", "L_hdr", "L_key", "L_rim", "L_fill"
+
 #light_aov_names = ["frontlight", "backlight"] # if no light aov denoising needed, just leave list empty: []
 
 
@@ -43,3 +44,16 @@ for i in range (startframe, endframe + 1):
             
     if i is not endframe:
       print " &&",
+      
+      
+
+"""
+Output 
+
+
+/mnt/pipeline/ATK_PIPELINE/maya/modules/2017x64/mtoa_3.0.0.2/bin/noice -patchradius 3 -searchradius 9 -variance 0.5 -aov L_fill -aov L_fill2 -aov L_hdr -aov L_key -aov L_neon -aov L_rim  -i /mnt/projects/global_sandbox/sequences/londonSeq/lonTestShot/LGT/work/maya/images/lonTestShot_LGT_arnoldFiveTest_v009/creature_adult_env/lonTestShot_LGT_arnoldFiveTest_v009.creature_adult_env.1001.exr  -output /mnt/projects/global_sandbox/sequences/londonSeq/lonTestShot/LGT/work/maya/images/lonTestShot_LGT_arnoldFiveTest_v009/creature_adult_env/lonTestShot_LGT_arnoldFiveTest_v009.creature_adult_env_denoiced.1001.exr
+
+
+
+
+"""
