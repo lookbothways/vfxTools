@@ -38,4 +38,12 @@ Open the .map file in OSM2World with File > Open, then export the whole thing as
 In a shell: ./osm2world.sh --input map.osm --output map.obj
 Import the OBJ
 
+---
+
+Using SED to Change Data Inside a File[edit]
+Example for changing a path to another path for every .ass in the pwd - use with caution.
+find . -name '*.ass' -exec sed -i 's!E:/Sam/Documents/Freelance Work/Aftermath/Aftermath_Maya/textures/!/mnt/projects/aft/publish/assets/hamburg/textures/!g' '{}' \;
+
+
+
 """
