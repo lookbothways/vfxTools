@@ -1,5 +1,5 @@
 """
-Notes of things:
+Notes of things, copypastas:
 
 Linux - Convert a file from forat to other format.
 
@@ -10,6 +10,7 @@ https://www.imagemagick.org/script/mogrify.php
 
 ===Use 'Mogrify' to convert formats===
 * https://www.imagemagick.org/script/mogrify.php<br><br>For example:<br>cd /the/place/where/your/hdrs/are<br>mkdir thumbs<br>mogrify  -format jpg -path thumbs -thumbnail 1024x512 *.hdr<br>
+---
 
 Track any point in Maya using locators and a scaled camera[edit]
 Load the tracked camera its undistorted backplate
@@ -22,5 +23,19 @@ This gives you a transform that has the same attributes as the camera.
 Change to a frame where the point has moved significantly, look through the tracked camera.
 Select 'locatorCam' and scale it until the locator lines up with the point you'd like tracked.
 Repeat this for several frames in the shot, scaling and refining the scale to improve the track.
+
+
+----
+
+Using OpenStreetMap[edit]
+OpenStreetMap can be used to extract OBJs from any map.
+Export a .map region file from OpenStreetMap - Click the Export button at the top of the page. The default area is the viewport, but you can also manually change that.
+Make sure the property you want is completely within the export region, then click the blue Export button to download the file.
+An example area: http://www.openstreetmap.org/search?query=st%20michaels%20hamburg#map=18/53.54786/9.97996
+Convert the OSM .map file to an OBJ model with OSM2World, a free Java program for converting OSM data into 3D models.
+/mnt/projects/library/openStreetMap_geoExtract
+Open the .map file in OSM2World with File > Open, then export the whole thing as an OBJ via File > Export OBJ file. That's it.
+In a shell: ./osm2world.sh --input map.osm --output map.obj
+Import the OBJ
 
 """
