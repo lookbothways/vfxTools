@@ -11,4 +11,16 @@ https://www.imagemagick.org/script/mogrify.php
 ===Use 'Mogrify' to convert formats===
 * https://www.imagemagick.org/script/mogrify.php<br><br>For example:<br>cd /the/place/where/your/hdrs/are<br>mkdir thumbs<br>mogrify  -format jpg -path thumbs -thumbnail 1024x512 *.hdr<br>
 
+Track any point in Maya using locators and a scaled camera[edit]
+Load the tracked camera its undistorted backplate
+Set the frame range and choose a frame where the point you want to track is clearly visible.
+Create a locator, look through the camera and move the locator to the point you want to track.
+Duplicate the camera without upstream connections on that frame, turn off its renderable flag, unlock its transform attributes and rename it locatorCam_#### (frame number)
+(or something you'll not accidentally render later.)
+Remove it from any grouping and parent the locator to it - ie MM drag the locator onto the cam.
+This gives you a transform that has the same attributes as the camera.
+Change to a frame where the point has moved significantly, look through the tracked camera.
+Select 'locatorCam' and scale it until the locator lines up with the point you'd like tracked.
+Repeat this for several frames in the shot, scaling and refining the scale to improve the track.
+
 """
