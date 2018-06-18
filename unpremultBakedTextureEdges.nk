@@ -1,0 +1,108 @@
+set cut_paste_input [stack 0]
+version 10.0 v6
+Read {
+ inputs 0
+ file /mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/baked/softPawsBase/softPaws2base_body_geoShape_####.exr
+ format "8192 8192 0 0 8192 8192 1 "
+ first 1001
+ last 1007
+ origfirst 1001
+ origlast 1007
+ origset true
+ name Read1
+ selected true
+ xpos 1646
+ ypos 2343
+}
+Dot {
+ name Dot1
+ selected true
+ xpos 1680
+ ypos 2523
+}
+set N7405110 [stack 0]
+push $N7405110
+Blur {
+ size 9.2
+ name Blur1
+ selected true
+ xpos 1721
+ ypos 2562
+}
+Unpremult {
+ name Unpremult1
+ selected true
+ xpos 1721
+ ypos 2600
+}
+Merge2 {
+ inputs 2
+ name Merge1
+ selected true
+ xpos 1646
+ ypos 2636
+}
+Write {
+ channels rgba
+ file /mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/baked/softPawsBase/softPaws2base_body_geoShapeUnpremult_####.exr
+ file_type exr
+ autocrop true
+ version 2
+ name Write1
+ selected true
+ xpos 1643
+ ypos 2791
+}
+Read {
+ inputs 0
+ file /mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/baked/softPawsDisp/softPawsDisp2_body_geoShape_####.exr
+ format "8192 8192 0 0 8192 8192 1 "
+ first 1001
+ last 1007
+ origfirst 1001
+ origlast 1007
+ origset true
+ name Read9
+ selected true
+ xpos 1924
+ ypos 2262
+}
+Dot {
+ name Dot8
+ selected true
+ xpos 1958
+ ypos 2475
+}
+set N8464440 [stack 0]
+push $N8464440
+Blur {
+ size 9.2
+ name Blur8
+ selected true
+ xpos 1999
+ ypos 2514
+}
+Unpremult {
+ name Unpremult8
+ selected true
+ xpos 1999
+ ypos 2552
+}
+Merge2 {
+ inputs 2
+ name Merge8
+ selected true
+ xpos 1924
+ ypos 2588
+}
+Write {
+ channels rgba
+ file /mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/baked/softPawsDisp/softPawsDisp2_body_geoShape_unpremult_####.exr
+ file_type exr
+ autocrop true
+ version 4
+ name Write2
+ selected true
+ xpos 1921
+ ypos 2743
+}
