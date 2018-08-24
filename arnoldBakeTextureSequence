@@ -1,0 +1,41 @@
+# Bake texture sequence, Arnold. 
+# To do:
+#
+# Get frame range: 0001-0005 (for example)
+# create breakLoop file
+# append _currentTime to shape node
+# bakeTextureSequence on object
+# advance to next frame
+# append _currentTime to shape node
+# loop with breakLoop
+#
+# Notes
+# dir(renderToTexture)
+# currentTime is broken?!
+
+
+import mtoa.renderToTexture as renderToTexture
+
+import maya.cmds as cmds
+
+
+class rkMtoaRtoT(renderToTexture.MtoARenderToTexture):
+    def __init__(self):
+        renderToTexture.MtoARenderToTexture.__init__(self)
+        self.dFolder = 'C:/Users/Mark/Desktop/Kingsman/maya/bakeTextureSequence_2014'
+        self.dResolution = 128
+        self.dCameraSamples = 1
+
+    def doAutomaticExport(self):
+        renderToTexture.MtoARenderToTexture.create(self)
+        
+        cmds.textFieldButtonGrp('outputFolder', e=True, tx=self.dFolder)
+        #cmds.textFieldButtonGrp('outputFolder', e=True, tx='C:/Users/Mark/Desktop/Kingsman/maya/bakeTextureSequence_2014')
+        cmds.intFieldGrp('resolution', e=True, v1=self.dResolution)
+        cmds.intFieldGrp('aa_samples', e=True, v1=self.dCameraSamples)
+        
+        renderToTexture.MtoARenderToTexture.doExport(self)
+
+
+rt = rkMtoaRtoT()
+rt.doAutomaticExport()
