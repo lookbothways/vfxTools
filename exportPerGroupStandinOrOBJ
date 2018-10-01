@@ -47,7 +47,7 @@ def exportFiles():
         if option == 'Export OBJs':
             cmds.file(export_file,pr=1,typ="OBJexport",es=1,op="groups=0; ptgroups=0; materials=0; smoothing=0; normals=0")
         else:
-            cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=0, shadowLinks=0, selected=True)
+            cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=1, shadowLinks=1, selected=True)
         if reimport == True:
             cmds.file( export_file, i=True )
             #cmds.setAttr( "ArnoldStandInShape.deferStandinLoad", 0)
