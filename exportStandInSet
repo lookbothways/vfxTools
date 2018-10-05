@@ -1,0 +1,77 @@
+# Export all selected as individual standins to specified path - A modifictation for Curfew. 
+"""
+For the shelf:
+
+import exportStandInSet
+exportStandInSet.exportFiles()
+
+
+Get the correct mask value using these constants:
+    AI_NODE_UNDEFINED   0x0000
+    AI_NODE_OPTIONS     0x0001
+    AI_NODE_CAMERA      0x0002
+    AI_NODE_LIGHT       0x0004
+    AI_NODE_SHAPE       0x0008
+    AI_NODE_SHADER      0x0010
+    AI_NODE_OVERRIDE    0x0020
+    AI_NODE_DRIVER      0x0040
+    AI_NODE_FILTER      0x0080
+    AI_NODE_ALL         0xFFFF
+    
+    
+No shaders:
+mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER 
+no lights:
+mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER | arnold.AI_NODE_CAMERA | arnold.AI_NODE_SHADER | arnold.AI_NODE_DRIVER | arnold.AI_NODE_FILTER
+
+
+    Everything:
+    mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_ALL
+"""
+
+
+
+# End of section for wall standins
+import arnold 
+import maya.cmds as cmds
+def exportFiles():    
+    export_dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here')
+    export_dir = export_dir[0]+"/"
+    mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_ALL
+    print mask
+    selected = cmds.ls(sl=True)
+    #Some options to choose from:
+    option=""
+    option=cmds.confirmDialog(title='Export selected',message="Export selected as standins",button=['Export and reimport .ass', 'Export .ass only', 'Export OBJs', 'Cancel'],defaultButton='Export and reimport',cancelButton='Cancel',dismissString='Cancel')
+    #empties reimport:
+    reimport = ""
+    if option == 'Export and reimport .ass':
+        reimport = True
+    else:
+        reimport = False
+    
+    if option == 'Export OBJs':
+        suffix = ".obj"
+    else:
+        suffix = ".ass"
+    for sel in selected: 
+        print "Exporting {}".format(sel)
+        export_file = export_dir+sel+suffix
+        cmds.select(sel)        
+        if option == 'Export OBJs':
+            cmds.file(export_file,pr=1,typ="OBJexport",es=1,op="groups=0; ptgroups=0; materials=0; smoothing=0; normals=0")
+        else:
+            cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=1, shadowLinks=1, selected=True)
+        if reimport == True:
+            cmds.file( export_file, i=True )
+            #cmds.setAttr( "ArnoldStandInShape.deferStandinLoad", 0)
+            imported = cmds.ls( 'ArnoldStandIn*', sl=False )  
+            #selects and renames the standin
+            swapOutName = ( sel+"_standIn" )
+            cmds.rename( imported[0], swapOutName)
+            cmds.select( sel, swapOutName )
+            cmds.warning( "If original objects were in render layers, imported objects will need to be added to those layers manually." )
+            
+            
+#end mb150118
+
