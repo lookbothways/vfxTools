@@ -1,0 +1,50 @@
+# Transfer Presets tool. By Ewan Laidlaw. 181018
+
+import maya.cmds as cmds
+import os
+import shutil
+import getpass
+User=getpass.getuser()    
+HomeDirectory="/home/"+User+"/maya/2017/presets/attrPresets"
+Project="CUR"
+#ShareDirectory=str(("/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType))
+
+def exportFiles(HomeDirectory):
+    export_dir = cmds.fileDialog2(fm=1, dialogStyle=2, cap='Select preset to export', okCaption='Select',cc="cancel",ff="*.mel*",dir=HomeDirectory)
+    path=str(export_dir)
+    path=path.lstrip("[u'")
+    path=path.rstrip("']")
+    pathList=path.split("/")
+    count=len(pathList)
+    presetType=pathList[(count-2)]
+    
+    
+    
+
+    #Check if folder for preset type exists in project 
+    if not os.path.isdir("/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType):
+        os.makedirs(("/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType))
+        print(presetType)
+    
+    #Check if preset version exists
+  
+    fileName=pathList[(count-1)]
+    
+    if not os.path.exists("/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType+"/"+fileName):
+        shutil.copy(path,"/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType)
+        print(fileName)
+        print("FILE COPIED")
+    else:
+        ###version up preset in sharded drive###
+        
+        #exists=os.path.exists(("/mnt/pipeline/ATK_PIPELINE/maya/modules/CUR/presets/attrPresets/"presetType+"/"+fileName+".mel")):
+        #while exists = True:
+            #versionNumb+=1
+        cmds.confirmDialog(b="OK",m="A file with this name already exists in the shared drive, please rename/version up your preset",t="Name Clash")        
+       
+        return
+    return
+    
+    
+exportFiles(HomeDirectory)
+
