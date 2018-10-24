@@ -1,0 +1,28 @@
+#Rendersettings
+import maya.cmds as cmds
+
+    
+""" Improvements to make
+
+Get show from SG
+Get Show's res + FPS from SG
+
+""" 
+
+def setRenderSettings():
+	print "Executing render settings..."
+	widthRes= float(3840)
+	heightRes= float(1606)
+	devAspc=float(widthRes/heightRes)
+	cmds.setAttr("defaultResolution.aspectLock",False)
+	cmds.setAttr("defaultResolution.deviceAspectRatio",float(devAspc))
+	cmds.setAttr("defaultResolution.pixelAspect",1)
+	aspect = cmds.getAttr ("defaultResolution.pixelAspect")
+	cmds.setAttr("defaultResolution.width", int(widthRes))
+	cmds.setAttr("defaultResolution.height", int(heightRes))
+	aspectLock = cmds.setAttr("defaultResolution.aspectLock",True)
+	fps = cmds.currentUnit(t='pal')
+	cmds.setAttr ("defaultRenderGlobals.imageFilePrefix","<Scene>/<RenderLayer>/<Scene>.<RenderLayer>.<RenderPass>",type="string")
+	output = "Render settings applied for CUR: width {} height {} | aspect {} | fps {} ".format(widthRes, heightRes, aspect, fps )
+	print output,
+
