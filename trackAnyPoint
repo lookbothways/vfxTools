@@ -1,18 +1,8 @@
-# Locator for tracking backplate point
+# track any point
 """
 Select the camera you want a locator under to scale
-
-* Load the tracked camera its undistorted backplate from SG
-* Set the frame range and choose a frame where the point you want to track is clearly visible.
-* Create a locator, look through the camera and move the locator to the point you want to track.
-* Duplicate the camera without upstream connections on that frame, turn off its renderable flag, unlock its transform attributes and rename it locatorCam_#### (frame number)
-  (or something you'll not accidentally render later.)
-* Remove it from any grouping and parent the locator to it - ie MM drag the locator onto the cam.
-* This gives you a transform that has the same attributes as the camera.
-* Change to a frame where the point has moved significantly, look through the tracked camera.
-* Select 'locatorCam' and scale it until the locator lines up with the point you'd like tracked.
-* Repeat this for several frames in the shot, scaling and refining the scale to improve the track.
-
+! Assumes the camera has an imageplane attached upstream. 
+! Assumes only one imagePlane
 
 """
 
@@ -26,8 +16,8 @@ newcam = cmds.duplicate(cam, rr=True)
 # Unlock all axes / axis
 nounicode=str(newcam[0]).split("'")
 camNoUnicode = "{}.".format(nounicode[0])
-axis = ['x', 'y', 'z']
-attrs = ['t', 'r', 's']
+axis = ['X', 'Y', 'Z']
+attrs = ['translate', 'rotate', 'scale']
 for ax in axis:
     for attr in attrs:
         cmds.setAttr(camNoUnicode+attr+ax, lock=0)
@@ -40,11 +30,40 @@ cmds.select( newcam, r=True )
 locatorParent = cmds.rename( 'scale_me' )
 
 # Create and parent a locator
-cmds.spaceLocator(n="AOV_Settings") # "Locator"
+pointInWorld = cmds.spaceLocator(n="pointInWorld")
+cmds.parent(pointInWorld, locatorParent, relative=True)
+pointInWorld = str(pointInWorld[0]).split("'")
+pointInWorld = "{}.translateZ".format(pointInWorld[0])
+
+
+# Get image plane distance and halves it
+
+if cmds.nodeType(cam) == 'transform':
+    dagNode = cmds.listRelatives(cam, s=True, c=True)[0]
+
+# get all the imageplane nodes connected to image plane
+sourceConnections = cmds.listConnections(cam[0] + '.imagePlane', source = True, type = 'imagePlane') or []
+
+# collect all the 'imageName(s)' into a list and return it
+imageNames = []
+imageDepth = []
+for lc in sourceConnections:
+   atribVal1=cmds.getAttr(lc+".imageName")
+   atribVal2=cmds.getAttr(lc+".depth")/2
+   
+   imageNames.append(atribVal1)
+   locatorScale = atribVal2/10
+   locatorDistance = atribVal2*-1
+
+cmds.setAttr(pointInWorld, locatorDistance)
+# Sets scale 
+cmds.setAttr("pointInWorld.scaleX", locatorScale)
+cmds.setAttr("pointInWorld.scaleY", locatorScale)
+cmds.setAttr("pointInWorld.scaleZ", locatorScale)
+
 
 
 #MSB 241018
-
 
 
 
