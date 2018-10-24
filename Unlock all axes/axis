@@ -1,0 +1,8 @@
+#Unlock all axes / axis
+nounicode=str(newcam[0]).split("'")
+camNoUnicode = "{}.".format(nounicode[0])
+axis = ['x', 'y', 'z']
+attrs = ['t', 'r', 's']
+for ax in axis:
+    for attr in attrs:
+        cmds.setAttr(camNoUnicode+attr+ax, lock=
