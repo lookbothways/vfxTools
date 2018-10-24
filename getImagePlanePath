@@ -1,0 +1,16 @@
+#Select camera
+cam = cmds.ls(sl=True)
+if cmds.nodeType(cam) == 'transform':
+    dagNode = cmds.listRelatives(cam, s=True, c=True)[0]
+    print "Cam transform"
+
+# get all the imageplane nodes connected to image plane
+sourceConnections = cmds.listConnections(cam[0] + '.imagePlane', source = True, type = 'imagePlane') or []
+
+imageNames = []
+for lc in sourceConnections:
+   atribVal=cmds.getAttr(lc+".imageName")
+   imageNames.append(atribVal)
+   print imageNames
+
+# adapted from here: https://stackoverflow.com/questions/12990615/how-should-i-get-the-shape-node-of-imageplane-connected-to-camera-in-maya
