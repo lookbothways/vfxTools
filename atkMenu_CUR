@@ -1,0 +1,26 @@
+// ATK Custom Maya Menu MEL - runs python via -sourceType (-stp)
+
+global proc atkMenu() 
+{
+    if(!`about -batch`) 
+    {
+        if(`menu -exists atkMenu`)
+        {
+           deleteUI atkMenu;
+           print("ATK menu removed\n");
+        }
+
+        global string $gMainWindow;
+        setParent $gMainWindow;
+        menu -label "ATK" -to true atkMenu;
+        menuItem -label "Send to Deadline" -command "SubmitJobToDeadline";
+        menuItem -divider true;
+        menuItem -label "Set resolution, aspect & FPS" -sourceType "python" -command "import setRenderSettings_pythonEdition";
+        menuItem -label "Add X-Wing" -command "AbcImport -mode import \"/mnt/pipeline/ATK_PIPELINE/maya/modules/ATK/lon/release/all/xwing.abc\"";
+        menuItem -label "Add VRay Ball" -command "AbcImport -mode import \"/mnt/pipeline/ATK_PIPELINE/maya/modules/ATK/lon/release/all/vray.abc\"";
+        menuItem -label "Add to Export Set" -command ("python(\"import atkExportManager;atkExportManager.addToSet()\")");
+        menuItem -label "Remove from Export Set" -command ("python(\"import atkExportManager;atkExportManager.removeFromSet()\")");
+    }
+}
+atkMenu();
+
