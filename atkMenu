@@ -1,0 +1,55 @@
+// ATK Custom Maya Menu
+
+global proc atkMenu() 
+{
+    if(!`about -batch`) 
+    {
+        if(`menu -exists atkMenu`)
+        {
+           deleteUI atkMenu;
+           print("ATK menu removed\n");
+        }
+
+        global string $gMainWindow;
+        setParent $gMainWindow;
+        menu -label "ATK Tools" -to true atkMenu;
+       
+        menuItem -label "SUBMIT Scene to Deadline"      -command "SubmitJobToDeadline";
+        
+        menuItem -divider true  -dividerLabel "Render Presets";
+        menuItem -subMenu true -label "Render Settings" -to true ;
+   
+            menuItem -label "Set Medinah render settings"                   -command "source \"setRenderSettings.mel\""                         -ann "Set typical render settings for the Scene";
+            menuItem -divider true ;
+            menuItem -label "Set Standard AOVs"                             -command ("python(\"import setAOVs;setAOVs.createAOVs()\")")        -ann "Create the full set of AOVs";
+            menuItem -label "Count Global AOV"                              -command ("python(\"import setAOVs;setAOVs.getAOVNumber()\")")      -ann "Get the global aov count";                                   
+            menuItem -divider true ;
+           // menuItem -label "Auto LightGroups"                            -command ("python(\"import setAOVs;setAOVs.makeLightGroups()\")")   -ann "Create a MTOA lightgroup 1 for every light in scene !";
+            menuItem -label "Load AOVs from file"                           -command ("python(\"import setAOVs;setAOVs.import_file(filename='/mnt/projects/medinah/assets/Character/Hyena/SHD/work/maya/AOV_Arnold5/hyena_aovs_arnold5_v006.json') \")")      -ann "load AOVs by external file";
+            
+            // menuItem -label "Set Hyena Ground"                       -command "source \"setOverrideGround.mel\"";
+            setParent -menu ..;
+        
+        menuItem -divider true  -dividerLabel "Tools";
+        menuItem -label "Comet_Renamer"             -command "cometRename()"                                                            -ann "Renamer by Michael Comet";
+        menuItem -label "AlignSelection"             -command ("python (\"import alignSel;alignSel.ALS.align_UI()\")")                  -ann "Align Tool, 3dsMax style";
+        
+        menuItem -label "CameraCleaner"             -command ("python (\"import cameraCleaner;cameraCleaner.CC.ccUI()\")")              -ann "Camera Export Tool";
+        menuItem -label "LazyShading"               -command ("python (\"import lazyShading\")")                                        -ann "Shading Renamer Tool";                                             
+
+        menuItem -divider true  -dividerLabel "ATK Export Sets";
+        
+        menuItem -label "Add to Export Set"         -command ("python(\"import atkExportManager;atkExportManager.addToSet()\")");
+        menuItem -label "Remove from Export Set"    -command ("python(\"import atkExportManager;atkExportManager.removeFromSet()\")");
+        
+        menuItem -divider true ;
+        
+        menuItem -subMenu true -label "Debug";
+            menuItem -label "Add X-Wing"                -command "AbcImport -mode import \"/mnt/pipeline/ATK_PIPELINE/maya/modules/ATK/ber/release/all/xwing.abc\"";
+            menuItem -label "Add VRay Ball"             -command "AbcImport -mode import \"/mnt/pipeline/ATK_PIPELINE/maya/modules/ATK/ber/release/all/vray.abc\"";
+            menuItem -label "Load Reference Scene"      -command "file -force -open \"/mnt/pipeline/ATK_PIPELINE/maya/modules/ATK/ber/release/all/sourceFiles/HDRI_SHD2x2m_shaderball_v003.mb\"";
+            setParent -menu ..;
+
+    }
+}
+atkMenu();
