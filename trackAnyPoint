@@ -4,14 +4,81 @@ Select the camera you want a locator under to scale
 ! Assumes the camera has an imageplane attached upstream. 
 ! Assumes only one imagePlane
 
+To Do:
+    Set all new cameras as non-renderable
+    check if selected is a camera, if not and 'scale_me' exists, use the camera from last time, otherwise alert
+
 """
 
 import maya.cmds as cmds
+import arnold
+import pymel.core as pymel
+import maya.mel as mel
 
-# Select the camera
+newcam = []
+nounicode = []
+pointInWorld = []
+cam = []
+
+# Select the camera & check it's a camera
 cam = cmds.ls(sl=True)
-print cam
+camRelatives = cmds.listRelatives(cam)
+print camRelatives
+print cmds.nodeType(camRelatives)
+
+for node in camRelatives:
+    isCamera = []
+    print node
+    isCamera = cmds.nodeType(node)
+    if isCamera == "camera":
+        print "camera found: "+node,   
+    else:
+        cmds.error( "No camera selected. Select a camera transform." )
+        break
+
 newcam = cmds.duplicate(cam, rr=True)
+
+# Rename old tracks:
+
+#pointInWorld
+try:
+    exists = []
+    exists = cmds.select("pointInWorld")
+    if exists < 0:
+        print "Old trackers found, renaming"
+        newName = "pointInWorldPlaced"
+        renamedPoint = cmds.rename(exists, newName)
+        if (cmds.listRelatives(renamedPoint, p=True) != None):
+            cmds.parent(renamedPoint, world=True)
+except:
+    print "No old trackers found, moving on."
+    pass
+  
+    
+    
+# swap scale_me camera for locator (to stop 'is camera' breaking and keep scene clean)
+try:
+    exists = []
+    exists = cmds.select("scale_me")
+    if exists < 0:
+        print "old scale nodes found, renaming"
+        newName = "trackedScaler"
+        #cmds.select("scale_me")
+        cmds.rename(exists, newName)
+except:
+    print "No old scalers found, moving on."
+    pass
+
+#------ THIS BIT IS UNFINISHED
+scaleMeLocator = cmds.spaceLocator(n="scale_meLoc")
+
+cmds.select("trackedScaler", "scale_meLoc")
+cmds.transferAttributes("trackedScaler", "scale_meLoc1")
+cmds.delete(scaleMeLocator)
+cmds.parent("scale_meLoc", "pointInWorldPlaced")
+
+#----------------- start of trackAnyPoint code
+
 
 # Unlock all axes / axis
 nounicode=str(newcam[0]).split("'")
@@ -35,7 +102,20 @@ cmds.parent(pointInWorld, locatorParent, relative=True)
 pointInWorld = str(pointInWorld[0]).split("'")
 pointInWorld = "{}.translateZ".format(pointInWorld[0])
 
+#position it
+locatorScale = 20    
+locatorDistance = -250
 
+cmds.setAttr(pointInWorld, locatorDistance)
+
+cmds.setAttr("pointInWorld.scaleX", locatorScale)
+cmds.setAttr("pointInWorld.scaleY", locatorScale)
+cmds.setAttr("pointInWorld.scaleZ", locatorScale)
+
+
+
+
+"""
 # Get image plane distance and halves it
 
 if cmds.nodeType(cam) == 'transform':
@@ -52,19 +132,25 @@ for lc in sourceConnections:
    atribVal2=cmds.getAttr(lc+".depth")/2
    
    imageNames.append(atribVal1)
-   locatorScale = atribVal2/10
-   locatorDistance = atribVal2*-1
+   locatorScale = 20    
+   locatorDistance = -250
+      
+   #locatorScale = atribVal2/10
+   #locatorDistance = atribVal2*-2
+"""
 
-cmds.setAttr(pointInWorld, locatorDistance)
-# Sets scale 
-cmds.setAttr("pointInWorld.scaleX", locatorScale)
-cmds.setAttr("pointInWorld.scaleY", locatorScale)
-cmds.setAttr("pointInWorld.scaleZ", locatorScale)
 
 
 
 #MSB 241018
 
 
+
+"""
+
+import trackAnyPoint
+trackAnyPoint.trackAnyPoint()
+
+"""
 
 
