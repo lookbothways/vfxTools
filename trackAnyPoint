@@ -1,4 +1,5 @@
 # track any point
+# NOTE, this code is still WIP!
 """
 Select the camera you want a locator under to scale
 ! Assumes the camera has an imageplane attached upstream. 
