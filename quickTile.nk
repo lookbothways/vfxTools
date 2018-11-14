@@ -1,0 +1,308 @@
+set cut_paste_input [stack 0]
+version 10.0 v6
+push $cut_paste_input
+Roto {
+ output alpha
+ cliptype none
+ curves {{{v x3f99999a}
+  {f 0}
+  {n
+   {layer Root
+    {f 2097152}
+    {t x44800000 x44428000}
+    {a pt1x 0 pt1y 0 pt2x 0 pt2y 0 pt3x 0 pt3y 0 pt4x 0 pt4y 0 ptex00 0 ptex01 0 ptex02 0 ptex03 0 ptex10 0 ptex11 0 ptex12 0 ptex13 0 ptex20 0 ptex21 0 ptex22 0 ptex23 0 ptex30 0 ptex31 0 ptex32 0 ptex33 0 ptof1x 0 ptof1y 0 ptof2x 0 ptof2y 0 ptof3x 0 ptof3y 0 ptof4x 0 ptof4y 0 pterr 0 ptrefset 0 ptmot x40800000 ptref 0}
+    {curvegroup Bezier1 512 bezier
+     {{cc
+       {f 8192}
+       {px x4481a000
+        {x42cc0000 0}
+        {x44844000 x45002000}
+        {xc2cc0000 0}
+        {xc0000000 x42100000}
+        {x44788000 x44d8c000}
+        {x40000000 xc2100000}
+        {0 x41a00000}
+        {x44710000 x44c54000}
+        {0 xc1a00000}
+        {x41200000 x42400000}
+        {x44768000 x44a9c000}
+        {xc1200000 xc2400000}
+        {x41e00000 x40000000}
+        {x44748000 x4484ffff}
+        {xc1e00000 xc0000000}
+        {x42200000 xc1400000}
+        {x445a0000 x44854000}
+        {xc2200000 x41400000}
+        {x40800000 x40800000}
+        {x44208000 x44850000}
+        {xc0800000 xc0800000}
+        {x41a00000 xc1000000}
+        {x43f50000 x4487c000}
+        {xc1a00000 x41000000}
+        {x430a0000 x41000000}
+        {x43b80000 x44874000}
+        {xc30a0000 xc1000000}
+        {x41000000 x40800000}
+        {x42fc0000 x4485c000}
+        {xc1000000 xc0800000}
+        {x41000000 x42080000}
+        {x41400000 x44804000}
+        {xc1000000 xc2080000}
+        {xc2300000 xc1000000}
+        {x42a40000 x446c0000}
+        {x42300000 x41000000}
+        {xc1d00000 x41b00000}
+        {x43760000 x446a0000}
+        {x41d00000 xc1b00000}
+        {xc2300000 xc1000000}
+        {x43c10000 x446b8000}
+        {x42300000 x41000000}
+        {xc2180000 x41600000}
+        {x44060000 x446d8000}
+        {x42180000 xc1600000}
+        {xc1d00000 xc0800000}
+        {x44248000 x446b8000}
+        {x41d00000 x40800000}
+        {xc2180000 x41600000}
+        {x44420000 x446e0000}
+        {x42180000 xc1600000}
+        {xc1600000 x41000000}
+        {x446b8000 x446f8000}
+        {x41600000 xc1000000}
+        {x41c00000 x41c00000}
+        {x446f8000 x44520000}
+        {xc1c00000 xc1c00000}
+        {xc1b00000 x41e00000}
+        {x44730000 x44410000}
+        {x41b00000 xc1e00000}
+        {x41600000 x42600000}
+        {x44758000 x44278000}
+        {xc1600000 xc2600000}
+        {xc0c00000 x42180000}
+        {x44700000 x44030000}
+        {x40c00000 xc2180000}
+        {0 x41a00000}
+        {x44788000 x43cd0000}
+        {0 xc1a00000}
+        {x40800000 x42300000}
+        {x44758000 x437e0000}
+        {xc0800000 xc2300000}
+        {xc1000000 x40800000}
+        {x446a0000 x42900000}
+        {x41000000 xc0800000}
+        {xc2600000 x41200000}
+        {x44818000 x41b00000}
+        {x42600000 xc1200000}
+        {x40000000 xc2380000}
+        {x44918000 x42a80000}
+        {xc0000000 x42380000}
+        {0 xc1a00000}
+        {x448bc000 x43700000}
+        {0 x41a00000}
+        {xc0800000 xc2000000}
+        {x448c8000 x43b40000}
+        {x40800000 x42000000}
+        {x41a00000 xc2000000}
+        {x4490c000 x44118000}
+        {xc1a00000 x42000000}
+        {0 xc2000000}
+        {x448bc000 x44318000}
+        {0 x42000000}
+        {0 xc1b00000}
+        {x448c8000 x444b0000}
+        {0 x41b00000}
+        {x40800000 xc2000000}
+        {x448b0000 x445f0000}
+        {xc0800000 x42000000}
+        {xc1d00000 0}
+        {x44930000 x44740000}
+        {x41d00000 0}
+        {xc0c00000 0}
+        {x44a28000 x44668000}
+        {x40c00000 0}
+        {xc3100000 xc0c00000}
+        {x44b54000 x446f0000}
+        {x43100000 x40c00000}
+        {xc2380000 x41c00000}
+        {x44d44000 x44668000}
+        {x42380000 xc1c00000}
+        {xc1b00000 xc1000000}
+        {x44ed8000 x44610000}
+        {x41b00000 x41000000}
+        {xc1000000 xc0800000}
+        {x44f9c000 x446c8000}
+        {x41000000 x40800000}
+        {x41900000 xc2780000}
+        {x45006000 x447b0000}
+        {xc1900000 x42780000}
+        {x42bc0000 x41a00000}
+        {x44f30000 x44884000}
+        {xc2bc0000 xc1a00000}
+        {x42b40000 xc0c00000}
+        {x44db8000 x44840000}
+        {xc2b40000 x40c00000}
+        {x43000000 xc2400000}
+        {x44c88000 x44868000}
+        {xc3000000 x42400000}
+        {x430c0000 x42380000}
+        {x44b44000 x448ec000}
+        {xc30c0000 xc2380000}
+        {x42b40000 x41600000}
+        {x449a8000 x44874000}
+        {xc2b40000 xc1600000}
+        {x41200000 xc2680000}
+        {x448a0000 x44874000}
+        {xc1200000 x42680000}
+        {xc1000000 xc2280000}
+        {x4489c000 x4499c000}
+        {x41000000 x42280000}
+        {x42200000 xc2840000}
+        {x448cc000 x44aa0000}
+        {xc2200000 x42840000}
+        {xc1400000 xc2280000}
+        {x44874000 x44b7c000}
+        {x41400000 x42280000}
+        {xc1000000 xc2300000}
+        {x448b4000 x44c64000}
+        {x41000000 x42300000}
+        {x41d00000 xc2940000}
+        {x448c0000 x44d90000}
+        {xc1d00000 x42940000}
+        {xc1600000 xc2200000}
+        {x44898000 x44ea4000}
+        {x41600000 x42200000}
+        {x41000000 xc1a00000}
+        {x448cc000 x44f9c000}
+        {xc1000000 x41a00000}}}     idem}
+     {tx x4481a000 x4482643a x44776cae}
+     {a fx x42c80000 fy x42c80000 osw x41200000 osf 0 str 1 spx x44800000 spy x44428000 sb 1 ltn x4481a000 ltm x4481a000 tt x40800000}}}}}}
+ toolbox {selectAll {
+  { selectAll str 1 ssx 1 ssy 1 sf 1 }
+  { createBezier str 1 ssx 1 ssy 1 sf 1 sb 1 tt 4 }
+  { createBezierCusped str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createBSpline str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createEllipse str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createRectangle str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { createRectangleCusped str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { brush str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { eraser src 2 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { clone src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { reveal src 3 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { dodge src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { burn src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { blur src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { sharpen src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+  { smear src 1 str 1 ssx 1 ssy 1 sf 1 sb 1 }
+} }
+ toolbar_brush_hardness 0.200000003
+ toolbar_source_transform_scale {1 1}
+ toolbar_source_transform_center {1024 778}
+ colorOverlay {0 0 0 0}
+ lifetime_type "all frames"
+ lifetime_start 1037
+ lifetime_end 1037
+ motionblur_shutter_offset_type centred
+ feather 100
+ source_black_outside true
+ name Roto1
+ selected true
+ xpos 1254
+ ypos 216
+}
+Read {
+ inputs 0
+ file /mnt/projects/library/assets/elizabethanLondon/assets/londonLayout/maya/sourceimages/Water/v1/Ingested/WaterNRM_001.####.png
+ format "2048 2048 0 0 2048 2048 1 square_2K"
+ first 1001
+ last 1500
+ origfirst 1001
+ origlast 1500
+ origset true
+ name Read14
+ selected true
+ xpos 1078
+ ypos -174
+}
+Reformat {
+ format "2000 2000 0 0 2000 2000 1 2000x"
+ name Reformat1
+ selected true
+ xpos 1078
+ ypos -90
+}
+set N946ba900 [stack 0]
+push $N946ba900
+Transform {
+ translate {-1000 0}
+ center {1024 1024}
+ name Transform2
+ selected true
+ xpos 973
+ ypos 10
+}
+set Nfce5dc50 [stack 0]
+push $N946ba900
+Transform {
+ translate {1000 0}
+ center {1024 1024}
+ name Transform1
+ selected true
+ xpos 1158
+ ypos 3
+}
+set Nffe3a00 [stack 0]
+Merge2 {
+ inputs 2
+ name Merge1
+ selected true
+ xpos 973
+ ypos 67
+}
+Transform {
+ translate {0 1000}
+ center {1024 1024}
+ name Transform4
+ selected true
+ xpos 973
+ ypos 127
+}
+push $Nfce5dc50
+push $Nffe3a00
+Merge2 {
+ inputs 2
+ name Merge2
+ selected true
+ xpos 1158
+ ypos 67
+}
+Transform {
+ translate {1000 -1000}
+ center {1024 1024}
+ name Transform3
+ selected true
+ xpos 1158
+ ypos 126
+ disable true
+}
+Merge2 {
+ inputs 2
+ name Merge3
+ selected true
+ xpos 1070
+ ypos 197
+}
+Transform {
+ center {1024 1024}
+ name Transform5
+ selected true
+ xpos 1070
+ ypos 223
+}
+Merge2 {
+ inputs 2+1
+ operation in
+ name Merge4
+ selected true
+ xpos 1151
+ ypos 309
+}
