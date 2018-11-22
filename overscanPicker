@@ -1,0 +1,59 @@
+#########################
+##                     ##
+##   Overscan Picker   ##
+##                     ##
+#########################
+
+## Toby Sanderson, 2018
+
+## Applies a selected amount of overscan based on current frame resolution.
+
+def overscanPicker():
+        
+    import maya.cmds as cmds
+    
+    currentWidth = cmds.getAttr("defaultResolution.width")
+    currentHeight = cmds.getAttr("defaultResolution.height")
+    
+    # Get the renderable camera
+    renderCam = []
+    allCams = cmds.ls(type = "camera")
+    for cam in allCams:
+        if cmds.getAttr(cam+".renderable") == 1:
+            renderCam.append(cam)
+    #print "Render Cameras:", renderCam
+    
+    # Ensure only one render camera
+    if len(renderCam) != 1:
+        cmds.confirmDialog(m="Looks like you've got multiple cameras set to render!\nSelect just one and try again...", b="OK", icn="warning", ma="center", t="Overscan Picker")
+        return
+        
+    # Choose overscan amount
+    theCamera = str(renderCam[0])
+    print "Choose the overscan amount...",
+    overscanAmount = cmds.confirmDialog(m="Choose the amount of overscan you'd like...", b=["10%", "15%", "20%", "Cancel"], t="Overscan Picker")
+    if overscanAmount == "10%":
+        newWidth = currentWidth*1.1
+        newHeight = currentHeight*1.1
+        cmds.setAttr(theCamera+".preScale", 0.9)
+        cmds.setAttr("defaultResolution.width", newWidth)
+        cmds.setAttr("defaultResolution.height", newHeight)
+        print "10% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
+    elif overscanAmount == "15%":
+        newWidth = currentWidth*1.15
+        newHeight = currentHeight*1.15
+        cmds.setAttr(theCamera+".preScale", 0.85)
+        cmds.setAttr("defaultResolution.width", newWidth)
+        cmds.setAttr("defaultResolution.height", newHeight)
+        print "15% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
+    elif overscanAmount == "20%":
+        newWidth = currentWidth*1.2
+        newHeight = currentHeight*1.2
+        cmds.setAttr(theCamera+".preScale", 0.8)
+        cmds.setAttr("defaultResolution.width", newWidth)
+        cmds.setAttr("defaultResolution.height", newHeight)
+        print "20% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
+    else:
+        print "No overscan applied, resolution is {} x {}\n".format(currentWidth, currentHeight),
+        
+# END
