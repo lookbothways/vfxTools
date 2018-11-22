@@ -8,9 +8,17 @@ import trackAnyPoint
 trackAnyPoint.trackAnyPoint()
 
 Usage:
-* Select the camera you want a locator under to scale
-! Assumes the camera has an imageplane attached upstream. 
-! Assumes only one imagePlane
+* Select the tracked camera
+  It will create a 'scale_me' camera + locator called 'pointInWorld'
+* Move the 'pointInWorld locator over the point you want to track. Get it as accurate as possible, ideally use 2D pan/zoom.
+* Change the time to a few frames ahead/behind the current frame, you'll see the new locator drift from the point.
+* Select the 'scale_me' camera, scale it until the locator is back over the point you want to track. 
+  Selecting scale xyz in the channel editor and middle-mouse dragging in the viewport is the best way to do this.
+* Move the time-slider again, further from the original frame and scale the 'scale_me' node again - check first-frame/last frame. The locator should now be in the right world-space. 
+
+The script can be run over and over and will clean up the scale_me cameras en-route and will re-use the first camera you selected.
+
+
 
 The manual way:
 
