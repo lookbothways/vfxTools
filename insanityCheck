@@ -1,0 +1,17 @@
+# Important shelf button for VFX artists
+import maya.cmds as cmds
+
+sanity = []
+
+def insanityCheck():
+    global sanity
+    sanity = cmds.confirmDialog( title='Insanity Check', message='Are you insane?', button=['Yes','No'], defaultButton='Yes', cancelButton='No', dismissString='No' )
+
+    if sanity == 'No':
+        print "TRY HARDER",
+        insanityCheck()
+
+insanityCheck()
+
+if sanity == "Yes":
+    print "This is fine.",
