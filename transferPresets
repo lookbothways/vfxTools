@@ -1,4 +1,11 @@
 # Transfer Presets tool. By Ewan Laidlaw. 181018
+# For sharing presets between artist - needs to have the presets path env variable set by pipeline
+"""
+Improvements to make: 
+* Get project from shotgun
+
+
+"""
 
 import maya.cmds as cmds
 import os
