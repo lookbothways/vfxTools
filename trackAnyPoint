@@ -22,13 +22,16 @@ The script can be run over and over and will clean up the scale_me cameras en-ro
 
 The manual way:
 
-*Looking through the cameras perspective with a back plate, on the first frame. Create a locator and line it up through the cameras view (effectively in 2d) on the point in the image you want to line up.
-*Now scrub along to the time line making sure the point you want to track is still in view.
-*Select the camera and duplicate it. This will delete the key frames for the duplicate so it will stay in the position the original camera was in on the frame you scrubbed to.
-*Now group the locator under the camera. This will effectively set the pivot of the locator to be the location of the duplicate camera.
-*Now if you scale the duplicate camera, it effectively moves the locator in Z space for the original matchmove cameras perspective.
-*look though both views, scaling the duplicate camera until the locator lines up on the track point in both perspectives.
-*You have now triangulated a point in 3d space and can use the locator to place other geometry at the correct point in 3d space.
+* Look through a tracked camera with a back plate with the object you want to located in 3D space visible. 
+* Create a locator and line it up through the cameras view (effectively in 2d) over the point in the image you want to line up.
+* Select the camera and duplicate it. 
+* This will delete the key frames for the duplicate so it will stay in the position the original camera. 
+* Unlock the new camera's scale axes. 
+* Group the locator under the duplicate camera.
+* Scrub time a couple of frames, ensuring the object you want to track is still visible - the locator will drift off its point.
+* Scale the duplicate camera, this moves the locator in Z space from the original matchmove camera's perspective - keep tweaking until the point lines up again.
+* Change time again, scale the duplicate camera until the point lines up. 
+* Check first and last frames line up. 
 
 
 """
