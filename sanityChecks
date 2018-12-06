@@ -1,30 +1,30 @@
+############################################
+###                                      ###
+###        PRE-RENDER CHECKS v2.1        ###
+###                                      ###
+############################################
+
+### Version 1 by Mark Bailey
+### Version 2 by Toby Sanderson
 
 import maya.cmds as cmds
 import maya.mel as mel
-import sys
 import pymel.core
 import os
-import time 
+import time
+## import shotgun? 
 
-#ATK sanitychecks
+"""
+2.1: Disable image planes now works for multiple image planes
 
-#Add file path metaData
-#Hide assistants
-#Set project here
-#hide all imagePlanes
-#Sets up distortion ST maps connections
+"""
 
-
-
+# ------------------------------------------------------------
+### ADDS METADATA OF SAVED NAME TO THE MAYA FILE METADATA SLOT
 def addFilePathMetaData():
-    
-    # Adds metaData of saved name to the mayaFile metaData slot 
-    
-    
     nodeName = "defaultArnoldDriver.customAttributes"
     filePath = cmds.file(q=1,sn=1)
     mayaFile = {"type":"STRING","name":"mayaFile","value": filePath}
-    
     
     def addAttribute(nodeName, value):
         #add an attribute
@@ -38,314 +38,420 @@ def addFilePathMetaData():
             j= i.split(" ")
             if len(j)>1:
                 if j[1] == 'mayaFile':
-                    cmds.setAttr(nodeName+'['+str(nodeNameIndex)+']', "%s %s %s" % (value["type"],value["name"],value["value"]), type="string")
+                    cmds.setAttr(nodeName + '[' + str(nodeNameIndex) + ']', "%s %s %s" % (value["type"],value["name"],value["value"]), type="string")
                     break
     
     attributes=[]
     for i in pymel.core.getAttr(nodeName):
         j= i.split(" ")
         if len(j)>1:
-            attributes.append( j[1])
-        
+            attributes.append(j[1])
         
     if "mayaFile" in attributes:
-        metaDataAction = "mayaFile attribute existed, overwrote with new filename."
+        metaDataAction = "PRC-MayaFile: MayaFile attribute existed, overwrote with new filename.\n"
         #change the attribute
         changeAttribute(nodeName,mayaFile)
     
-                
     else:
         #add an attribute
-        metaDataAction = "mayaFile attribute did not exist. Added it for you."
+        metaDataAction = "PRC-MayaFile: MayaFile attribute did not exist. Added it for you.\n"
         addAttribute(nodeName,mayaFile)
      
-    print "Added metaData"
-    #sys.stdout.write("metaData status: %s\n" %metaDataAction)
+    print metaDataAction,
 
+# -----------------------------------------------------------
+### ADD METADATA OF ANY ALEMBIC ANIMATION OBJECT IN THE SCENE
+def addAlembicMetaData():
+    # Determine the alembic filepath
+    abcList = cmds.ls("*AlembicNode")
+    for x in abcList:
+        if "_ANM_" in x:
+            nodeName = str(x)
+            
+    if nodeName > 1:
+        print "PRC-Alembic: Warning, more than one alembic animation found!\n",
+            
+    alembicFilePath = nodeName[:-12] + ".abc"
+    print "PRC-Alembic: File to be added to the metadata: " + alembicFilePath + "\n",
+    
+    nodeName = "defaultArnoldDriver.customAttributes"
+    filePath = cmds.file(q=1,sn=1)
+    alembicFile = {"type":"STRING","name":"alembicFile","value": alembicFilePath}
+       
+    def addAttribute(nodeName, value): # If the attribute doesn't exist already
+        nextIndex = 0
+        if cmds.getAttr(nodeName, multiIndices= True):
+            nextIndex = cmds.getAttr(nodeName, multiIndices= True)[-1] + 1
+        cmds.setAttr(nodeName + '[' + str(nextIndex) + ']', "%s %s %s" % (value["type"],value["name"],value["value"]), type="string")
+    
+    def changeAttribute(nodename, value): # If the attribute already exists
+        for nodeNameIndex,i in enumerate(pymel.core.getAttr(nodeName)):
+            j= i.split(" ")
+            if len(j)>1:
+                if j[1] == 'alembicFile':
+                    cmds.setAttr(nodeName + '[' + str(nodeNameIndex) + ']', "%s %s %s" % (value["type"],value["name"],value["value"]), type="string")
+                    break
+    
+    attributes=[]
+    for i in pymel.core.getAttr(nodeName):
+        j= i.split(" ")
+        if len(j)>1:
+            attributes.append(j[1])
+                
+    if "alembicFile" in attributes: # If the attribute already exists
+        alembicMetaDataAction = "PRC-Alembic: The attribute already existed, overwrote with new filename.\n"
+        changeAttribute(nodeName,alembicFile)
+                   
+    else: # The attribute doesn't exist already
+        alembicMetaDataAction = "PRC-Alembic: The attribute did not exist. Added it for you.\n"
+        addAttribute(nodeName,alembicFile)
+     
+    print alembicMetaDataAction,
 
-#Hide assistants
-
-
+# ----------------------------------------------------------------
+### HIDE ASSISTANTS
 def hideAssistants():
-    renderlayers = cmds.ls(type="renderLayer")
-    print renderlayers
+    findAssistants = cmds.ls("::Assistants", r=True)
+    try:
+        if findAssistants:
+            cmds.select(findAssistants)
+            cmds.hide(findAssistants)
+            print "PRC-HideAssistants: Finished hiding the Assistants.\n",
+            return 1
+        else:
+            print "PRC-HideAssistants: No Assistants Found!\n",
+            return 1
+    except:
+        print "PRC-HideAssistants: Error!\n",
+        return 0 
     
-    if u'default_light_rig:defaultRenderLayer' in renderlayers:  
-        renderlayers.remove(u'default_light_rig:defaultRenderLayer')
-        print renderlayers
-    
-    for layer in renderlayers:
-        print layer
-        #select the render layer
-        cmds.editRenderLayerGlobals(crl=layer)
-        wordIn = "Assistants"
-        sel = cmds.ls("*" + wordIn + "*", r=True)
-        cmds.select(sel)
-        cmds.hide(sel)
-    print "Hid Assistants"
-
-
+# ------------------------------------------------------------------
+### SET MAYA PROJECT LOCATION
 def setProjectHere():
-    #set project here
+    import sys
+    try:
+        scene = cmds.file(q=1,sn=1)
+        project = os.path.dirname(os.path.dirname(scene))
+        mel.eval('setProject("%s")' % project)
+        sys.stdout.write("Project location set: %s" %project)
+        print "PRC-SetProject: Completed\n",
+        return 1
+    except:
+        print "PRC-SetProject: Error!\n",
+        return 0
 
-    scene = cmds.file(q=1,sn=1)
-    project = os.path.dirname(os.path.dirname(scene))
-    mel.eval('setProject("%s")' % project)
-    sys.stdout.write("Project location set: %s" %project)
-
+# ------------------------------------------------------------------
+### DISABLE ALL IMAGE PLANES (Currently doesn't find *all* of them)
 
 def delAllImagePlanes():
-
-    renderlayers = cmds.ls(type="renderLayer")
-    print renderlayers
-    
-    if u'default_light_rig:defaultRenderLayer' in renderlayers:  
-        renderlayers.remove(u'default_light_rig:defaultRenderLayer')
-        print renderlayers
+    imageplanes = cmds.ls(type="imagePlane")
+    print "Imageplanes: "+str(imageplanes)    
+    errorDetect = False
+    for imgpln in imageplanes:
+        print "Setting "+str(imgpln)+": display mode to none"
+        command = imgpln + ".displayMode"
+        cmds.setAttr(command, 0)
+    return 1
         
-    #deletes all camera relatives
-    allCameras = cmds.ls(type=['camera'])
-    imagePlanes = str(mel.eval('ls -typ "imagePlane"'))
-    print "imagePlanes: "+ imagePlanes
-    
-    hasrelatives = []
-    
-    for cam in allCameras:
-        if cmds.listRelatives(cam):
-            hasrelatives = cmds.listRelatives(cam)
-            print "Deleted "+ str(hasrelatives)[3:-2]
-            cmds.delete(hasrelatives)
-            imagePlanes = str(mel.eval('ls -typ "imagePlane"'))
-            
-    
-    
-#deletedplanes = []
-#deleteAllImagePlanes()
+        
 
+
+
+# ------------------------------------------------------------------
+
+### CHECK FRAME RESOLUTION
+def checkResolution():
+    # Get the curent resolution
+    currentWidth = cmds.getAttr("defaultResolution.width")
+    currentHeight = cmds.getAttr("defaultResolution.height")
+    print "PRC-Resolution: Your current frame resolution settings are", currentWidth, "x", currentHeight, "\n",
+
+    """
+    Get Resolution from Shotgun
+
+    filters = ['project', 'is', {'type': 'Project', 'id': project_id}]
+    fields = ['resolution']
+
+    projectSGresolution = sg.find("##entity_type##, filters, fields")
+
+    """
+
+    try:
+        # Get the Project resolution
+        #fromShotgun = "3K 3424x2202 1.55:1"
+        #shotgunSplit = fromShotgun.split(" ")
+        #shotgunResolution = shotgunSplit[1].split("x")
+        projectWidth = 2880 #shotgunResolution[0]             ## CUR SETUP ##
+        projectHeight = 1620 #shotgunResolution[1]
+
+        if (currentHeight != projectHeight) or (currentWidth != projectWidth):
+            print "PRC-Resolution: This doesn't match the project settings of {} x {}!\n".format(projectWidth, projectHeight),
+            cmds.confirmDialog(m="The resolution you have set doesn't match the project settings!\nCancel and double check if this isn't expected.\n\nYour settings:    {} x {}\nProject settings: {} x {}\n".format(currentWidth, currentHeight, projectWidth, projectHeight), b="OK", icn="information", ma="center", t="PRC Alert")
+            return 1
+
+    except:
+        print "PRC-Resolution: Error!\n",
+        return 0
+        
+# ------------------------------------------------------------------
+
+### ENSURE RENDER CAMERA
 def checkRenderCamera():
-
-    # pick up here - check this is working
-    myCameras=cmds.ls(typ='camera',l=True)
     renderableList=[]
-
-    for x in myCameras:
+    for x in cmds.ls(typ='camera',l=True):
         if cmds.getAttr(x+'.renderable'):
             renderableList.append(x)
-
     ll=len(renderableList)
-
-    if ll==0 or ll>=2:
-        print('Too many or no renderable cameras')
+    if ll==0:
+        print "PRC-RenderCamera: There is no renderable camera!\n",
         return 0
-    return 1
-
-def renderSettingsAlwaysOn():
-    cmds.setAttr( 'defaultArnoldDriver.autocrop', 1)
-    cmds.setAttr( 'defaultArnoldRenderOptions.bucketScanning', 2)
-    cmds.setAttr( 'defaultArnoldRenderOptions.bucketSize', 32) 
-    cmds.setAttr( 'defaultArnoldRenderOptions.abortOnLicenseFail', 1)
-    cmds.setAttr ("defaultRenderGlobals.currentRenderer", "arnold", type="string")
-    cmds.setAttr ("defaultRenderGlobals.outFormatControl", 0)
-    cmds.setAttr ("defaultRenderGlobals.animation", 1)
-    cmds.setAttr ("defaultRenderGlobals.putFrameBeforeExt", 1)
-    cmds.setAttr ("defaultRenderGlobals.extensionPadding", 4)
-    cmds.setAttr ("defaultRenderGlobals.periodInExt", 1)  
-
-"""
-For shelf:
-from sanityChecks import sanityChecks
-
-reload(sanityChecks)
-sanityChecks.renderSettingsAlwaysOn()
-
-outputQuality = cmds.confirmDialog( title='Set render quality', message='HQ: 84440 subdiv 4\nLQ: 211110 subdiv 1', button=['HQ','LQ','Cancel'], defaultButton='HQ', cancelButton='Cancel', dismissString='Cancel' )
-
-if outputQuality == "HQ":
-    sanityChecks.setHQ()
-    print "Set HQ samples 844440, turned on Subdiv + Disp. Subdiv max = 4",
-
-if outputQuality == "LQ":
-    sanityChecks.setLQ()
-    print "Set LQ samples 211110, Subdiv max = 1",
-
-if outputQuality == "Cancel":
-    print "No settings changed.",
-""" 
-def setHQ():
-
-
-
-
-
-    #Turn on Disp + Subviv, blur
-    cmds.setAttr( 'defaultArnoldRenderOptions.maxSubdivisions', 4)
-    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreSubdivision', 0)
-    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreDisplacement', 0)        
-    cmds.setAttr( 'defaultArnoldRenderOptions.motion_blur_enable', 1)
-    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreBump', 0)
-    
-    #Arnold AA settings
-    cmds.setAttr( 'defaultArnoldRenderOptions.AASamples', 8 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseSamples', 4 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularSamples', 4 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionSamples', 4 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GISssSamples', 4 )    
-    cmds.setAttr( 'defaultArnoldRenderOptions.GIVolumeSamples', 0 )    
-    cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseDepth', 0 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularDepth', 1 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionDepth', 4 )        
-
-    #Low light threshold
-    cmds.setAttr( 'defaultArnoldRenderOptions.lowLightThreshold', 0.015 )
-
-def setLQ():
-
-    #Turn on Disp + Subviv, blur
-    cmds.setAttr( 'defaultArnoldRenderOptions.maxSubdivisions', 1)
-    cmds.setAttr( 'defaultArnoldRenderOptions.motion_blur_enable', 1)
-    cmds.setAttr( 'defaultArnoldRenderOptions.ignoreBump', 0)
-    
-    #Arnold AA settings
-    cmds.setAttr( 'defaultArnoldRenderOptions.AASamples', 2 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseSamples', 1 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularSamples', 1 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionSamples', 1 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GISssSamples', 1 )    
-    cmds.setAttr( 'defaultArnoldRenderOptions.GIVolumeSamples', 0 )    
-    cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseDepth', 0 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GISpecularDepth', 1 )
-    cmds.setAttr( 'defaultArnoldRenderOptions.GITransmissionDepth', 4 )        
-
-    #Low light threshold
-    cmds.setAttr( 'defaultArnoldRenderOptions.lowLightThreshold', 0.015 )
-
-
-
-#-------------------------------------------------------------------------------
-
-
-def executeThis():
-    renderSettingsAlwaysOn()
-
-    #checks to see if distortion file exists:
-    distortionExists=False
-    matching = []
+    if ll>1:
+        print "PRC-RenderCamera: More than one render camera detected!\n",
+        cmds.confirmDialog(m="There is more than one camera selected to render!\nIf this is unexpected, cancel the render and try again.", b="OK", icn="information", t="PRC Alert")
+        return 1
+    else: # if ll==1
+        camSelect = []
+        camSelect = renderableList[0].split("|")
+        defaultCamList = ["persp", "top", "front", "side", "back", "right", "left", "bottom"]
         
-    fileNodes=cmds.ls(typ='aiImage')
-    matching = [s for s in fileNodes if "UV_lensDistortionMap" in s]
+        for cam in defaultCamList:
+            if cam == camSelect[1]:
+                print "PRC-RenderCamera: Looks like you've got a default camera selected to render:", camSelect[1], "\n",
+                cmds.confirmDialog(m="Render Camera: " + camSelect[1] + "\nThis looks like one of the default cameras.\nIf this is unexpected, cancel the render and try again.", b="OK", icn="information", ma="center", t="PRC Alert")
+                return 1
+        print "PRC-RenderCamera: Looks good, your selected camera is:", camSelect[1], "\n",
+        return 1
+
+# -------------------------------------------------------------------------
+### DEFINE RENDER SETTINGS THAT ARE ALWAYS ENABLED
+def renderSettingsAlwaysOn():
+    try:
+        cmds.setAttr("defaultArnoldDriver.autocrop", 1)
+        cmds.setAttr("defaultArnoldRenderOptions.bucketScanning", 2)
+        cmds.setAttr("defaultArnoldRenderOptions.bucketSize", 32) 
+        cmds.setAttr("defaultArnoldRenderOptions.abortOnLicenseFail", 1)
+        cmds.setAttr("defaultRenderGlobals.currentRenderer", "arnold", type="string")
+        cmds.setAttr("defaultRenderGlobals.outFormatControl", 0)
+        cmds.setAttr("defaultRenderGlobals.animation", 1)
+        cmds.setAttr("defaultRenderGlobals.putFrameBeforeExt", 1)
+        cmds.setAttr("defaultRenderGlobals.extensionPadding", 4)
+        cmds.setAttr("defaultRenderGlobals.periodInExt", 1)
+        print "PRC-RenderSettings: Completed\n",
+        return 1
+    except:
+        print "PRC-RenderSettings: Error!\n",
+        return 0
+
+# ------------------------------------------------------------------------------
+### SETTINGS FOR A HIGH-QUALITY RENDER
+def setHQ():
+    try:
+        #Turn on Disp + Subviv, blur
+        cmds.setAttr('defaultArnoldRenderOptions.maxSubdivisions', 3)
+        cmds.setAttr('defaultArnoldRenderOptions.ignoreSubdivision', 0)
+        cmds.setAttr('defaultArnoldRenderOptions.ignoreDisplacement', 0)        
+        cmds.setAttr('defaultArnoldRenderOptions.motion_blur_enable', 1)
+        cmds.setAttr('defaultArnoldRenderOptions.ignoreBump', 0)
+        
+        #Arnold AA settings
+        cmds.setAttr('defaultArnoldRenderOptions.AASamples', 8)
+        cmds.setAttr('defaultArnoldRenderOptions.GIDiffuseSamples', 4)
+        cmds.setAttr('defaultArnoldRenderOptions.GISpecularSamples', 4)
+        cmds.setAttr('defaultArnoldRenderOptions.GITransmissionSamples', 4)
+        cmds.setAttr('defaultArnoldRenderOptions.GISssSamples', 4)    
+        cmds.setAttr('defaultArnoldRenderOptions.GIVolumeSamples', 0)    
+        #cmds.setAttr( 'defaultArnoldRenderOptions.GIDiffuseDepth', 0)
+        cmds.setAttr('defaultArnoldRenderOptions.GISpecularDepth', 1)
+        cmds.setAttr('defaultArnoldRenderOptions.GITransmissionDepth', 4)        
+
+        #Low light threshold
+        cmds.setAttr('defaultArnoldRenderOptions.lowLightThreshold', 0.015)
+        print "PRC-HQRender: Your scene has been set up for a HQ Render!\n",
+        return 1
+    except:
+        print "PRC-HQRender: Error!\n",
+        return 0
+
+# --------------------------------------------------------------------------------
+### SETTINGS FOR A LOW-QUALITY RENDER
+def setLQ():
+    try:
+        #Turn on Disp + Subviv, blur
+        cmds.setAttr('defaultArnoldRenderOptions.maxSubdivisions', 1)
+        cmds.setAttr('defaultArnoldRenderOptions.motion_blur_enable', 1)
+        cmds.setAttr('defaultArnoldRenderOptions.ignoreBump', 0)
+        
+        #Arnold AA settings
+        cmds.setAttr('defaultArnoldRenderOptions.AASamples', 2)
+        cmds.setAttr('defaultArnoldRenderOptions.GIDiffuseSamples', 1)
+        cmds.setAttr('defaultArnoldRenderOptions.GISpecularSamples', 1)
+        cmds.setAttr('defaultArnoldRenderOptions.GITransmissionSamples', 1)
+        cmds.setAttr('defaultArnoldRenderOptions.GISssSamples', 1)    
+        cmds.setAttr('defaultArnoldRenderOptions.GIVolumeSamples', 0)    
+        #cmds.setAttr('defaultArnoldRenderOptions.GIDiffuseDepth', 0)
+        #cmds.setAttr('defaultArnoldRenderOptions.GISpecularDepth', 1)
+        cmds.setAttr('defaultArnoldRenderOptions.GITransmissionDepth', 4)        
+
+        #Low light threshold
+        cmds.setAttr('defaultArnoldRenderOptions.lowLightThreshold', 0.015)
+        print "PRC-LQRender: Your scene has been set up for a LQ Render\n",
+        return 1
+    except:
+        print "PRC-LQRender: Error!\n",
+        return 0
+
+
+# -------------------------------------------------------------------------------
+### USER INTERFACE
+def executeThis():
     
-    if matching:
-        print "Lens Distortion UV_lensDistortionMap aiImage exists."
-        distortionExists=False
-    else:
-        print "Lens distortion UV_lensDistortionMap aiImage does not exist"
-
-
-    #Creates a dialogue with checkboxes for the above defs
+    print "\n\n--------------------------------\nStarting Pre-Render Checks V2.0!\n"
     
+    # Alembic checkbox setup
+    alembicExists = False
+    isThereAlembic = cmds.ls("::*AlembicNode")
+    if isThereAlembic:
+        print "PRC-Alembic: Found some alembic animation in the scene.\n",
+        alembicExists = True
 
-    if not checkRenderCamera():
-        cmds.error('Please pick a camera to render')
+    # Hide Assistants checkbox setup
+    assistantsExist = False
+    areThereAssistants = cmds.ls("::Assistants")
+    if areThereAssistants:
+        print "PRC-HideAssistants: Found some assistants in the scene.\n",
+        assistantsExist = True
 
-    class createMyLayoutCls(object):
+    # ImagePlane checkbox setup
+    imageplanesExist = False
+    areThereImageplanes = cmds.ls(type="imagePlane")
+    if areThereImageplanes:
+        print "PRC-ImagePlanes: Found some imageplanes in the scene.\n",
+        imageplanesExist = True
+
+    # Distortion checkbox setup
+    #distortionExists = False
+    #matching = []
+    #fileNodes = cmds.ls(typ='aiImage')
+    #matching = [s for s in fileNodes if "UV_lensDistortionMap" in s]
+    #if matching:
+    #    print "PRC-Distortion: Lens Distortion UV_lensDistortionMap aiImage exists\n",
+    #    distortionExists = True
+    #else:
+    #    print "PRC-Distortion: Lens distortion UV_lensDistortionMap aiImage does not exist\n",
+
+    # Shows a warning if the resolution isn't the same as the project settings
+    #checkResolution()
+
+    # Shows a warning if there is no render camera selected
+    if checkRenderCamera() == 0:
+        cmds.confirmDialog(m="Make sure you've selected a camera to render!", b="Okay!", icn="warning", t="PRC Alert")
+        return
+
+    # Shows a warning if "Ignore Displacement" or "Ignore Subdivision" are enabled
+    if (cmds.getAttr("defaultArnoldRenderOptions.ignoreSubdivision") == 1) or (cmds.getAttr("defaultArnoldRenderOptions.ignoreDisplacement") == 1):
+        print "PRC-Warning: Check the Render Diagnostics, it looks like Subdivision or Displacement are being ignored!\n",
+        cmds.confirmDialog(m="Check the Render Settings: it looks like either\nDisplacement or Subdivision are switched off!", b="Okay!", icn="warning", t="PRC Alert")
+
+    class PreRenderChecks(object):
         def __init__(self, *args):
             pass
 
         def show(self):
-            self.createMyLayout()
+            self.showPRCwindow()
 
-        def createMyLayout(self):
+        def showPRCwindow(self):
+            # Check to see if the window exists...
+            if cmds.window('PRCwindow', exists = True):
+                cmds.deleteUI('PRCwindow')
 
-            #check to see if our window exists
-            if cmds.window('utility', exists = True):
-                cmds.deleteUI('utility')
-
-            # create window
-            self.window = cmds.window('utility', widthHeight = (200, 220), title = 'Pre-render checks', resizeToFitChildren=1, sizeable = True)
+            # Create the window...
+            self.window = cmds.window('PRCwindow', widthHeight=(200, 250), title='PRC', resizeToFitChildren=1, sizeable=False, mnb=0)
 
             cmds.setParent(menu=True)
 
-            # create a main layout
-            mainLayout = cmds.columnLayout(w = 200, h = 200, cw = 10, rs = 8, co = ['both',2])
+            # Create a main layout...
+            mainLayout = cmds.columnLayout(w = 200, h = 250, cw = 10, rs = 8, co = ['both',2])
 
-            # Control - which things to do
-            
-            self.AFPMDbox = cmds.checkBox('Add file path MetaData', value=True)
-            #self.setProjectbox = cmds.checkBox('Set Project Here', value=True)
-            self.deleteAllImagePlanesbox = cmds.checkBox('Delete imagePlanes', value=True)
-            self.hideAssbox = cmds.checkBox('Hide Assistants', value=True)
-            self.distortion = cmds.checkBox('Setup distortion', value=distortionExists)
-            self.hqRender = cmds.checkBox('HQ render', value=False)
+            # Add the checkboxes...
+            self.fileMetaDataBox = cmds.checkBox('Add Filepath MetaData', value=True)
+            self.alembicMetaDataBox = cmds.checkBox('Add Alembic MetaData', value=alembicExists)
+            self.imagePlanesBox = cmds.checkBox('Disable Image Planes', value=imageplanesExist)
+            self.hideAssistantsBox = cmds.checkBox('Hide Assistants', value=assistantsExist)
+            #self.distortionBox = cmds.checkBox('Setup Distortion', value=distortionExists)
+            self.hqRenderBox = cmds.checkBox('HQ Render', value=False)
 
-            # Buttons that do things
-            btnDoSelected = cmds.button(label = 'Do Selected', width = 200, height = 40, c = self.GetSelectedNodes)
-            btnNoChanges = cmds.button(label = 'Make no changes', width = 200, height = 40, c = self.noChangesMade)
+            # Add the buttons...
+            cmds.button(label = 'Perform Actions then Render', width = 200, height = 30, c = self.GetSelectedNodes)
+            cmds.button(label = 'Render with No Actions', width = 200, height = 30, c = self.noChangesMade)
+            cmds.button(label = 'Cancel', width = 200, height = 30, c = self.cancel)
             
-           
-            # show window
+            # Show the window...
             cmds.showWindow(self.window)
 
+        # Perform selected actions then submit to Deadline
         def GetSelectedNodes(self,*args):
                 
-            hideAss = cmds.checkBox(self.hideAssbox,q = True, v = True)
-            AFPMD = cmds.checkBox(self.AFPMDbox,q = True, v = True)
-            #setProject = cmds.checkBox(self.setProjectbox,q = True, v = True)
-            deleteAllImagePlanes = cmds.checkBox(self.deleteAllImagePlanesbox,q = True, v = True)
-            distortion = cmds.checkBox(self.distortion,q = True, v = True)
-            hqRenderSettings = cmds.checkBox(self.hqRender,q = True, v = True)
-            
-            print hideAss
-            if hideAss == True:
+            # Always do these things
+            renderSettingsAlwaysOn()
+            if renderSettingsAlwaysOn() == 0:
+                cmds.confirmDialog(m="Error in PRC-RenderSettingsAlwaysOn!\nSee the Script Editor for details...", b="OK", icn="warning", t="PRC Alert")
+                return
+
+            # Get and perform the requested actions
+            if cmds.checkBox(self.hideAssistantsBox, q=True, v=True) == True:
                 hideAssistants()
+                if hideAssistants() == 0:
+                    cmds.confirmDialog(m="Error in PRC-HideAssistants!\nSee the Script Editor for details...", b="OK", icn="warning", t="PRC Alert")
+                    return
                 
-            print AFPMD
-            if AFPMD == True:
+            if cmds.checkBox(self.fileMetaDataBox, q = True, v = True) == True:
                 addFilePathMetaData()
-                
-            print deleteAllImagePlanes
-            if deleteAllImagePlanes == True:
+                if addFilePathMetaData() == 0:
+                    cmds.confirmDialog(m="Error in PRC-AddFilePathMetaData!\nSee the Script Editor for details...", b="OK", icn="warning", t="PRC Alert")
+                    return
+
+            if cmds.checkBox(self.alembicMetaDataBox, q = True, v = True) == True:
+                addAlembicMetaData()
+                if addAlembicMetaData() == 0:
+                    cmds.confirmDialog(m="Error in PRC-AddAlembicMetaData!\nSee the Script Editor for details...", b="OK", icn="warning", t="PRC Alert")
+                    return
+
+            if cmds.checkBox(self.imagePlanesBox, q = True, v = True) == True:
                 delAllImagePlanes()
+                if delAllImagePlanes() == 0:
+                    cmds.confirmDialog(m="Error in PRC-DelAllImagePlanes!\nSee the Script Editor for details...", b="OK", icn="warning", t="PRC Alert")
+                    return
 
-            #print setProject
-            #if setProject == True:
-            #    setProjectHere()
-                
-            print distortion
-            if distortion == True:
-                import setupMayaLensDistortionOptions
-                reload(setupMayaLensDistortionOptions)
-                setupMayaLensDistortionOptions.doSomething()
+            #if cmds.checkBox(self.distortionBox, q = True, v = True) == True:
+            #    import setupMayaLensDistortionOptions
+            #    reload(setupMayaLensDistortionOptions)
+            #    setupMayaLensDistortionOptions.doSomething()
 
-            print hqRenderSettings
-            if hqRenderSettings == True:
-                renderSettingsAlwaysOn()
+            if cmds.checkBox(self.hqRenderBox, q = True, v = True) == True:
                 setHQ()
+                if setHQ() == 0:
+                    cmds.confirmDialog(m="Error in PRC-SetHQ!\nSee the Script Editor for details...", b="OK", icn="warning", t="PRC Alert")
+                    return
 
-            if cmds.window('utility', exists = True):
-                cmds.deleteUI('utility')
+            if cmds.window('PRCwindow', exists = True):
+                cmds.deleteUI('PRCwindow')
             
-            
+            print "PRC-Info: Completed the requested actions, proceeding to Deadline Submission...\n",
             mel.eval('SubmitJobToDeadline')
-        
-        
-               
+              
+        # Make no changes and submit to Deadline anyway
         def noChangesMade(self,*args):
-            cmds.deleteUI('utility')
-            
+            print "PRC-Info: No changes made, proceeding to Deadline Submission...\n",
+            cmds.deleteUI('PRCwindow')
             mel.eval('SubmitJobToDeadline')
-            print "No changes made, proceeding to Deadline Submission."
+
+        # Cancel and make no changes
+        def cancel(self,*args):
+            cmds.deleteUI('PRCwindow')
+            print "PRC-Info: Cancelled, no changes made.\n",
 
   
-
-    b_cls = createMyLayoutCls()  
+    b_cls = PreRenderChecks()  
     b_cls.show()
 
-
-
-
-
-
 #end
-
-
-
