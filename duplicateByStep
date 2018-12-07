@@ -1,13 +1,13 @@
 # Duplicate by frame-step
-
 import maya.cmds as cmds
 
-step = 18
-    
-cmds.duplicate( 'motionPathCube' )
+selected = cmds.ls(sl=True)
+step = 23
 
-timeNow = cmds.currentTime( query=True )
-print timeNow
-nextStep = timeNow+step
-cmds.currentTime( nextStep, update=True, edit=True )
-timeNow = cmds.currentTime( query=True )
+while cmds.currentTime( query=True ) < 1500:
+    newObject = cmds.duplicate( selected[0] )
+    timeNow = cmds.currentTime( query=True )
+    nextStep = timeNow+step
+    cmds.currentTime( nextStep, update=True, edit=True )
+    timeNow = cmds.currentTime( query=True )
+
