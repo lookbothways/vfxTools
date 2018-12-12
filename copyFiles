@@ -1,50 +1,26 @@
-import shutil
-
-
-def copyFile(image):
-	print "copying file "+ str(image)
-
+# adds an output folder to the current path and copies the input path to it (as part of the detect_blur opencv tool) 
 
 import os
 import shutil
 
+
 #change this to the output from the detect_blur.py script
 fullImagePath="/home/mark/Desktop/atk_usefulInfo/detecting-blur/images/image_001.png"
 
-# Make a new folder called output
-extractParts = str(fullImagePath).split("/")
-folderOnly = str(fullImagePath.split(extractParts[-1])[0])
-
-
 
 def copyFiles(fullImagePath):
+    # Make a new folder called output       
+    extractParts = str(fullImagePath).split("/")
+    folderOnly = str(fullImagePath.split(extractParts[-1])[0])
+    fileOnly = extractParts[-1]
+    outputPath = folderOnly+ "output/"+fileOnly
     
-    path=str(fullImagePath)
-    path=path.lstrip("[u'")
-    path=path.rstrip("']")
-    pathList=path.split("/")
-    count=len(pathList)
-    presetType=pathList[(count-2)]
-    
-    
-    #Check if preset version exists
-  
-    fileName=pathList[(count-1)]
-    
-    if not os.path.exists("/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType+"/"+fileName):
-        shutil.copy(path,"/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType)
-        print(fileName)
-        print("FILE COPIED")
+    if not os.path.exists(outputPath):
+        shutil.copy(fullImagePath,outputPath)
+        print("Copied to /output: "+ fullImagePath)
     else:
-        ###version up preset in sharded drive###
-        
-        #exists=os.path.exists(("/mnt/pipeline/ATK_PIPELINE/maya/modules/CUR/presets/attrPresets/"presetType+"/"+fileName+".mel")):
-        #while exists = True:
-            #versionNumb+=1
-        cmds.confirmDialog(b="OK",m="A file with this name already exists in the shared drive, please rename/version up your preset",t="Name Clash")        
-       
-        return
+        print "File exists!" 
     return
     
-    
-exportFiles(HomeDirectory)
+
+copyFiles(fullImagePath)
