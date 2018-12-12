@@ -3,18 +3,6 @@ import shutil
 
 def copyFile(image):
 	print "copying file "+ str(image)
-	
-	
-#------
-
-# Transfer Presets tool. By Ewan Laidlaw. 181018
-# For sharing presets between artist - needs to have the presets path env variable set by pipeline
-"""
-Improvements to make: 
-* Get project from shotgun
-
-
-"""
 
 
 import os
