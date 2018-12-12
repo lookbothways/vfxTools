@@ -1,0 +1,62 @@
+import shutil
+
+
+def copyFile(image):
+	print "copying file "+ str(image)
+	
+	
+#------
+
+# Transfer Presets tool. By Ewan Laidlaw. 181018
+# For sharing presets between artist - needs to have the presets path env variable set by pipeline
+"""
+Improvements to make: 
+* Get project from shotgun
+
+
+"""
+
+
+import os
+import shutil
+
+#change this to the output from the detect_blur.py script
+fullImagePath="/home/mark/Desktop/atk_usefulInfo/detecting-blur/images/image_001.png"
+
+# Make a new folder called output
+extractParts = str(fullImagePath).split("/")
+folderOnly = str(fullImagePath.split(extractParts[-1])[0])
+
+
+
+def copyFiles(fullImagePath):
+    
+    path=str(fullImagePath)
+    path=path.lstrip("[u'")
+    path=path.rstrip("']")
+    pathList=path.split("/")
+    count=len(pathList)
+    presetType=pathList[(count-2)]
+    
+    
+    #Check if preset version exists
+  
+    fileName=pathList[(count-1)]
+    
+    if not os.path.exists("/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType+"/"+fileName):
+        shutil.copy(path,"/mnt/pipeline/ATK_PIPELINE/maya/modules/"+Project+"/presets/attrPresets/"+presetType)
+        print(fileName)
+        print("FILE COPIED")
+    else:
+        ###version up preset in sharded drive###
+        
+        #exists=os.path.exists(("/mnt/pipeline/ATK_PIPELINE/maya/modules/CUR/presets/attrPresets/"presetType+"/"+fileName+".mel")):
+        #while exists = True:
+            #versionNumb+=1
+        cmds.confirmDialog(b="OK",m="A file with this name already exists in the shared drive, please rename/version up your preset",t="Name Clash")        
+       
+        return
+    return
+    
+    
+exportFiles(HomeDirectory)
