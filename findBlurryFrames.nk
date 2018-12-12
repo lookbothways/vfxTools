@@ -1,0 +1,41 @@
+set cut_paste_input [stack 0]
+version 10.0 v6
+push $cut_paste_input
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message "\[frame]"
+ old_message {{49 52 53 57}
+   }
+ old_expression_markers {{0 3}
+   }
+ box {0 0 3840 2160}
+ xjustify center
+ yjustify center
+ transforms {{0 2}
+   }
+ center {1920 1080}
+ autofit_bbox false
+ group_animations {{0} imported: 0 selected: 0 items: "root transform/"}
+ animation_layers {{1 11 1920 1080 0 0 1 1 0 0 0 0}
+   }
+ name Text1
+ selected true
+ xpos 6230
+ ypos -1282
+}
+FFT {
+ name FFT2
+ selected true
+ xpos 6230
+ ypos -1192
+}
+CurveTool {
+ ROI {960 540 2880 1620}
+ autocropdata {960 540 2880 1620}
+ name CurveTool1
+ selected true
+ xpos 6226
+ ypos -1091
+}
