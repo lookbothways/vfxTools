@@ -4,17 +4,16 @@ import os
 import shutil
 
 
-#change this to the output from the detect_blur.py script
-fullImagePath="/home/mark/Desktop/atk_usefulInfo/detecting-blur/images/image_001.png"
-
-
-def copyFiles(fullImagePath):
+def copyFile(fullImagePath):
     # Make a new folder called output       
     extractParts = str(fullImagePath).split("/")
     folderOnly = str(fullImagePath.split(extractParts[-1])[0])
     fileOnly = extractParts[-1]
     outputPath = folderOnly+ "output/"+fileOnly
-    
+    if not os.path.exists(folderOnly+"output/"):
+        print "Creating output folder"
+        os.makedirs(folderOnly+"output")
+        
     if not os.path.exists(outputPath):
         shutil.copy(fullImagePath,outputPath)
         print("Copied to /output: "+ fullImagePath)
@@ -22,5 +21,11 @@ def copyFiles(fullImagePath):
         print "File exists!" 
     return
     
+#------
 
-copyFiles(fullImagePath)
+
+
+#change this to the output from the detect_blur.py script
+fullImagePath="/home/mark/Desktop/atk_usefulInfo/detecting-blur/images/image_001.png"
+
+copyFile(fullImagePath)
