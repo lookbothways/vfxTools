@@ -1,0 +1,11 @@
+#Sets all selected curves to aiRenderCurve 1, thick
+import maya.cmds as cmds   
+selected = cmds.ls(sl=True)
+  
+for sel in selected: 
+    cmds.setAttr(sel+".aiRenderCurve",1)
+    cmds.setAttr(sel+".aiMode",1)
+    
+    
+ 
+    
