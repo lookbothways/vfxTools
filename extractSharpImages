@@ -1,12 +1,3 @@
-"""
-Tool for extracting the sharpest top n percentage of sharp images to an output directory.
-
-Based on this blog post by Adrian Rosebrock: 
-https://www.pyimagesearch.com/2015/09/07/blur-detection-with-opencv/
-
-Works on Linux. Not tested elsewhere yet. 
-"""
-
 # USAGE
 # python detect_blur.py -i images -p percentage to extract
 
@@ -14,29 +5,64 @@ Works on Linux. Not tested elsewhere yet.
 EG:
 python /home/mark/Desktop/atk_usefulInfo/detecting-blur/detect_blur.py -i /home/mark/Desktop/atk_usefulInfo/detecting-blur/images -p50
 """
-
-# import the necessary packages
-from imutils import paths
+# import the necessary packagess
 import argparse
 import cv2
 import shutil
 import os
 import operator
 
+
+#------
+#Paths from imutils https://github.com/jrosebr1/imutils/blob/master/imutils/paths.py
+
+image_types = (".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff")
+
+
+def list_images(basePath, contains=None):
+    # return the set of files that are valid
+    return list_files(basePath, validExts=image_types, contains=contains)
+
+
+def list_files(basePath, validExts=None, contains=None):
+    # loop over the directory structure
+    for (rootDir, dirNames, filenames) in os.walk(basePath):
+        # loop over the filenames in the current directory
+        for filename in filenames:
+            # if the contains string is not none and the filename does not contain
+            # the supplied string, then ignore the file
+            if contains is not None and filename.find(contains) == -1:
+                continue
+
+            # determine the file extension of the current file
+            ext = filename[filename.rfind("."):].lower()
+
+            # check to see if the file is an image and should be processed
+            if validExts is None or ext.endswith(validExts):
+                # construct the path to the image and yield it
+                imagePath = os.path.join(rootDir, filename)
+                yield imagePath
+
+#-----
+
+
 def percentage(percent, whole):
   return (percent * whole) / 100.0
 
 
 def copyFile(imagePath):
-    # Make a new folder called output+pc      
+    # Make a new folder called output+pc    
+    # This line below is problematic if the percentage required has already been run: 
+    # It creates an output_ folder in the already-made output_ folder.
     extractParts = str(imagePath).split("/")
+    #print extractParts
     folderName = "output_"+str(percentageArg)+"pc"
     folderOnly = str(imagePath.split(extractParts[-1])[0])
     folderToCreate = folderOnly+folderName 
     fileOnly = extractParts[-1]
     outputPath = folderOnly+ "output_"+str(percentageArg)+"pc/"+fileOnly
     if not os.path.exists(folderToCreate):
-        print "Creating output folder: "+folderToCreate
+        #print "Creating output folder: "+folderToCreate
         os.makedirs(folderToCreate)
         
     if not os.path.exists(outputPath):
@@ -65,7 +91,7 @@ ap.add_argument("-p", "--percentage", required=True,
 args = vars(ap.parse_args())
 
 # calculate the number of files to extract
-imagesList = list(paths.list_images(args["images"]))
+imagesList = list(list_images(args["images"]))
 numberOfFiles = len(imagesList)
 percentageArg = int(args["percentage"])
 numberToCopy = int(percentage(percentageArg, numberOfFiles))
@@ -73,13 +99,14 @@ numberToCopy = int(percentage(percentageArg, numberOfFiles))
 print "Number of files "+str(numberOfFiles)
 print "Percentage of best images to extract: "+str(args["percentage"])
 print "Number of files to copy "+str(int(percentage(percentageArg, numberOfFiles)))
+print "Reading folder contents..."
 
 imagesDict = {}
 #print imagesDict
 
 
 # loop over the input images
-for imagePath in paths.list_images(args["images"]):
+for imagePath in list_images(args["images"]):
 	# load the image, convert it to grayscale, and compute the
 	# focus measure of the image using the Variance of Laplacian method
 	image = cv2.imread(imagePath)
