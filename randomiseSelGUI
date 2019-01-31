@@ -1,46 +1,66 @@
-
-
+import random
 import maya.cmds as cmds
 
-
+def zeroAxes():
+    for each in selected:
+        cmds.setAttr(each+'.rotate', 0, 0, 0, type="double3")    
 
 def randomiseThings():
-    value = cmds.textFieldGrp(textFieldGrpVar, q=1, text=1)
-    print "randomising by "+value
-    rotateBy = random.random()*float(axis)
+    value = float(cmds.textFieldGrp(textFieldGrpVar, q=1, text=1))
+    print "Randomise up to "+str(value)+" degrees"
     if axis == "x":
-        for each in selected:
-            cmds.setAttr(j+'.rotate', rotateBy, 0, 0, type="double3")
+        for each in selected:      
+            x = cmds.getAttr(each+'.rotateX')
+            #print "X is :"+str(x)    
+            y = cmds.getAttr(each+'.rotateY')
+            z = cmds.getAttr(each+'.rotateZ')
+            rand = random.random()
+            #print "Random is :"+str(rand)
+            randRotate = ((rand*2)-1)*value
+            #print "Rand rotate is :"+str(randRotate)
+            #print "Rotating by "+str(x+randRotate)
+            cmds.setAttr(each+'.rotate', x+randRotate, y, z, type="double3")
+            
     if axis == "y":
-        cmds.setAttr(j+'.rotate', 0, rotateBy, 0, type="double3")
+        for each in selected:
+            x = cmds.getAttr(each+'.rotateX')  
+            y = cmds.getAttr(each+'.rotateY')
+            z = cmds.getAttr(each+'.rotateZ')
+            rand = random.random()
+            randRotate = ((rand*2)-1)*value
+            cmds.setAttr(each+'.rotate', x, y+randRotate, z, type="double3")
+            
     if axis == "z":
-        cmds.setAttr(j+'.rotate', 0, 0, rotateBy, type="double3")
-
-
-     
+        for each in selected:
+            x = cmds.getAttr(each+'.rotateX')  
+            y = cmds.getAttr(each+'.rotateY')
+            z = cmds.getAttr(each+'.rotateZ')
+            rand = random.random()
+            randRotate = ((rand*2)-1)*value
+            cmds.setAttr(each+'.rotate', x, y, z+randRotate, type="double3")
+            
+            
+text = 0
 axis = ""
 value = 0.0
 x = "x"
 y = "y"
 z = "z"
-
+randSeed = 0
 selected = cmds.ls(sl=True)
      
 # Make a new window
-window = cmds.window( title="Randomise selected", iconName='Short Name', widthHeight=(400, 155) )
+randomiser = cmds.window( title="Randomise selected", iconName='Short Name', widthHeight=(400, 155) )
 cmds.columnLayout( adjustableColumn=True  )
-textFieldGrpVar = cmds.textFieldGrp( label='Randomisation intensity:', text="15" )
-cmds.button( label='Randomise X axis', command=('axis = x;randomiseThings();') )
-cmds.button( label='Randomise Y axis', command=('axis = y') )
-cmds.button( label='Randomise Z axis', command=('axis = z') )
+textFieldGrpVar = cmds.textFieldGrp( label='Random degrees max :', text=10 )
+cmds.button( label='Randomise X axis', command=('axis = x;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Randomise Y axis', command=('axis = y;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Randomise Z axis', command=('axis = z;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Zero all axes', command=('selected = cmds.ls(sl=True);zeroAxes()') )
 cmds.button( label='Close', command=('cmds.deleteUI(\"' + window + '\", window=True);') )
 cmds.setParent( '..' )
-cmds.showWindow( window )
+cmds.showWindow( randomiser )
 
-# Workaround to get MEL global variable value in Python
+
+# This is a workaround to get MEL global variable value in Python
 gMainWindow = maya.mel.eval('$tmpVar=$gMainWindow')
-cmds.window( gMainWindow, edit=True, widthHeight=(900, 777) )
-
-
-  
-  
