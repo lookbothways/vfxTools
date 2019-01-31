@@ -1,61 +1,155 @@
 import random
 import maya.cmds as cmds
+import maya.mel
 
 def zeroAxes():
     for each in selected:
         cmds.setAttr(each+'.rotate', 0, 0, 0, type="double3")    
+        cmds.setAttr(each+'.translate', 0, 0, 0, type="double3")  
+        cmds.setAttr(each+'.scale', 0, 0, 0, type="double3")  
 
 def randomiseThings():
     value = float(cmds.textFieldGrp(textFieldGrpVar, q=1, text=1))
-    print "Randomise up to "+str(value)+" degrees"
-    if axis == "x":
-        for each in selected:      
-            x = cmds.getAttr(each+'.rotateX')
-            #print "X is :"+str(x)    
-            y = cmds.getAttr(each+'.rotateY')
-            z = cmds.getAttr(each+'.rotateZ')
-            rand = random.random()
-            #print "Random is :"+str(rand)
-            randRotate = ((rand*2)-1)*value
-            #print "Rand rotate is :"+str(randRotate)
-            #print "Rotating by "+str(x+randRotate)
-            cmds.setAttr(each+'.rotate', x+randRotate, y, z, type="double3")
-            
-    if axis == "y":
+    print "Randomising up to "+str(value)+" degrees"
+    #For rotation
+    if instruction == "rx":
         for each in selected:
-            x = cmds.getAttr(each+'.rotateX')  
-            y = cmds.getAttr(each+'.rotateY')
-            z = cmds.getAttr(each+'.rotateZ')
-            rand = random.random()
-            randRotate = ((rand*2)-1)*value
-            cmds.setAttr(each+'.rotate', x, y+randRotate, z, type="double3")
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.rotateX') 
+                y = cmds.getAttr(each+'.rotateY')
+                z = cmds.getAttr(each+'.rotateZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.rotate', x+randRotate, y, z, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."
             
-    if axis == "z":
+    if instruction == "ry":
         for each in selected:
-            x = cmds.getAttr(each+'.rotateX')  
-            y = cmds.getAttr(each+'.rotateY')
-            z = cmds.getAttr(each+'.rotateZ')
-            rand = random.random()
-            randRotate = ((rand*2)-1)*value
-            cmds.setAttr(each+'.rotate', x, y, z+randRotate, type="double3")
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.rotateX') 
+                y = cmds.getAttr(each+'.rotateY')
+                z = cmds.getAttr(each+'.rotateZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.rotate', x, y+randRotate, z, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."
+                            
+    if instruction == "rz":
+        for each in selected:
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.rotateX') 
+                y = cmds.getAttr(each+'.rotateY')
+                z = cmds.getAttr(each+'.rotateZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.rotate', x, y, z+randRotate, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."           
+    #For translation
+    if instruction == "tx":
+        for each in selected:
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.translateX') 
+                y = cmds.getAttr(each+'.translateY')
+                z = cmds.getAttr(each+'.translateZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.translate', x+randRotate, y, z, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."
             
+    if instruction == "ty":
+        for each in selected:
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.translateX') 
+                y = cmds.getAttr(each+'.translateY')
+                z = cmds.getAttr(each+'.translateZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.translate', x, y+randRotate, z, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."
+                            
+    if instruction == "tz":
+        for each in selected:
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.translateX') 
+                y = cmds.getAttr(each+'.translateY')
+                z = cmds.getAttr(each+'.translateZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.translate', x, y, z+randRotate, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."    
+    #For scale
+    if instruction == "sx":
+        for each in selected:
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.scaleX') 
+                y = cmds.getAttr(each+'.scaleY')
+                z = cmds.getAttr(each+'.scaleZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.scale', x+randRotate, y, z, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."
+            
+    if instruction == "sy":
+        for each in selected:
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.scaleX') 
+                y = cmds.getAttr(each+'.scaleY')
+                z = cmds.getAttr(each+'.scaleZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.scale', x, y+randRotate, z, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."
+                            
+    if instruction == "sz":
+        for each in selected:
+            if cmds.objectType( each, isType='transform') == True:
+                x = cmds.getAttr(each+'.scaleX') 
+                y = cmds.getAttr(each+'.scaleY')
+                z = cmds.getAttr(each+'.scaleZ')
+                rand = random.random()
+                randRotate = ((rand*2)-1)*value
+                cmds.setAttr(each+'.scale', x, y, z+randRotate, type="double3")
+            else:
+                print "Selected is not a transform, ignoring."    
             
 text = 0
-axis = ""
+instruction = ""
 value = 0.0
-x = "x"
-y = "y"
-z = "z"
-randSeed = 0
+rx = "rx"
+ry = "ry"
+rz = "rz"
+
+tx = "tx"
+ty = "ty"
+tz = "tz"
+
+sx = "sx"
+sy = "sy"
+sz = "sz"
+
 selected = cmds.ls(sl=True)
      
 # Make a new window
-randomiser = cmds.window( title="Randomise selected", iconName='Short Name', widthHeight=(400, 155) )
+randomiser = cmds.window( title="Randomise selected", iconName='Short Name', widthHeight=(400, 275) )
 cmds.columnLayout( adjustableColumn=True  )
 textFieldGrpVar = cmds.textFieldGrp( label='Random degrees max :', text=10 )
-cmds.button( label='Randomise X axis', command=('axis = x;selected = cmds.ls(sl=True);randomiseThings()') )
-cmds.button( label='Randomise Y axis', command=('axis = y;selected = cmds.ls(sl=True);randomiseThings()') )
-cmds.button( label='Randomise Z axis', command=('axis = z;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='X rotation', command=('instruction = rx;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Y rotation', command=('instruction = ry;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Z rotation', command=('instruction = rz;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='X translate', command=('instruction = tx;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Y translate', command=('instruction = ty;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Z translate', command=('instruction = tz;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='X scale', command=('instruction = sx;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Y scale', command=('instruction = sy;selected = cmds.ls(sl=True);randomiseThings()') )
+cmds.button( label='Z scale', command=('instruction = sz;selected = cmds.ls(sl=True);randomiseThings()') )
 cmds.button( label='Zero all axes', command=('selected = cmds.ls(sl=True);zeroAxes()') )
 cmds.button( label='Close', command=('cmds.deleteUI(\"' + randomiser + '\", window=True);') )
 cmds.setParent( '..' )
@@ -64,3 +158,4 @@ cmds.showWindow( randomiser )
 
 # This is a workaround to get MEL global variable value in Python
 gMainWindow = maya.mel.eval('$tmpVar=$gMainWindow')
+
