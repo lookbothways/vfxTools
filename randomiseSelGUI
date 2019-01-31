@@ -57,7 +57,7 @@ cmds.button( label='Randomise X axis', command=('axis = x;selected = cmds.ls(sl=
 cmds.button( label='Randomise Y axis', command=('axis = y;selected = cmds.ls(sl=True);randomiseThings()') )
 cmds.button( label='Randomise Z axis', command=('axis = z;selected = cmds.ls(sl=True);randomiseThings()') )
 cmds.button( label='Zero all axes', command=('selected = cmds.ls(sl=True);zeroAxes()') )
-cmds.button( label='Close', command=('cmds.deleteUI(\"' + window + '\", window=True);') )
+cmds.button( label='Close', command=('cmds.deleteUI(\"' + randomiser + '\", window=True);') )
 cmds.setParent( '..' )
 cmds.showWindow( randomiser )
 
