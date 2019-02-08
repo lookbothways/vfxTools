@@ -1,0 +1,249 @@
+set cut_paste_input [stack 0]
+version 11.2 v4
+BackdropNode {
+ inputs 0
+ name BackdropNode1
+ tile_color 0x6c6b68ff
+ label 0=passthrough
+ note_font_size 22
+ selected true
+ xpos -496
+ ypos -735
+ bdwidth 213
+ bdheight 73
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode2
+ tile_color 0x47726100
+ label "  2=barrel"
+ note_font_size 22
+ selected true
+ xpos 22
+ ypos -751
+ bdwidth 141
+ bdheight 71
+}
+BackdropNode {
+ inputs 0
+ name BackdropNode3
+ tile_color 0xb5b3b600
+ label "1 = other processes"
+ note_font_size 22
+ selected true
+ xpos -241
+ ypos -808
+ bdwidth 220
+ bdheight 87
+}
+CheckerBoard2 {
+ inputs 0
+ format "1920 1080 0 0 1920 1080 1 HD_1080"
+ name CheckerBoard1
+ selected true
+ xpos 168
+ ypos -1237
+}
+Read {
+ inputs 0
+ file_type png
+ file /mnt/projects/dco/assets/Environment/temp/LKD/work/maya/images/sanditonMeshroomTest_v19.####.png
+ format "2496 1404 0 0 2496 1404 1 "
+ last 99999
+ origlast 99999
+ origset true
+ on_error checkerboard
+ version 1
+ name Read1
+ selected true
+ xpos -47
+ ypos -1238
+}
+Dot {
+ name Dot2
+ selected true
+ xpos -80
+ ypos -988
+}
+set N7497cf0 [stack 0]
+Dot {
+ name Dot4
+ selected true
+ xpos 136
+ ypos -988
+}
+LensDistortion2 {
+ lensType Anamorphic
+ "Distortion Model" 1
+ "Distortion Equations" 1
+ distortionModelDisplayX "xu = xd / (1 + k0 * rd^2 + k1 * rd^4 + k2 * yd^2)"
+ distortionModelDisplayY "yu = yd / (1 + k0 * rd^2 + k1 * rd^4 + k3 * xd^2)"
+ distortionDenominator0 {{focalLengthToDistDenom.fValue}}
+ distortionDenominator1 {{focalLengthToDistDenom.fValue}}
+ keyFrame 1
+ keyingInitialised true
+ output Redistort
+ "Adjust Bounding Box" 1
+ adjustBBox 500
+ crop {0 0 2048 1556}
+ featuresKnob "
+version 1
+entries 0
+entries 0
+"
+ name LensDistortion2
+ selected true
+ xpos 102
+ ypos -913
+}
+Grade {
+ white {1 4 5 1}
+ multiply 0.88
+ black_clamp false
+ mix 0.152
+ name Grade2
+ selected true
+ xpos 102
+ ypos -818
+ disable true
+}
+Dot {
+ name Dot5
+ selected true
+ xpos 136
+ ypos -708
+}
+push $N7497cf0
+LD_3DE4_All_Parameter_Types {
+ name LD_3DE4_All_Parameter_Types1
+ selected true
+ xpos -114
+ ypos -927
+}
+Grade {
+ white {2 1 1 1}
+ black_clamp false
+ name Grade1
+ selected true
+ xpos -114
+ ypos -743
+}
+push $N7497cf0
+Dot {
+ name Dot1
+ selected true
+ xpos -327
+ ypos -988
+}
+Dot {
+ name Dot3
+ selected true
+ xpos -327
+ ypos -708
+}
+Switch {
+ inputs 3
+ which 32
+ name Switch1
+ selected true
+ xpos -114
+ ypos -711
+}
+Transform {
+ scale {{parent.overscan.overscanVal}}
+ center {{"\[python int(nuke.value(('Read1.width')))/2]"} {"\[python int(nuke.value(('Read1.height')))/2]"}}
+ black_outside false
+ name Transform1
+ selected true
+ xpos -44
+ ypos -549
+}
+Reformat {
+ format "1920 1080 0 0 1920 1080 1 HD_1080"
+ resize none
+ black_outside true
+ name Reformat2
+ selected true
+ xpos -44
+ ypos -495
+}
+Text2 {
+ font_size_toolbar 25
+ font_width_toolbar 100
+ font_height_toolbar 100
+ message "\[frame]\nLens: \[value focalLengthToDistDenom.focal]mm\nDistortion: \[value focalLengthToDistDenom.fValue]"
+ old_message {{49 51 50 48 10 76 101 110 115 58 32 49 52 109 109 10 68 105 115 116 111 114 116 105 111 110 58 32 45 48 46 54 53 53 51 54}
+   }
+ old_expression_markers {{0 3 11 12 28 35}
+   }
+ box {25 15 2048 1556}
+ yjustify bottom
+ transforms {{0 2}
+   }
+ font_size_values {{4 25 5 25 6 25 7 25 8 25 9 25 10 25 11 25 12 25 13 25 14 25 15 25 16 12 17 12 18 12 19 12 20 12 21 12 22 12 23 12 24 12 25 12 26 12 27 12 28 12 29 12 30 12 31 12 32 12 33 12 34 12 35 12 17 25 18 25 20 25 21 25 22 25 23 25 24 25 0 47 1 47 2 47 3 47 0 47 0 47 0 47 0 47 0 47 0 47 0 47 0 47 0 47 0 47 0 76}
+   }
+ cursor_position 52
+ font {{ Meera : Regular : smc/Meera.ttf : 0 }}
+ font_size 25
+ center {1024 778}
+ cursor_initialised true
+ autofit_bbox false
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 1024 778 0 0 1 1 0 0 0 0}
+   }
+ name Text2
+ selected true
+ xpos -44
+ ypos -361
+}
+Write {
+ file_type png
+ checkHashOnRead false
+ name Write1
+ selected true
+ xpos -44
+ ypos -313
+}
+set N9aeca50 [stack 0]
+push $N9aeca50
+Viewer {
+ inputs 2
+ frame 1320
+ frame_range 32-63
+ frame_range_lock true
+ gain 2
+ gamma 1.21
+ viewerProcess "sRGB (default)"
+ name Viewer1
+ selected true
+ xpos -44
+ ypos -213
+ hide_input true
+}
+push $cut_paste_input
+NoOp {
+ name focalLengthToDistDenom
+ selected true
+ xpos 515
+ ypos -907
+ addUserKnob {20 User}
+ addUserKnob {7 fValue R -5 0}
+ fValue {{pow(fNormal,5)*-2}}
+ addUserKnob {26 ""}
+ addUserKnob {7 fMax R 0 200}
+ fMax 70
+ addUserKnob {7 focal l Focal R 0 200}
+ focal 14
+ addUserKnob {7 fNormal}
+ fNormal {{(fMax-focal)/fMax}}
+}
+NoOp {
+ inputs 0
+ name overscan
+ selected true
+ xpos 370
+ ypos -934
+ addUserKnob {20 User}
+ addUserKnob {7 overscanVal l val R 0 2}
+ overscanVal 1.2
+}
