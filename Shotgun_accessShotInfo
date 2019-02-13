@@ -1,22 +1,19 @@
 # WIP CODE
 
+#-------------
+
 import sgtk
 import os
 import re
 
 
 #connect to SG
-
-"""
-# Example filenames
 filename = "/mnt/projects/wb/assets/Light-Rig/arnoldSettings/LGT/work/maya/arnoldSettings_LGT_base_v006.ma"
 
 filename = "/mnt/projects/wb/sequences/001_086/WB_001_086_290/LGT/work/maya/WB_001_086_290_LGT_DTB_v016.ma"
 
 filename = "/mnt/projects/wb/assets/Light-Rig/arnoldSettings/LGT/publish/maya/arnoldSettings_LGT_base_v005.ma"
 filename = "/mnt/projects/medinah/episodes/ep003/sequences/032/EP003_032_0110/LGT/publish/maya/EP003_032_0110_LGT_rndr_v011.mb"
-"""
-
 code = ""
 sequence_entity = ""
 
@@ -35,3 +32,51 @@ if matches:
 
 shotCode = sequence_entity["code"]
 
+#----
+
+
+
+import os, sys
+sys.path.append(r"/mnt/pipeline/ATK_PIPELINE/atk-api")
+from atk_shotgun.ShotgunTankAccess import CustomQuery
+reload(CustomQuery)
+custom_query_obj = CustomQuery.Custom_Query()
+
+# Example Values
+"""
+step_name = "Animation"
+entity_type_name = "Shot"
+asset_shot_code = "WB_001_086_290"
+
+
+step_name = "Lighting"
+entity_type_name = "Shot"
+asset_shot_code = "EP003_032_0110"
+
+
+step_name = "Lighting"
+entity_type_name = "Shot"
+asset_shot_code = "WB_001_086_290"
+
+"""
+
+step_name = "Lighting"
+entity_type_name = "Shot"
+asset_shot_code = "WB_001_086_290"
+
+projectName = "Wild Bill"
+#Get fps
+projectFps = custom_query_obj.get_frame_rate_by_project_name(projectName)['path']['local_path_linux']
+print maya_file_path_name
+
+
+
+# Get file path name of the latest published Maya scene file
+maya_file_path_name = custom_query_obj.get_latest_maya_scene_publish(step_name, entity_type_name, asset_shot_code)['path']['local_path_linux']
+print maya_file_path_name
+
+
+# Get the frame range of a specific shot as a tuple
+frame_range_result = custom_query_obj.get_shot_frame_range_by_shot_code(asset_shot_code)
+print frame_range_result[0] #First Frame
+print frame_range_result[1] #Last Frame
