@@ -1,0 +1,37 @@
+# WIP CODE
+
+import sgtk
+import os
+import re
+
+
+#connect to SG
+
+"""
+# Example filenames
+filename = "/mnt/projects/wb/assets/Light-Rig/arnoldSettings/LGT/work/maya/arnoldSettings_LGT_base_v006.ma"
+
+filename = "/mnt/projects/wb/sequences/001_086/WB_001_086_290/LGT/work/maya/WB_001_086_290_LGT_DTB_v016.ma"
+
+filename = "/mnt/projects/wb/assets/Light-Rig/arnoldSettings/LGT/publish/maya/arnoldSettings_LGT_base_v005.ma"
+filename = "/mnt/projects/medinah/episodes/ep003/sequences/032/EP003_032_0110/LGT/publish/maya/EP003_032_0110_LGT_rndr_v011.mb"
+"""
+
+code = ""
+sequence_entity = ""
+
+from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
+reload(ShotgunTankAccess)
+sta= ShotgunTankAccess.Shotgun_Tank_Access()
+sg= sta.get_sg()
+
+basename= os.path.basename(filename)
+
+regex = r"(\S*?[0-9])_[a-zA-Z]"
+matches = re.search(regex, basename)
+if matches:
+    code= matches.groups()[0]        
+    sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
+
+shotCode = sequence_entity["code"]
+
