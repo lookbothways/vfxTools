@@ -66,10 +66,9 @@ sta= ShotgunTankAccess.Shotgun_Tank_Access()
 sg= sta.get_sg()
 
 def getOpenSceneFilePath():
-
-	scene = cmds.file(q=1,sn=1)
-	project = os.path.dirname(os.path.dirname(scene))
-	return scene
+    scene = cmds.file(q=1,sn=1)
+    project = os.path.dirname(os.path.dirname(scene))
+    return scene
 
 
 def get_frame_rate_by_project_name(project_name):
@@ -136,7 +135,7 @@ def get_aspect_ratio_from_project_resolution_by_id(project_id):
   
          
 
-def checkFps():
+def checkFps(scenePath, project_name ):
     """
     currentUnits (from docs)
     
@@ -151,12 +150,12 @@ def checkFps():
     May be of help:
     https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
     """
-    scenePath = getOpenSceneFilePath()
+    #scenePath = getOpenSceneFilePath() #moved this outside the function
     if scenePath == "":
         cmds.error( "Scene is not saved. Use Shotgun to save your scene first." )
         
         
-    project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
+    # project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/ - moved outside the function
     # Checks to see if the FPS matches shotgun
     
     fps = get_frame_rate_by_project_name(project_name)
@@ -233,6 +232,8 @@ startEndFrameSummary = ""
 
 # Get shot resolution by shot ID
 fixRes = False
+scenePath = getOpenSceneFilePath()
+project_name = (str(scenePath).split("/")[3]) 
 
 shot_id = ""
 shot_id =  getShotDetails(scenePath)[0]
@@ -269,9 +270,9 @@ else:
 
 
 #----------------- CHECK FPS
-fixFps = checkFps()
+fixFps = checkFps(scenePath, project_name)
 
-if checkFps() == True:
+if fixFps == True:
     print "Setting fps to project fps. Warning - Keys may have changed"
     fpsSummary = "Set project fps, WARNING - existing keys may have changed "
     scenePath = getOpenSceneFilePath()
