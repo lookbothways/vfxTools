@@ -152,6 +152,10 @@ def checkFps():
     https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
     """
     scenePath = getOpenSceneFilePath()
+    if scenePath == "":
+        cmds.error( "Scene is not saved. Use Shotgun to save your scene first." )
+        
+        
     project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
     # Checks to see if the FPS matches shotgun
     
@@ -210,7 +214,17 @@ def get_shot_frame_range_by_shot_code(code):
     else:
         return int(data["sg_cut_in"]), int(data["sg_cut_out"])
     
-      
+def createAovs():
+    setupAOVs = ""
+    setupAOVs = cmds.confirmDialog( 
+                        title='AOVs', message='Run AOV setup?', 
+                        button=['Yes','No'], defaultButton='Yes', 
+                        cancelButton='No', dismissString='No' 
+                        
+                        )
+    if setupAOVs == "Yes":
+        aovSettings.aovSettings()
+              
 #----------------- Check the Resolution is correct
 # Setup summary
 fpsSummary = ""
@@ -292,40 +306,8 @@ print fpsSummary+resolutionSummary+startEndFrameSummary,
 # Create and set up lightgroup aovs (import scene from assets)
 
 # Create AOVs?
-setupAOVs = ""
-setupAOVs = cmds.confirmDialog( 
-                    title='AOVs', message='Run AOV setup?', 
-                    button=['Yes','No'], defaultButton='Yes', 
-                    cancelButton='No', dismissString='No' 
-                    
-                    )
-                    
-if setupAOVs == "Yes":
-    aovSettings.aovSettings()
+createAovs()
 
 
 #------------------------------End-MB140119
-"""
-
-#////// OTHER THINGS
-
-sg_shots = sg.find("Shot", [['project.Project.name', 'is', project_name]],
-                   ['code', 'sg_sequence.Sequence.sg_status_list'])
-
-
-
-# NOT used for this, but useful 	
-def get_all_projects(active=False):
-    fields = ['name']
-    if active:
-        filters = [["sg_status", "is", "Active"]]
-    else:
-        filters = []
-    project_list = sg.find("Project", filters, fields)
-    return project_list
-    
-    
-projects = get_all_projects()
-print projects
-"""
-break # This is here because when I paste into the script editor it sometimes runs the commands. Bad. 
+break # This is here because when I paste into the script editor it sometimes runs the commands. Bad maya. 
