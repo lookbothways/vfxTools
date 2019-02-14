@@ -27,7 +27,7 @@ To Get:
 # Startframe Endframe
 
 To Set, on request:
-# xy res (if not)
+# xy res (if not per shot, get project-res)
 # framerate (if not)
 On Dialogue:
 # Set default Aovs
@@ -36,7 +36,8 @@ On Dialogue:
 
 
 """
-import shotgun_api3 as shotgun
+
+
 import sgtk
 import os
 import sys
@@ -63,9 +64,9 @@ def getOpenSceneFilePath():
 	return scene
 
 
-def get_frame_rate_by_project_name(sg_project_name):
+def get_frame_rate_by_project_name(project_name):
     fields = ['sg_fps']
-    filters = [['name', 'is', sg_project_name]]
+    filters = [['name', 'is', project_name]]
     result = sg.find_one("Project", filters, fields)
     result = result["sg_fps"]
     if result is None or result == 0:
@@ -94,6 +95,27 @@ def getShotDetails(scenePath):
     print sequence_entity
     return shot_id
     
+    
+    
+def get_shot_resolution_by_id(shot_id):
+    sg_entity_type = "Shot"
+    sg_filters = [["id", "is", shot_id]]
+    fields = ['sg_resolution']
+    data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
+    print data
+    if data is None or data["sg_resolution"] is None:
+        return False
+    else:
+        return data["sg_resolution"]
+
+
+def get_project_id_by_name(project_name):
+    fields = ['id']
+    filters = [["name", "is", project_name]]
+    project = sg.find_one("Project", filters, fields)
+    return project
+    
+       
 # Compare with the scene
 """
 currentUnits (from docs)
@@ -108,12 +130,14 @@ ntscf: 60 fps
 """
 
 scenePath = getOpenSceneFilePath()
-sg_project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
+project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
 
 
 # Checks to see if the FPS matches shotgun
 fixFps = False
-fps = get_frame_rate_by_project_name(sg_project_name)
+
+
+fps = get_frame_rate_by_project_name(project_name)
 
 # the madness way?
 sceneTime = cmds.currentUnit(query=True, time=True)
@@ -139,30 +163,25 @@ else:
     fixFps = True    
    
 # Get shot resolution by ID
+fixRes = False
 shot_id = ""
 shot_id =  getShotDetails(scenePath)
-res = get_shot_resolution_by_id(shot_id)
+xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
+print xRes, yRes
 
 
-# START HERE:
-def get_project_resolution_by_project_name(sg_project_name):
+
+# Get project ID
+projectID = (get_project_id_by_name(project_name))["id"]
+print projectID
+
+
+# THIS IS BROKEN
+def get_project_resolution_by_project_name(project_name):
     sg_entity_type = "Project"
-    sg_filters = [["id", "is", sg_project_name]]
+    sg_filters = [["id", "is", project_name]]
     fields = ['sg_resolution']
     data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
-    if data is None or data["sg_resolution"] is None:
-        return False
-    else:
-        return data["sg_resolution"]
-
-
-#broken
-def get_shot_resolution_by_id(shot_id):
-    sg_entity_type = "Shot"
-    sg_filters = [["id", "is", shot_id]]
-    fields = ['sg_resolution']
-    data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
-    print data
     if data is None or data["sg_resolution"] is None:
         return False
     else:
@@ -172,13 +191,8 @@ def get_shot_resolution_by_id(shot_id):
 
 #////// OTHER THINGS
 
-sg_shots = sg.find("Shot", [['project.Project.name', 'is', sg_project_name]],
+sg_shots = sg.find("Shot", [['project.Project.name', 'is', project_name]],
                    ['code', 'sg_sequence.Sequence.sg_status_list'])
-
-
-shot_id = 6263
-
-
 
 
 	
