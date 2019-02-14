@@ -50,6 +50,8 @@ import sys
 import re
 import maya.cmds as cmds
 import maya.mel as mel
+import aovSettings
+reload(aovSettings)
 
 # Get CustomQuery
 sys.path.append(r"/mnt/pipeline/ATK_PIPELINE/atk-api")
@@ -284,5 +286,46 @@ if fStart != sg_startFrame or fEnd != sg_endFrame:
 #Summary output 
 print fpsSummary+resolutionSummary+startEndFrameSummary,
 
+#------------- OPTIONAL SETTINGS
+# Aovs
+# Load project renderGlobals preset
+# Create and set up lightgroup aovs (import scene from assets)
+
+# Create AOVs?
+setupAOVs = ""
+setupAOVs = cmds.confirmDialog( 
+                    title='AOVs', message='Run AOV setup?', 
+                    button=['Yes','No'], defaultButton='Yes', 
+                    cancelButton='No', dismissString='No' 
+                    
+                    )
+                    
+if setupAOVs == "Yes":
+    aovSettings.aovSettings()
+
 
 #------------------------------End-MB140119
+"""
+
+#////// OTHER THINGS
+
+sg_shots = sg.find("Shot", [['project.Project.name', 'is', project_name]],
+                   ['code', 'sg_sequence.Sequence.sg_status_list'])
+
+
+
+# NOT used for this, but useful 	
+def get_all_projects(active=False):
+    fields = ['name']
+    if active:
+        filters = [["sg_status", "is", "Active"]]
+    else:
+        filters = []
+    project_list = sg.find("Project", filters, fields)
+    return project_list
+    
+    
+projects = get_all_projects()
+print projects
+"""
+break # This is here because when I paste into the script editor it sometimes runs the commands. Bad. 
