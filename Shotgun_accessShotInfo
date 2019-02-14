@@ -1,82 +1,198 @@
-# WIP CODE
+# Shotgun: Access shot info
+# Actual code for 'Set Render Output Naming' python button
 
-#-------------
+"""
+Mel that does hardcoded things:
+# If this has to be .mel, make the mel run a separate python (?)
+// Rendersettings
 
+global proc setRenderSettings(){
+	setAttr "defaultResolution.width" 2704;
+	setAttr "defaultResolution.height" 1520;
+	//setAttr "defaultResolution.pixelAspect" 1.0;       // Not needed as this is driven by the line below.
+    setAttr "defaultResolution.deviceAspectRatio" 1.779; // Added this line to drive the pixelAspect -- Toby 6/6/18 
+	setAttr "defaultResolution.aspectLock" 1.0;
+    setMayaSoftwareFrameExt(3,0);
+	currentUnit -time film;
+	setAttr -type "string" "defaultRenderGlobals.imageFilePrefix" "<Scene>/<RenderLayer>/<Scene>.<RenderLayer>.<RenderPass>";
+	print("Render settings applied for SHR: Res 2704 x 1520 | pixelAspect 1.0 | aspectLock 1.0 | 24fps.\n");
+}
+
+setRenderSettings();
+
+To Get:
+# xy res
+# framerate
+# imageFilePrefix
+# Startframe Endframe
+
+To Set, on request:
+# xy res (if not)
+# framerate (if not)
+On Dialogue:
+# Set default Aovs
+# load arnold Render presets from show specific preset file
+# ask to setup hdr,key,rim,fill lightrig (with lightgroups)
+
+
+"""
+import shotgun_api3 as shotgun
 import sgtk
 import os
+import sys
 import re
+import maya.cmds as cmds
+import maya.mel as mel
 
-
-#connect to SG
-filename = "/mnt/projects/wb/assets/Light-Rig/arnoldSettings/LGT/work/maya/arnoldSettings_LGT_base_v006.ma"
-
-filename = "/mnt/projects/wb/sequences/001_086/WB_001_086_290/LGT/work/maya/WB_001_086_290_LGT_DTB_v016.ma"
-
-filename = "/mnt/projects/wb/assets/Light-Rig/arnoldSettings/LGT/publish/maya/arnoldSettings_LGT_base_v005.ma"
-filename = "/mnt/projects/medinah/episodes/ep003/sequences/032/EP003_032_0110/LGT/publish/maya/EP003_032_0110_LGT_rndr_v011.mb"
-code = ""
-sequence_entity = ""
-
-from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
-reload(ShotgunTankAccess)
-sta= ShotgunTankAccess.Shotgun_Tank_Access()
-sg= sta.get_sg()
-
-basename= os.path.basename(filename)
-
-regex = r"(\S*?[0-9])_[a-zA-Z]"
-matches = re.search(regex, basename)
-if matches:
-    code= matches.groups()[0]        
-    sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
-
-shotCode = sequence_entity["code"]
-
-#----
-
-
-
-import os, sys
+# Get CustomQuery
 sys.path.append(r"/mnt/pipeline/ATK_PIPELINE/atk-api")
 from atk_shotgun.ShotgunTankAccess import CustomQuery
 reload(CustomQuery)
 custom_query_obj = CustomQuery.Custom_Query()
 
-# Example Values
+# Get Tank access
+from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
+reload(ShotgunTankAccess)
+sta= ShotgunTankAccess.Shotgun_Tank_Access()
+sg= sta.get_sg()
+
+def getOpenSceneFilePath():
+
+	scene = cmds.file(q=1,sn=1)
+	project = os.path.dirname(os.path.dirname(scene))
+	return scene
+
+
+def get_frame_rate_by_project_name(sg_project_name):
+    fields = ['sg_fps']
+    filters = [['name', 'is', sg_project_name]]
+    result = sg.find_one("Project", filters, fields)
+    result = result["sg_fps"]
+    if result is None or result == 0:
+        return 24
+    else:
+        return result
+        
+def getShotDetails(scenePath):
+    code = ""
+    sequence_entity = ""
+    
+    from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
+    reload(ShotgunTankAccess)
+    sta= ShotgunTankAccess.Shotgun_Tank_Access()
+    sg= sta.get_sg()
+    
+    basename= os.path.basename(scenePath)
+    
+    regex = r"(\S*?[0-9])_[a-zA-Z]"
+    matches = re.search(regex, basename)
+    if matches:
+        code= matches.groups()[0]        
+        sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
+    
+    shot_id = sequence_entity["id"]
+    print sequence_entity
+    return shot_id
+    
+# Compare with the scene
 """
-step_name = "Animation"
-entity_type_name = "Shot"
-asset_shot_code = "WB_001_086_290"
+currentUnits (from docs)
 
-
-step_name = "Lighting"
-entity_type_name = "Shot"
-asset_shot_code = "EP003_032_0110"
-
-
-step_name = "Lighting"
-entity_type_name = "Shot"
-asset_shot_code = "WB_001_086_290"
-
+game: 15 fps
+film: 24 fps
+pal: 25 fps
+ntsc: 30 fps
+show: 48 fps
+palf: 50 fps
+ntscf: 60 fps
 """
 
-step_name = "Lighting"
-entity_type_name = "Shot"
-asset_shot_code = "WB_001_086_290"
-
-projectName = "Wild Bill"
-#Get fps
-projectFps = custom_query_obj.get_frame_rate_by_project_name(projectName)['path']['local_path_linux']
-print maya_file_path_name
+scenePath = getOpenSceneFilePath()
+sg_project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
 
 
+# Checks to see if the FPS matches shotgun
+fixFps = False
+fps = get_frame_rate_by_project_name(sg_project_name)
 
-# Get file path name of the latest published Maya scene file
-maya_file_path_name = custom_query_obj.get_latest_maya_scene_publish(step_name, entity_type_name, asset_shot_code)['path']['local_path_linux']
-print maya_file_path_name
+# the madness way?
+sceneTime = cmds.currentUnit(query=True, time=True)
+if sceneTime == "game":
+    sceneTime = 15
+if sceneTime == "film":
+    sceneTime = 24
+if sceneTime == "pal":
+    sceneTime = 25
+if sceneTime == "ntsc":
+    sceneTime = 30
+if sceneTime == "show":
+    sceneTime = 48
+if sceneTime == "palf":
+    sceneTime = 50
+if sceneTime == "ntscf":
+    sceneTime = 60
+
+if int(fps) == sceneTime:
+    print "Scene FPS matches shotgun"
+else:
+    print "Scene FPS does not match Shotgun"
+    fixFps = True    
+   
+# Get shot resolution by ID
+shot_id = ""
+shot_id =  getShotDetails(scenePath)
+res = get_shot_resolution_by_id(shot_id)
 
 
-# Get the frame range of a specific shot as a tuple
-frame_range_result = custom_query_obj.get_shot_frame_range_by_shot_code(asset_shot_code)
-print frame_range_result[0] #First Frame
-print frame_range_result[1] #Last Frame
+# START HERE:
+def get_project_resolution_by_project_name(sg_project_name):
+    sg_entity_type = "Project"
+    sg_filters = [["id", "is", sg_project_name]]
+    fields = ['sg_resolution']
+    data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
+    if data is None or data["sg_resolution"] is None:
+        return False
+    else:
+        return data["sg_resolution"]
+
+
+#broken
+def get_shot_resolution_by_id(shot_id):
+    sg_entity_type = "Shot"
+    sg_filters = [["id", "is", shot_id]]
+    fields = ['sg_resolution']
+    data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
+    print data
+    if data is None or data["sg_resolution"] is None:
+        return False
+    else:
+        return data["sg_resolution"]
+
+
+
+#////// OTHER THINGS
+
+sg_shots = sg.find("Shot", [['project.Project.name', 'is', sg_project_name]],
+                   ['code', 'sg_sequence.Sequence.sg_status_list'])
+
+
+shot_id = 6263
+
+
+
+
+	
+def get_all_projects(active=False):
+    fields = ['name']
+    if active:
+        filters = [["sg_status", "is", "Active"]]
+    else:
+        filters = []
+    project_list = sg.find("Project", filters, fields)
+    return project_list
+    
+    
+projects = get_all_projects()
+print projects
+
+break
