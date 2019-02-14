@@ -294,7 +294,10 @@ fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
 if fStart != sg_startFrame or fEnd != sg_endFrame:
     cmds.setAttr("defaultRenderGlobals.startFrame", sg_startFrame)
     cmds.setAttr("defaultRenderGlobals.endFrame", sg_endFrame)
-    cmds.playbackOptions(min=int(sg_startFrame),max=int(sg_endFrame))
+    cmds.playbackOptions(min=sg_startFrame,max=sg_endFrame)
+    cmds.playbackOptions(animationStartTime=sg_startFrame)
+    cmds.playbackOptions(animationEndTime=sg_endFrame)
+
     startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
     
 
@@ -310,5 +313,13 @@ print fpsSummary+resolutionSummary+startEndFrameSummary,
 createAovs()
 
 
+"""
+    cmds.playbackOptions(minTime=edit_in)
+    cmds.playbackOptions(maxTime=edit_out)
+    cmds.playbackOptions(animationStartTime=edit_in)
+    cmds.playbackOptions(animationEndTime=edit_out)
+    cmds.playbackOptions(minTime=edit_in)
+    cmds.playbackOptions(maxTime=edit_out)
+"""
 #------------------------------End-MB140119
 break # This is here because when I paste into the script editor it sometimes runs the commands. Bad maya. 
