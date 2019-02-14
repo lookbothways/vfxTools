@@ -1,7 +1,13 @@
-# Shotgun: Access shot info
+# Shotgun: Access shot info 
 # Actual code for 'Set Render Output Naming' python button
-
 """
+
+To Do:
+* Add option for double-res
+* If changing FPS, keep keys at current frames (this may be hard)
+
+
+
 Mel that does hardcoded things:
 # If this has to be .mel, make the mel run a separate python (?)
 // Rendersettings
@@ -92,8 +98,9 @@ def getShotDetails(scenePath):
         sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
     
     shot_id = sequence_entity["id"]
+    code = sequence_entity["code"]
     print sequence_entity
-    return shot_id
+    return shot_id, code
     
     
     
@@ -114,99 +121,168 @@ def get_project_id_by_name(project_name):
     filters = [["name", "is", project_name]]
     project = sg.find_one("Project", filters, fields)
     return project
-    
-       
-# Compare with the scene
-"""
-currentUnits (from docs)
 
-game: 15 fps
-film: 24 fps
-pal: 25 fps
-ntsc: 30 fps
-show: 48 fps
-palf: 50 fps
-ntscf: 60 fps
-"""
-
-scenePath = getOpenSceneFilePath()
-project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
-
-
-# Checks to see if the FPS matches shotgun
-fixFps = False
-
-
-fps = get_frame_rate_by_project_name(project_name)
-
-# the madness way?
-sceneTime = cmds.currentUnit(query=True, time=True)
-if sceneTime == "game":
-    sceneTime = 15
-if sceneTime == "film":
-    sceneTime = 24
-if sceneTime == "pal":
-    sceneTime = 25
-if sceneTime == "ntsc":
-    sceneTime = 30
-if sceneTime == "show":
-    sceneTime = 48
-if sceneTime == "palf":
-    sceneTime = 50
-if sceneTime == "ntscf":
-    sceneTime = 60
-
-if int(fps) == sceneTime:
-    print "Scene FPS matches shotgun"
-else:
-    print "Scene FPS does not match Shotgun"
-    fixFps = True    
-   
-# Get shot resolution by ID
-fixRes = False
-shot_id = ""
-shot_id =  getShotDetails(scenePath)
-xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
-print xRes, yRes
-
-
-
-# Get project ID
-projectID = (get_project_id_by_name(project_name))["id"]
-print projectID
-
-
-# THIS IS BROKEN
-def get_project_resolution_by_project_name(project_name):
+def get_aspect_ratio_from_project_resolution_by_id(project_id):
     sg_entity_type = "Project"
-    sg_filters = [["id", "is", project_name]]
+    sg_filters = [["id", "is", project_id]]
     fields = ['sg_resolution']
     data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
-    if data is None or data["sg_resolution"] is None:
+    print data
+    if data:
+        aspect = float(data["sg_resolution"].split(" ")[-1][:-2])
+    return data, aspect
+  
+         
+
+def checkFps():
+    """
+    currentUnits (from docs)
+    
+    game: 15 fps
+    film: 24 fps
+    pal: 25 fps
+    ntsc: 30 fps
+    show: 48 fps
+    palf: 50 fps
+    ntscf: 60 fps
+    
+    May be of help:
+    https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
+    """
+    scenePath = getOpenSceneFilePath()
+    project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
+    # Checks to see if the FPS matches shotgun
+    
+    fps = get_frame_rate_by_project_name(project_name)
+    
+    # the madness way?
+    sceneTime = cmds.currentUnit(query=True, time=True)
+    
+    if sceneTime == "game":
+        sceneTime = 15
+    if sceneTime == "film":
+        sceneTime = 24
+    if sceneTime == "pal":
+        sceneTime = 25
+    if sceneTime == "ntsc":
+        sceneTime = 30
+    if sceneTime == "show":
+        sceneTime = 48
+    if sceneTime == "palf":
+        sceneTime = 50
+    if sceneTime == "ntscf":
+        sceneTime = 60
+    if int(fps) == sceneTime:
+        print "Scene FPS matches shotgun"
+    else:
+        print "Project fps {} may not match scene fps: {}".format(str(fps),str(sceneTime)) 
+        fixFps = True
+        return fixFps
+    
+   
+   
+def setResolution(pxRes, pyRes, pixelAspect=1.0):
+
+    cmds.setAttr("defaultResolution.aspectLock", 0) # unlocks ratio
+    #Calculates the device aspect since pixel aspect isn't an actual attribute.
+    device_aspect = float(int(pxRes) * pixelAspect)/float(int(pyRes))
+
+    #Set the Lock Device Aspect Ratio. IMPORTANT!
+    #If you don't do this it won't work.
+    cmds.setAttr("defaultResolution.lockDeviceAspectRatio", 1)
+
+    #Set width, height, and aspect ratio.
+    cmds.setAttr("defaultResolution.width", pxRes)
+    cmds.setAttr("defaultResolution.height", pyRes)
+    cmds.setAttr("defaultResolution.deviceAspectRatio", device_aspect)
+    cmds.setAttr("defaultResolution.aspectLock", 1) # locks ratio
+
+def get_shot_frame_range_by_shot_code(code):
+    sg_filters = [["code", "is", code]]
+    fields = ['sg_cut_in', 'sg_cut_out']
+    print fields
+    data = sg.find_one("Shot", filters=sg_filters, fields=fields)
+
+    if data is None or data["sg_cut_in"] is None or data["sg_cut_out"] is None:
         return False
     else:
-        return data["sg_resolution"]
-
-
-
-#////// OTHER THINGS
-
-sg_shots = sg.find("Shot", [['project.Project.name', 'is', project_name]],
-                   ['code', 'sg_sequence.Sequence.sg_status_list'])
-
-
-	
-def get_all_projects(active=False):
-    fields = ['name']
-    if active:
-        filters = [["sg_status", "is", "Active"]]
-    else:
-        filters = []
-    project_list = sg.find("Project", filters, fields)
-    return project_list
+        return int(data["sg_cut_in"]), int(data["sg_cut_out"])
     
-    
-projects = get_all_projects()
-print projects
+      
+#----------------- Check the Resolution is correct
+# Setup summary
+fpsSummary = ""
+resolutionSummary = ""
+startEndFrameSummary = ""
 
-break
+# Get shot resolution by shot ID
+fixRes = False
+
+shot_id = ""
+shot_id =  getShotDetails(scenePath)[0]
+xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
+
+# Get project resolution by project ID
+project_id = (get_project_id_by_name(project_name))["id"]
+print project_id
+
+projectRes, aspect = get_aspect_ratio_from_project_resolution_by_id(project_id)
+projectRes = str(projectRes["sg_resolution"])
+pxRes, pyRes = ((projectRes).split(" ")[1]).split("x")
+
+# Get local resolution
+localxRes = cmds.getAttr("defaultResolution.width")
+localyRes = cmds.getAttr("defaultResolution.height")
+
+
+# Check and set the resolution (remember to unlock aspect and then lock it)
+
+print "Shot Resolution        : "+ str(xRes), str(yRes)
+print "Project Resolution     : "+ str(pxRes), str(pyRes)
+print "Local scene Resolution : "+ str(localxRes), str(localyRes)
+
+if xRes == pxRes and yRes == pyRes and localxRes == pxRes and localyRes == pxRes:
+    print "Local scene resolution matches shot and project resolution. Moving on."
+else:
+    print "SG Shot resolution DOES NOT match project resolution"
+    if xRes == pxRes and yRes == pyRes:
+        print "Setting local shot res to {} x {}. Forcing pixel aspect to 1.0".format(pxRes, pyRes),
+        setResolution(int(pxRes), int(pyRes), pixelAspect=1.0)
+        resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(pxRes), str(pyRes))
+
+
+
+#----------------- CHECK FPS
+fixFps = checkFps()
+
+if checkFps() == True:
+    print "Setting fps to project fps. Warning - Keys may have changed"
+    fpsSummary = "Set project fps, WARNING - existing keys may have changed "
+    scenePath = getOpenSceneFilePath()
+    project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/    
+    fps = get_frame_rate_by_project_name(project_name)
+    fps = str(int(fps))+"fps"
+    cmds.currentUnit( time=fps )  
+
+# Also add option to set double-res??
+
+
+#----------------- Set start-end-frame (especially changing fps will move the start-end frames)
+code = getShotDetails(scenePath)[1]
+sg_startFrame, sg_endFrame = get_shot_frame_range_by_shot_code(code)
+
+fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
+fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
+
+if fStart != sg_startFrame or fEnd != sg_endFrame:
+    cmds.setAttr("defaultRenderGlobals.startFrame", sg_startFrame)
+    cmds.setAttr("defaultRenderGlobals.endFrame", sg_endFrame)
+    cmds.playbackOptions(min=int(sg_startFrame),max=int(sg_endFrame))
+    startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
+    
+
+#Summary output 
+print fpsSummary+resolutionSummary+startEndFrameSummary,
+
+
+#------------------------------End-MB140119
