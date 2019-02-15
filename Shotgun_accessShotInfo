@@ -29,8 +29,8 @@ setRenderSettings();
 To Get:
 # xy res
 # framerate
-# imageFilePrefix
 # Startframe Endframe
+# imageFilePrefix
 
 To Set, on request:
 # xy res (if not per shot, get project-res)
@@ -38,18 +38,33 @@ To Set, on request:
 On Dialogue:
 # Set default Aovs
 # load arnold Render presets from show specific preset file
+https://forums.autodesk.com/t5/maya-programming/load-render-setup-json-file-with-python/td-p/6762688
+
 # ask to setup hdr,key,rim,fill lightrig (with lightgroups)
 
+renderGlobal paths:
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings"
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_setups"
+#1.1:
+Dialogue with checkboxes - all on by default:
+    * Check resolution, force 1.0 aspect
+    * Check frame-range
+    
 
 """
+#Setting up the load render globals preset
+import maya.app.renderSetup.model.renderSetup as renderSetup # for renderlayers
+import maya.app.renderSetup.model.renderSettings as renderSettings # for renderGlobals
+import json
 
-
+#Setting up all the other bits
 import sgtk
 import os
 import sys
 import re
 import maya.cmds as cmds
 import maya.mel as mel
+# my aovs script
 import aovSettings
 reload(aovSettings)
 
@@ -223,7 +238,26 @@ def createAovs():
                         )
     if setupAOVs == "Yes":
         aovSettings.aovSettings()
-              
+
+
+def importDefaultLights():
+    importLights = cmds.confirmDialog( 
+                        title='AOVs', message='Import default Wild Bill lights\nHDR, Key, Rim, Fill + lightgroups', 
+                        button=['Yes','No'], defaultButton='Yes', 
+                        cancelButton='No', dismissString='No' 
+                        
+                        )
+    if importLights == "Yes":
+        print "Importing: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
+        
+    
+# Load atk_arnoldSettings .json file
+
+#prefs.loadUserPreset()
+#prefs.getGlobalPresets("arnold")
+import maya.app.renderSetup.views.renderSetupPreferences as prefs 
+prefs.loadGlobalPreset("atk_arnoldSettings_v001")
+          
 #----------------- Check the Resolution is correct
 # Setup summary
 fpsSummary = ""
@@ -232,8 +266,12 @@ startEndFrameSummary = ""
 
 # Get shot resolution by shot ID
 fixRes = False
+scenePath = ""
 scenePath = getOpenSceneFilePath()
-project_name = (str(scenePath).split("/")[3]) 
+if scenePath:
+    project_name = (str(scenePath).split("/")[3]) 
+else:
+    cmds.error( "Scene not saved. Save scene via Shotgun > file save first." )
 
 shot_id = ""
 shot_id =  getShotDetails(scenePath)[0]
