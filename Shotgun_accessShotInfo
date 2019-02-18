@@ -1,4 +1,4 @@
-
+#CURRENTLY deliberately BROKEN ON 291
 # Shotgun: Access shot info
 # Actual code for 'Set Render Output Naming' python button
 """
@@ -47,7 +47,7 @@ Useful paths:
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings"
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_setups"
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
-"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_arnoldSettings_v001.json"
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
 #1.1:
 Dialogue with checkboxes - all on by default.
 
@@ -267,6 +267,8 @@ def importDefaultLights():
 import maya.app.renderSetup.views.renderSetupPreferences as prefs
 prefs.loadGlobalPreset("atk_arnoldSettings_v002")
 
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
+
 #----------------- Check the Resolution is correct
 # Setup summary
 fpsSummary = ""
@@ -284,7 +286,12 @@ else:
 
 shot_id = ""
 shot_id =  getShotDetails(scenePath)[0]
-xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
+
+#THIS SECTION IS BROKEN
+break
+#xRes = 2048
+#yRes = 1080
+#xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
 
 # Get project resolution by project ID
 project_id = (get_project_id_by_name(project_name))["id"]
@@ -314,7 +321,13 @@ else:
         setResolution(int(pxRes), int(pyRes), pixelAspect=1.0)
         resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(pxRes), str(pyRes))
 
-
+# THIS BIT ^^ returns an anomaly sometimes:
+"""
+Shot Resolution        : 2048 1080
+Project Resolution     : 2048 1080
+Local scene Resolution : 2048 1080
+SG Shot resolution DOES NOT match project resolution
+"""
 
 #----------------- CHECK FPS
 fixFps = checkFps(scenePath, project_name)
@@ -356,9 +369,11 @@ print fpsSummary+resolutionSummary+startEndFrameSummary,
 # Load project renderGlobals preset
 # Create and set up lightgroup aovs (import scene from assets)
 
+#THIS NEEDS TO CHECK FOR AOVS BEFORE RUNNING
 # Create AOVs?
 createAovs()
 
+#THIS ALSO NEEDS TO CHECK FOR THE DEFAULT LIGHTRIG FIRST
 # Import default lightRig?
 importDefaultLights()
 
