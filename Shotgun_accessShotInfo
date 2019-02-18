@@ -248,8 +248,17 @@ def importDefaultLights():
                         
                         )
     if importLights == "Yes":
-        print "Importing: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
         
+        fileExists = False
+        fileExists = cmds.file( "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma", q=True, ex=True )
+        if fileExists == True:
+            cmds.file( "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma", i=True, type='mayaAscii', namespace='lightRig' )
+            print "Imported: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
+        else:
+            cmds.error( "lightRig file not found: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma - Contact your supervisor." )
+
+
+
     
 # Load atk_arnoldSettings .json file
 
@@ -349,15 +358,3 @@ print fpsSummary+resolutionSummary+startEndFrameSummary,
 
 # Create AOVs?
 createAovs()
-
-
-"""
-    cmds.playbackOptions(minTime=edit_in)
-    cmds.playbackOptions(maxTime=edit_out)
-    cmds.playbackOptions(animationStartTime=edit_in)
-    cmds.playbackOptions(animationEndTime=edit_out)
-    cmds.playbackOptions(minTime=edit_in)
-    cmds.playbackOptions(maxTime=edit_out)
-"""
-#------------------------------End-MB140119
-break # This is here because when I paste into the script editor it sometimes runs the commands. Bad maya. 
