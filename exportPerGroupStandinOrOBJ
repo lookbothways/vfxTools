@@ -21,6 +21,7 @@ mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | ar
 """
 import maya.cmds as cmds
 import maya.mel as mel
+import arnold as arnold
 from arnold import *
 
 def exportFiles():
