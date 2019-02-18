@@ -1,4 +1,5 @@
-# Shotgun: Access shot info 
+
+# Shotgun: Access shot info
 # Actual code for 'Set Render Output Naming' python button
 """
 
@@ -13,15 +14,15 @@ Mel that does hardcoded things:
 // Rendersettings
 
 global proc setRenderSettings(){
-	setAttr "defaultResolution.width" 2704;
-	setAttr "defaultResolution.height" 1520;
-	//setAttr "defaultResolution.pixelAspect" 1.0;       // Not needed as this is driven by the line below.
-    setAttr "defaultResolution.deviceAspectRatio" 1.779; // Added this line to drive the pixelAspect -- Toby 6/6/18 
-	setAttr "defaultResolution.aspectLock" 1.0;
+    setAttr "defaultResolution.width" 2704;
+    setAttr "defaultResolution.height" 1520;
+    //setAttr "defaultResolution.pixelAspect" 1.0;       // Not needed as this is driven by the line below.
+    setAttr "defaultResolution.deviceAspectRatio" 1.779; // Added this line to drive the pixelAspect -- Toby 6/6/18
+    setAttr "defaultResolution.aspectLock" 1.0;
     setMayaSoftwareFrameExt(3,0);
-	currentUnit -time film;
-	setAttr -type "string" "defaultRenderGlobals.imageFilePrefix" "<Scene>/<RenderLayer>/<Scene>.<RenderLayer>.<RenderPass>";
-	print("Render settings applied for SHR: Res 2704 x 1520 | pixelAspect 1.0 | aspectLock 1.0 | 24fps.\n");
+    currentUnit -time film;
+    setAttr -type "string" "defaultRenderGlobals.imageFilePrefix" "<Scene>/<RenderLayer>/<Scene>.<RenderLayer>.<RenderPass>";
+    print("Render settings applied for SHR: Res 2704 x 1520 | pixelAspect 1.0 | aspectLock 1.0 | 24fps.\n");
 }
 
 setRenderSettings();
@@ -42,14 +43,13 @@ https://forums.autodesk.com/t5/maya-programming/load-render-setup-json-file-with
 
 # ask to setup hdr,key,rim,fill lightrig (with lightgroups)
 
-renderGlobal paths:
+Useful paths:
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings"
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_setups"
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_arnoldSettings_v001.json"
 #1.1:
-Dialogue with checkboxes - all on by default:
-    * Check resolution, force 1.0 aspect
-    * Check frame-range
-    
+Dialogue with checkboxes - all on by default.
 
 """
 #Setting up the load render globals preset
@@ -95,31 +95,31 @@ def get_frame_rate_by_project_name(project_name):
         return 24
     else:
         return result
-        
+
 def getShotDetails(scenePath):
     code = ""
     sequence_entity = ""
-    
+
     from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
     reload(ShotgunTankAccess)
     sta= ShotgunTankAccess.Shotgun_Tank_Access()
     sg= sta.get_sg()
-    
+
     basename= os.path.basename(scenePath)
-    
+
     regex = r"(\S*?[0-9])_[a-zA-Z]"
     matches = re.search(regex, basename)
     if matches:
-        code= matches.groups()[0]        
+        code= matches.groups()[0]
         sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
-    
+
     shot_id = sequence_entity["id"]
     code = sequence_entity["code"]
     print sequence_entity
     return shot_id, code
-    
-    
-    
+
+
+
 def get_shot_resolution_by_id(shot_id):
     sg_entity_type = "Shot"
     sg_filters = [["id", "is", shot_id]]
@@ -147,13 +147,13 @@ def get_aspect_ratio_from_project_resolution_by_id(project_id):
     if data:
         aspect = float(data["sg_resolution"].split(" ")[-1][:-2])
     return data, aspect
-  
-         
+
+
 
 def checkFps(scenePath, project_name ):
     """
     currentUnits (from docs)
-    
+
     game: 15 fps
     film: 24 fps
     pal: 25 fps
@@ -161,23 +161,23 @@ def checkFps(scenePath, project_name ):
     show: 48 fps
     palf: 50 fps
     ntscf: 60 fps
-    
+
     May be of help:
-    https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
+https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
     """
     #scenePath = getOpenSceneFilePath() #moved this outside the function
     if scenePath == "":
         cmds.error( "Scene is not saved. Use Shotgun to save your scene first." )
-        
-        
+
+
     # project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/ - moved outside the function
     # Checks to see if the FPS matches shotgun
-    
+
     fps = get_frame_rate_by_project_name(project_name)
-    
+
     # the madness way?
     sceneTime = cmds.currentUnit(query=True, time=True)
-    
+
     if sceneTime == "game":
         sceneTime = 15
     if sceneTime == "film":
@@ -195,12 +195,12 @@ def checkFps(scenePath, project_name ):
     if int(fps) == sceneTime:
         print "Scene FPS matches shotgun"
     else:
-        print "Project fps {} may not match scene fps: {}".format(str(fps),str(sceneTime)) 
+        print "Project fps {} may not match scene fps: {}".format(str(fps),str(sceneTime))
         fixFps = True
         return fixFps
-    
-   
-   
+
+
+
 def setResolution(pxRes, pyRes, pixelAspect=1.0):
 
     cmds.setAttr("defaultResolution.aspectLock", 0) # unlocks ratio
@@ -227,28 +227,28 @@ def get_shot_frame_range_by_shot_code(code):
         return False
     else:
         return int(data["sg_cut_in"]), int(data["sg_cut_out"])
-    
+
 def createAovs():
     setupAOVs = ""
-    setupAOVs = cmds.confirmDialog( 
-                        title='AOVs', message='Run AOV setup?', 
-                        button=['Yes','No'], defaultButton='Yes', 
-                        cancelButton='No', dismissString='No' 
-                        
+    setupAOVs = cmds.confirmDialog(
+                        title='AOVs', message='Run AOV setup?',
+                        button=['Yes','No'], defaultButton='Yes',
+                        cancelButton='No', dismissString='No'
+
                         )
     if setupAOVs == "Yes":
         aovSettings.aovSettings()
 
 
 def importDefaultLights():
-    importLights = cmds.confirmDialog( 
-                        title='AOVs', message='Import default Wild Bill lights\nHDR, Key, Rim, Fill + lightgroups', 
-                        button=['Yes','No'], defaultButton='Yes', 
-                        cancelButton='No', dismissString='No' 
-                        
+    importLights = cmds.confirmDialog(
+                        title='AOVs', message='Import default Wild Bill lights\nHDR, Key, Rim, Fill + lightgroups',
+                        button=['Yes','No'], defaultButton='Yes',
+                        cancelButton='No', dismissString='No'
+
                         )
     if importLights == "Yes":
-        
+
         fileExists = False
         fileExists = cmds.file( "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma", q=True, ex=True )
         if fileExists == True:
@@ -258,15 +258,15 @@ def importDefaultLights():
             cmds.error( "lightRig file not found: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma - Contact your supervisor." )
 
 
+#---------------Code here-------------------------------------------------------------------------
 
-    
 # Load atk_arnoldSettings .json file
 
 #prefs.loadUserPreset()
 #prefs.getGlobalPresets("arnold")
-import maya.app.renderSetup.views.renderSetupPreferences as prefs 
-prefs.loadGlobalPreset("atk_arnoldSettings_v001")
-          
+import maya.app.renderSetup.views.renderSetupPreferences as prefs
+prefs.loadGlobalPreset("atk_arnoldSettings_v002")
+
 #----------------- Check the Resolution is correct
 # Setup summary
 fpsSummary = ""
@@ -278,7 +278,7 @@ fixRes = False
 scenePath = ""
 scenePath = getOpenSceneFilePath()
 if scenePath:
-    project_name = (str(scenePath).split("/")[3]) 
+    project_name = (str(scenePath).split("/")[3])
 else:
     cmds.error( "Scene not saved. Save scene via Shotgun > file save first." )
 
@@ -323,10 +323,10 @@ if fixFps == True:
     print "Setting fps to project fps. Warning - Keys may have changed"
     fpsSummary = "Set project fps, WARNING - existing keys may have changed "
     scenePath = getOpenSceneFilePath()
-    project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/    
+    project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
     fps = get_frame_rate_by_project_name(project_name)
     fps = str(int(fps))+"fps"
-    cmds.currentUnit( time=fps )  
+    cmds.currentUnit( time=fps )
 
 # Also add option to set double-res??
 
@@ -346,9 +346,9 @@ if fStart != sg_startFrame or fEnd != sg_endFrame:
     cmds.playbackOptions(animationEndTime=sg_endFrame)
 
     startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
-    
 
-#Summary output 
+
+#Summary output
 print fpsSummary+resolutionSummary+startEndFrameSummary,
 
 #------------- OPTIONAL SETTINGS
@@ -358,3 +358,7 @@ print fpsSummary+resolutionSummary+startEndFrameSummary,
 
 # Create AOVs?
 createAovs()
+
+# Import default lightRig?
+importDefaultLights()
+
