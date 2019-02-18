@@ -26,19 +26,7 @@ global proc setRenderSettings(){
 }
 
 setRenderSettings();
-
-To Get:
-# xy res
-# framerate
-# Startframe Endframe
-# imageFilePrefix
-
-To Set, on request:
-# xy res (if not per shot, get project-res)
-# framerate (if not)
-On Dialogue:
-# Set default Aovs
-# load arnold Render presets from show specific preset file
+ile
 https://forums.autodesk.com/t5/maya-programming/load-render-setup-json-file-with-python/td-p/6762688
 
 # ask to setup hdr,key,rim,fill lightrig (with lightgroups)
