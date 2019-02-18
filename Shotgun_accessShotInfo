@@ -1,5 +1,4 @@
-#CURRENTLY deliberately BROKEN ON 291
-
+# Maya Shotgun sync tool Mark Bailey 180219
 # Shotgun: Access shot info
 # Actual code for 'Set Render Output Naming' python button
 """
@@ -10,7 +9,7 @@ To Do:
 
 
 
-Mel that does hardcoded things:
+Pipeline's Mel that does hardcoded things:
 # If this has to be .mel, make the mel run a separate python (?)
 // Rendersettings
 
@@ -131,8 +130,18 @@ def get_shot_resolution_by_id(shot_id):
         return False
     else:
         return data["sg_resolution"]
-
-
+        
+def get_aspect_ratio_from_project_resolution_by_name(project_name):
+    sg_entity_type = "Project"
+    sg_filters = [["name", "is", project_name]]
+    fields = ['sg_resolution']
+    print fields
+    data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
+    if data:
+        #data = float(data["sg_resolution"].split(" ")[-1][:-2])
+        data = data["sg_resolution"]
+    return data
+    
 def get_project_id_by_name(project_name):
     fields = ['id']
     filters = [["name", "is", project_name]]
@@ -256,7 +265,7 @@ def importDefaultLights():
             cmds.file( "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma", i=True, type='mayaAscii', namespace='lightRig' )
             print "Imported: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
         else:
-            cmds.error( "lightRig file not found: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma - Contact your supervisor." )
+            cmds.error( "LightRig file not found: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma - Contact your supervisor." )
 
 
 #---------------Code here-------------------------------------------------------------------------
@@ -268,7 +277,7 @@ def importDefaultLights():
 import maya.app.renderSetup.views.renderSetupPreferences as prefs
 prefs.loadGlobalPreset("atk_arnoldSettings_v003")
 
-"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
+# Full Path to the globals preset it's importing "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
 
 #----------------- Check the Resolution is correct
 # Setup summary
@@ -288,12 +297,15 @@ else:
 shot_id = ""
 shot_id =  getShotDetails(scenePath)[0]
 
-#THIS SECTION IS BROKEN
-break
-#xRes = 2048
-#yRes = 1080
-#xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
+xRes = ""
+yRes = ""
 
+if get_shot_resolution_by_id(shot_id) != False:
+    xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
+    print "Shot res is {}x{}".format(xRes,yRes)
+else:
+    print "Using project res as shot res"
+    
 # Get project resolution by project ID
 project_id = (get_project_id_by_name(project_name))["id"]
 print project_id
@@ -313,24 +325,31 @@ print "Shot Resolution        : "+ str(xRes), str(yRes)
 print "Project Resolution     : "+ str(pxRes), str(pyRes)
 print "Local scene Resolution : "+ str(localxRes), str(localyRes)
 
-if xRes == pxRes and yRes == pyRes and localxRes == pxRes and localyRes == pxRes:
+
+# Forces shot res is res field isn't False (empty)
+
+if xRes == pxRes and yRes == pyRes and localxRes == pxRes and localyRes == pxRes and localxRes == xRes and localyRes == yRes:
     print "Local scene resolution matches shot and project resolution. Moving on."
-else:
-    print "SG Shot resolution DOES NOT match project resolution"
-    if xRes == pxRes and yRes == pyRes:
-        print "Setting local shot res to {} x {}. Forcing pixel aspect to 1.0".format(pxRes, pyRes),
+else:    
+    if get_shot_resolution_by_id(shot_id) == False:
+        print "SG Shot resolution field is empty. Matching project resolution"
+       
+if get_shot_resolution_by_id(shot_id) != False:
+    if localxRes != xRes or localyRes != yRes:
+        print "Setting local shot res to {} x {}. Forcing pixel aspect to 1.0".format(xRes, yRes),
+        setResolution(int(xRes), int(yRes), pixelAspect=1.0)
+        resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(xRes), str(yRes))
+                
+if get_shot_resolution_by_id(shot_id) == False:
+    if localxRes != pxRes or localyRes != pyRes:
+        print "Setting res to project res: {} x {}. Forcing pixel aspect to 1.0".format(pxRes, pyRes),
         setResolution(int(pxRes), int(pyRes), pixelAspect=1.0)
         resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(pxRes), str(pyRes))
 
-# THIS BIT ^^ returns an anomaly sometimes:
-"""
-Shot Resolution        : 2048 1080
-Project Resolution     : 2048 1080
-Local scene Resolution : 2048 1080
-SG Shot resolution DOES NOT match project resolution
-"""
 
-#----------------- CHECK FPS
+
+
+#----------------- CHECKS PROJECT FPS
 fixFps = checkFps(scenePath, project_name)
 
 if fixFps == True:
@@ -341,8 +360,6 @@ if fixFps == True:
     fps = get_frame_rate_by_project_name(project_name)
     fps = str(int(fps))+"fps"
     cmds.currentUnit( time=fps )
-
-# Also add option to set double-res??
 
 
 #----------------- Set start-end-frame (especially changing fps will move the start-end frames)
@@ -362,8 +379,6 @@ if fStart != sg_startFrame or fEnd != sg_endFrame:
     startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
 
 
-#Summary output
-print fpsSummary+resolutionSummary+startEndFrameSummary,
 
 #------------- OPTIONAL SETTINGS
 # Aovs
@@ -378,4 +393,6 @@ createAovs()
 # Import default lightRig?
 importDefaultLights()
 
+#Summary output
+print fpsSummary+resolutionSummary+startEndFrameSummary,
 
