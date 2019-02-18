@@ -1,4 +1,5 @@
 #CURRENTLY deliberately BROKEN ON 291
+
 # Shotgun: Access shot info
 # Actual code for 'Set Render Output Naming' python button
 """
@@ -265,7 +266,7 @@ def importDefaultLights():
 #prefs.loadUserPreset()
 #prefs.getGlobalPresets("arnold")
 import maya.app.renderSetup.views.renderSetupPreferences as prefs
-prefs.loadGlobalPreset("atk_arnoldSettings_v002")
+prefs.loadGlobalPreset("atk_arnoldSettings_v003")
 
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
 
@@ -376,4 +377,5 @@ createAovs()
 #THIS ALSO NEEDS TO CHECK FOR THE DEFAULT LIGHTRIG FIRST
 # Import default lightRig?
 importDefaultLights()
+
 
