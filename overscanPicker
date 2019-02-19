@@ -1,10 +1,4 @@
-#########################
-##                     ##
-##   Overscan Picker   ##
-##                     ##
-#########################
-
-## Toby Sanderson, 2018
+## Toby Sanderson, 2018. MSB update 190219
 
 ## Applies a selected amount of overscan based on current frame resolution.
 
@@ -35,21 +29,21 @@ def overscanPicker():
     if overscanAmount == "10%":
         newWidth = currentWidth*1.1
         newHeight = currentHeight*1.1
-        cmds.setAttr(theCamera+".preScale", 0.9)
+        cmds.setAttr(theCamera+".preScale", (1/1.1))
         cmds.setAttr("defaultResolution.width", newWidth)
         cmds.setAttr("defaultResolution.height", newHeight)
         print "10% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
     elif overscanAmount == "15%":
         newWidth = currentWidth*1.15
         newHeight = currentHeight*1.15
-        cmds.setAttr(theCamera+".preScale", 0.85)
+        cmds.setAttr(theCamera+".preScale", (1/1.15)
         cmds.setAttr("defaultResolution.width", newWidth)
         cmds.setAttr("defaultResolution.height", newHeight)
         print "15% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
     elif overscanAmount == "20%":
         newWidth = currentWidth*1.2
         newHeight = currentHeight*1.2
-        cmds.setAttr(theCamera+".preScale", 0.8)
+        cmds.setAttr(theCamera+".preScale", (1/1.2))
         cmds.setAttr("defaultResolution.width", newWidth)
         cmds.setAttr("defaultResolution.height", newHeight)
         print "20% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
