@@ -1,0 +1,28 @@
+#Unfinished WIP
+
+import pymel.core as pm
+
+renderCam = []
+aiImageToDisconnect = ""
+cameraToDisconnect = ""
+
+allCams = cmds.ls(type = "camera")
+for cam in allCams:
+    if cmds.getAttr(cam+".renderable") == 1:
+        renderCam.append(cam)
+
+cameraConnections = pm.listConnections(renderCam, c=True)
+print cameraConnections
+
+for cameraShape, aiImage in cameraConnections:
+    print cameraShape, aiImage
+    if cameraShape.endswith("aiUvRemap"):
+        print "Camera has aiUvRemap: "+str(cameraShape)
+        cameraToDisconnect = cameraShape
+    if aiImage.startswith("aiImage"):
+        print "Camera tuple has aiImagep: "+str(aiImage)
+        aiImageToDisconnect = aiImage
+            
+pm.disconnectAttr(aiImageToDisconnect, cameraToDisconnect)
+
+break
