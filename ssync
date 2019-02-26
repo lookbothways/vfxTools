@@ -1,0 +1,481 @@
+# Maya Shotgun sync tool Mark Bailey 180219
+# Shotgun: Access shot info
+# Actual code for 'Set Render Output Naming' python button
+"""
+#For shelf  
+import ssync
+reload(ssync)
+
+ssync.shotgunSync()
+
+
+
+https://forums.autodesk.com/t5/maya-programming/load-render-setup-json-file-with-python/td-p/6762688
+
+
+Useful paths:
+"/mnt/pipeline/ATK_PIPELINE/atk-api/atk_shotgun/ShotgunTankAccess" # for customQuery
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings"
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_setups"
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
+
+"""
+
+
+#Setting up the load render globals preset
+import maya.app.renderSetup.model.renderSetup as renderSetup # for renderlayers
+import maya.app.renderSetup.model.renderSettings as renderSettings # for renderGlobals
+import json
+
+#Setting up all the other bits
+import sgtk
+import os
+import sys
+import re
+import maya.cmds as cmds
+import maya.mel as mel
+# my aovs script
+import aovSettings
+reload(aovSettings)
+
+# Get CustomQuery /mnt/pipeline/ATK_PIPELINE/atk-api/atk_shotgun/ShotgunTankAccess
+sys.path.append(r"/mnt/pipeline/ATK_PIPELINE/atk-api")
+from atk_shotgun.ShotgunTankAccess import CustomQuery
+reload(CustomQuery)
+custom_query_obj = CustomQuery.Custom_Query()
+
+# Get Tank access
+from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
+reload(ShotgunTankAccess)
+sta= ShotgunTankAccess.Shotgun_Tank_Access()
+sg= sta.get_sg()
+
+def getOpenSceneFilePath():
+    scene = cmds.file(q=1,sn=1)
+    project = os.path.dirname(os.path.dirname(scene))
+    return scene
+
+
+def get_frame_rate_by_project_name(project_name):
+    fields = ['sg_fps']
+    filters = [['name', 'is', project_name]]
+    result = sg.find_one("Project", filters, fields)
+    result = result["sg_fps"]
+    if result is None or result == 0:
+        return 24
+    else:
+        return result
+
+def getShotDetails(scenePath):
+    code = ""
+    sequence_entity = ""
+
+    from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
+    reload(ShotgunTankAccess)
+    sta= ShotgunTankAccess.Shotgun_Tank_Access()
+    sg= sta.get_sg()
+
+    basename= os.path.basename(scenePath)
+
+    regex = r"(\S*?[0-9])_[a-zA-Z]"
+    matches = re.search(regex, basename)
+    if matches:
+        code= matches.groups()[0]
+        sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
+
+    shot_id = sequence_entity["id"]
+    code = sequence_entity["code"]
+    print sequence_entity
+    return shot_id, code
+
+
+
+def get_shot_resolution_by_id(shot_id):
+    sg_entity_type = "Shot"
+    sg_filters = [["id", "is", shot_id]]
+    fields = ['sg_resolution']
+    data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
+    print data
+    if data is None or data["sg_resolution"] is None:
+        return False
+    else:
+        return data["sg_resolution"]
+        
+def get_aspect_ratio_from_project_resolution_by_name(project_name):
+    sg_entity_type = "Project"
+    sg_filters = [["name", "is", project_name]]
+    fields = ['sg_resolution']
+    print fields
+    data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
+    if data:
+        #data = float(data["sg_resolution"].split(" ")[-1][:-2])
+        data = data["sg_resolution"]
+    return data
+    
+def get_project_id_by_name(project_name):
+    fields = ['id']
+    filters = [["name", "is", project_name]]
+    project = sg.find_one("Project", filters, fields)
+    return project
+
+def get_aspect_ratio_from_project_resolution_by_id(project_id):
+    sg_entity_type = "Project"
+    sg_filters = [["id", "is", project_id]]
+    fields = ['sg_resolution']
+    data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
+    print data
+    if data:
+        aspect = float(data["sg_resolution"].split(" ")[-1][:-2])
+    return data, aspect
+
+
+
+def checkFps(scenePath, project_name ):
+    """
+    currentUnits (from docs)
+
+    game: 15 fps
+    film: 24 fps
+    pal: 25 fps
+    ntsc: 30 fps
+    show: 48 fps
+    palf: 50 fps
+    ntscf: 60 fps
+
+    May be of help:
+https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
+    """
+    #scenePath = getOpenSceneFilePath() #moved this outside the function
+    if scenePath == "":
+        cmds.error( "Scene is not saved. Use Shotgun to save your scene first." )
+
+
+    # project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/ - moved outside the function
+    # Checks to see if the FPS matches shotgun
+
+    fps = get_frame_rate_by_project_name(project_name)
+
+    # the madness way?
+    sceneTime = cmds.currentUnit(query=True, time=True)
+
+    if sceneTime == "game":
+        sceneTime = 15
+    if sceneTime == "film":
+        sceneTime = 24
+    if sceneTime == "pal":
+        sceneTime = 25
+    if sceneTime == "ntsc":
+        sceneTime = 30
+    if sceneTime == "show":
+        sceneTime = 48
+    if sceneTime == "palf":
+        sceneTime = 50
+    if sceneTime == "ntscf":
+        sceneTime = 60
+    if int(fps) == sceneTime:
+        print "Scene FPS matches shotgun"
+    else:
+        print "Project fps {} may not match scene fps: {}".format(str(fps),str(sceneTime))
+        fixFps = True
+        return fixFps
+
+
+
+def setResolution(pxRes, pyRes, pixelAspect=1.0):
+
+    cmds.setAttr("defaultResolution.aspectLock", 0) # unlocks ratio
+    #Calculates the device aspect since pixel aspect isn't an actual attribute.
+    device_aspect = float(int(pxRes) * pixelAspect)/float(int(pyRes))
+
+    #Set the Lock Device Aspect Ratio. IMPORTANT!
+    #If you don't do this it won't work.
+    cmds.setAttr("defaultResolution.lockDeviceAspectRatio", 1)
+
+    #Set width, height, and aspect ratio.
+    cmds.setAttr("defaultResolution.width", pxRes)
+    cmds.setAttr("defaultResolution.height", pyRes)
+    cmds.setAttr("defaultResolution.deviceAspectRatio", device_aspect)
+    cmds.setAttr("defaultResolution.aspectLock", 1) # locks ratio
+
+def get_shot_frame_range_by_shot_code(code):
+    sg_filters = [["code", "is", code]]
+    fields = ['sg_cut_in', 'sg_cut_out']
+    print fields
+    data = sg.find_one("Shot", filters=sg_filters, fields=fields)
+
+    if data is None or data["sg_cut_in"] is None or data["sg_cut_out"] is None:
+        return False
+    else:
+        return int(data["sg_cut_in"]), int(data["sg_cut_out"])
+
+
+
+def importDefaultLights():
+    fileExists = False
+    fileExists = cmds.file( "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma", q=True, ex=True )
+    if fileExists == True:
+        cmds.file( "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma", i=True, type='mayaAscii', namespace='lightRig' )
+        print "Imported: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
+    else:
+        cmds.error( "LightRig file not found: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma - Contact your supervisor." )
+
+
+def shotgunSync():
+    
+    # Load atk_arnoldSettings .json file
+    
+    import maya.app.renderSetup.views.renderSetupPreferences as prefs
+    prefs.loadGlobalPreset("atk_arnoldSettings_v003")
+    
+    # Full Path to the globals preset it's importing "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
+    
+    #----------------- Check the Resolution is correct
+    # Setup summary
+    fpsSummary = ""
+    resolutionSummary = ""
+    startEndFrameSummary = ""
+    
+    # Get shot resolution by shot ID
+    fixRes = False
+    scenePath = ""
+    scenePath = getOpenSceneFilePath()
+    if scenePath:
+        project_name = (str(scenePath).split("/")[3])
+    else:
+        cmds.error( "Scene not saved. Save scene via Shotgun > file save first." )
+    
+    shot_id = ""
+    shot_id =  getShotDetails(scenePath)[0]
+    
+    xRes = ""
+    yRes = ""
+    
+    if get_shot_resolution_by_id(shot_id) != False:
+        xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
+        print "Shot res is {}x{}".format(xRes,yRes)
+    else:
+        print "Using project res as shot res"
+        
+    # Get project resolution by project ID
+    project_id = (get_project_id_by_name(project_name))["id"]
+    print project_id
+    
+    projectRes, aspect = get_aspect_ratio_from_project_resolution_by_id(project_id)
+    projectRes = str(projectRes["sg_resolution"])
+    pxRes, pyRes = ((projectRes).split(" ")[1]).split("x")
+    
+    # Get local resolution
+    localxRes = cmds.getAttr("defaultResolution.width")
+    localyRes = cmds.getAttr("defaultResolution.height")
+    
+    
+    # Check and set the resolution (remember to unlock aspect and then lock it)
+    
+    print "Shot Resolution        : "+ str(xRes), str(yRes)
+    print "Project Resolution     : "+ str(pxRes), str(pyRes)
+    print "Local scene Resolution : "+ str(localxRes), str(localyRes)
+    
+    
+    # Forces shot res is res field isn't False (empty)
+    
+    if xRes == pxRes and yRes == pyRes and localxRes == pxRes and localyRes == pxRes and localxRes == xRes and localyRes == yRes:
+        print "Local scene resolution matches shot and project resolution. Moving on."
+    else:    
+        if get_shot_resolution_by_id(shot_id) == False:
+            print "SG Shot resolution field is empty. Matching project resolution"
+           
+    if get_shot_resolution_by_id(shot_id) != False:
+        if localxRes != xRes or localyRes != yRes:
+            print "Setting local shot res to {} x {}. Forcing pixel aspect to 1.0".format(xRes, yRes),
+            setResolution(int(xRes), int(yRes), pixelAspect=1.0)
+            resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(xRes), str(yRes))
+                    
+    if get_shot_resolution_by_id(shot_id) == False:
+        if localxRes != pxRes or localyRes != pyRes:
+            print "Setting res to project res: {} x {}. Forcing pixel aspect to 1.0".format(pxRes, pyRes),
+            setResolution(int(pxRes), int(pyRes), pixelAspect=1.0)
+            resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(pxRes), str(pyRes))
+    
+    
+    
+    
+    #----------------- CHECKS PROJECT FPS
+    fixFps = checkFps(scenePath, project_name)
+    
+    if fixFps == True:
+        print "Setting fps to project fps. Warning - Keys may have changed"
+        fpsSummary = "Set project fps, WARNING - existing keys may have changed "
+        scenePath = getOpenSceneFilePath()
+        project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
+        fps = get_frame_rate_by_project_name(project_name)
+        fps = str(int(fps))+"fps"
+        cmds.currentUnit( time=fps )
+    
+    
+    #----------------- Set start-end-frame (especially changing fps will move the start-end frames)
+    code = getShotDetails(scenePath)[1]
+    sg_startFrame, sg_endFrame = get_shot_frame_range_by_shot_code(code)
+    
+    fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
+    fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
+    
+    if fStart != sg_startFrame or fEnd != sg_endFrame:
+        cmds.setAttr("defaultRenderGlobals.startFrame", sg_startFrame)
+        cmds.setAttr("defaultRenderGlobals.endFrame", sg_endFrame)
+        cmds.playbackOptions(min=sg_startFrame,max=sg_endFrame)
+        cmds.playbackOptions(animationStartTime=sg_startFrame)
+        cmds.playbackOptions(animationEndTime=sg_endFrame)
+    
+        startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
+    
+    
+    
+    #------------- OPTIONAL SETTINGS
+    # Aovs
+    # Load project renderGlobals preset
+    # Create and set up lightgroup aovs (import scene from assets)
+    
+    
+    #Summary output
+    print fpsSummary+resolutionSummary+startEndFrameSummary,
+    
+   
+
+
+
+def getLatestCam():
+    #Gets shot ID
+    scenePath = ""
+    scenePath = getOpenSceneFilePath()
+    if scenePath:
+        project_name = (str(scenePath).split("/")[3])
+    else:
+        cmds.error( "Scene not saved, path not resolved. Save scene via Shotgun > file save first." )
+    
+    shot_id = ""
+    shot_id =  getShotDetails(scenePath)[0]
+    #Uses ATK customQuery to get all published objects
+    publishedFiles = custom_query_obj.get_all_published_files_by_shot_id(shot_id)
+    
+    # Useful code: Runs through the dictionary searching for camera .ma
+    cameras=[]
+    for publishedFile in publishedFiles:
+        if publishedFile['code'].endswith('.ma') and 'camera' in publishedFile['code'] :
+           for key , value in publishedFile.items():
+               print key, value
+           cameras.append(publishedFile['path']['local_path_linux'])
+            
+    
+    publishedCameraPath = cameras[-1]
+    return publishedCameraPath
+    
+    
+### USER INTERFACE
+def executeThis():
+    
+    print "Running Shotgun Sync"
+    
+    # Setup AOVs
+    aovsExist = True
+    
+    allAOVs = ""
+    wordIn = "aiAOV"
+    allAOVs = cmds.ls("*" + wordIn + "*", r=True)
+    print allAOVs
+    
+    if allAOVs:
+        print "AOVs exist already\n",
+        aovsExist = False
+
+    # Setup lightrig
+    lightsExist = True
+    
+    lights = ""
+    doLightsExist = cmds.ls(lights=True)
+    if doLightsExist:
+        print "Found Maya lights, skipping lightrig import."
+        lightsExist = False
+    
+    # Project Specific Thing
+    pst = False
+    doPst = cmds.ls(type="imagePlane")
+    if doPst:
+        print "Project Specific Thing!\n",
+        pst = True
+
+
+    class PreRenderChecks(object):
+        def __init__(self, *args):
+            pass
+
+        def show(self):
+            self.showSsyncWindow()
+
+        def showSsyncWindow(self):
+            # Check to see if the window exists...
+            if cmds.window('ShotgunSync', exists = True):
+                cmds.deleteUI('ShotgunSync')
+
+            # Create the window...
+            self.window = cmds.window('ShotgunSync', widthHeight=(200, 250), title='ssync', resizeToFitChildren=1, sizeable=False, mnb=0)
+
+            cmds.setParent(menu=True)
+
+            # Create a main layout...
+            mainLayout = cmds.columnLayout(w = 200, h = 250, cw = 10, rs = 8, co = ['both',2])
+
+            # Add the checkboxes...
+            self.ssyncBox = cmds.checkBox('Shotgun Sync:\nFramerange\nResolution\nFPS\nArnold renderSettings', value=True)
+            self.aovsExistBox = cmds.checkBox('Set up AOVs', value=aovsExist)
+            self.lightsExistBox = cmds.checkBox('Import default lightrig', value=lightsExist)
+            self.refLatestCameraBox = cmds.checkBox('Reference published camera', value=False)
+            self.pstBox = cmds.checkBox('Do Project Specific Thing', value=pst)
+            
+            # Add the buttons...
+            cmds.button(label = 'Setup above', width = 200, height = 30, c = self.GetSelectedNodes)
+            cmds.button(label = 'Cancel', width = 200, height = 30, c = self.cancel)
+            
+            # Show the window...
+            cmds.showWindow(self.window)
+
+        # Perform selected actions then submit to Deadline
+        def GetSelectedNodes(self,*args):
+
+            # Get and perform the requested actions
+            if cmds.checkBox(self.ssyncBox, q=True, v=True) == True:
+                shotgunSync()
+                
+            if cmds.checkBox(self.aovsExistBox, q=True, v=True) == True:
+                aovSettings.aovSettings()
+                
+            if cmds.checkBox(self.lightsExistBox, q = True, v = True) == True:
+                importDefaultLights()
+                
+            if cmds.checkBox(self.refLatestCameraBox, q = True, v = True) == True:
+                print "Referencing latest published file named 'camera' .ma",
+                publishedCameraPath = getLatestCam()
+                cmds.file(publishedCameraPath, r=True)
+   
+            if cmds.checkBox(self.pstBox, q = True, v = True) == True:
+                print "No project specific thing set!",
+
+
+            if cmds.window('ShotgunSync', exists = True):
+                cmds.deleteUI('ShotgunSync')
+            
+        # Make no changes and submit to Deadline anyway
+        def getLatestCam(self,*args):
+            print "Referencing in latest camera...\n",
+            cmds.deleteUI('ShotgunSync')
+
+        # Cancel and make no changes
+        def cancel(self,*args):
+            cmds.deleteUI('ShotgunSync')
+            print "ShotgunSync cancelled, no changes made.\n",
+
+    b_cls = PreRenderChecks()  
+    b_cls.show()
+    
+    
+#break # TEMP LINE
