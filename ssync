@@ -20,6 +20,8 @@ Useful paths:
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
 
+In dialogue 'pst' stands for 'Project Specific Thing' - ie set custom clipping planes
+
 """
 
 
@@ -370,6 +372,18 @@ def getLatestCam():
     publishedCameraPath = cameras[-1]
     return publishedCameraPath
     
+def forceClippingPlanes():
+    # Get the renderable camera
+    renderCam = []
+    allCams = cmds.ls(type = "camera")
+    for cam in allCams:
+        if cmds.getAttr(cam+".renderable") == 1:
+            renderCam.append(cam)
+    
+    renderableCamera = renderCam[0]
+    # set clipping planes
+    cmds.setAttr(renderableCamera+".nearClipPlane", 100)
+    cmds.setAttr(renderableCamera+".farClipPlane", 600000)
     
 ### USER INTERFACE
 def executeThis():
@@ -399,11 +413,12 @@ def executeThis():
     
     # Project Specific Thing
     pst = False
-    doPst = cmds.ls(type="imagePlane")
+    """
+    doPst = cmds.ls(type="imagePlane") #Example existing object check
     if doPst:
         print "Project Specific Thing!\n",
         pst = True
-
+    """
 
     class PreRenderChecks(object):
         def __init__(self, *args):
@@ -430,7 +445,7 @@ def executeThis():
             self.aovsExistBox = cmds.checkBox('Set up AOVs', value=aovsExist)
             self.lightsExistBox = cmds.checkBox('Import default lightrig', value=lightsExist)
             self.refLatestCameraBox = cmds.checkBox('Reference published camera', value=False)
-            self.pstBox = cmds.checkBox('Do Project Specific Thing', value=pst)
+            self.pstBox = cmds.checkBox('Clipping planes: 100,600000', value=pst)
             
             # Add the buttons...
             cmds.button(label = 'Setup above', width = 200, height = 30, c = self.GetSelectedNodes)
@@ -456,9 +471,11 @@ def executeThis():
                 print "Referencing latest published file named 'camera' .ma",
                 publishedCameraPath = getLatestCam()
                 cmds.file(publishedCameraPath, r=True)
-   
+
             if cmds.checkBox(self.pstBox, q = True, v = True) == True:
-                print "No project specific thing set!",
+                # DO PROJCET SPECIFIC THING HERE
+                #print "No project specific thing set!",
+                forceClippingPlanes()
 
 
             if cmds.window('ShotgunSync', exists = True):
@@ -477,5 +494,6 @@ def executeThis():
     b_cls = PreRenderChecks()  
     b_cls.show()
     
-    
-#break # TEMP LINE
+
+#end
+#executeThis()   
