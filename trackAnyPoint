@@ -41,144 +41,145 @@ import arnold
 import pymel.core as pymel
 import maya.mel as mel
 
-def removeOldTracks():
-    try:
-        exists = []
-        exists = cmds.select("pointInWorld")
-        if exists < 0:
-            print "Old trackers found, renaming."
-            newName = "pointInWorldPlaced"
-            renamedPoint = cmds.rename(exists, newName)
-            if (cmds.listRelatives(renamedPoint, p=True) != None):
-                cmds.parent(renamedPoint, world=True)
-    except:
-        print "No old trackers found, moving on."
-        pass     
-
-
-def removeLocatorPlacementCam():
-    try:
-        exists = []
-        exists = cmds.select("scale_me")
-        if exists < 0:
-            print "Old scale_me nodes found, removing.",
-            newName = "trackedScaler"
-            #cmds.select("scale_me")
-            cmds.rename(exists, newName)
-            cmds.delete(newName)
-    except:
-        print "No old scalers found, moving on."
-        pass
-            
-def unlockAllAxes():
-    nounicode=str(newcam[0]).split("'")
-    camNoUnicode = "{}.".format(nounicode[0])
-    axis = ['X', 'Y', 'Z']
-    attrs = ['translate', 'rotate', 'scale']
-    for ax in axis:
-        for attr in attrs:
-            cmds.setAttr(camNoUnicode+attr+ax, lock=0)
+def executeThis():
+    
+    def removeOldTracks():
+        try:
+            exists = []
+            exists = cmds.select("pointInWorld")
+            if exists < 0:
+                print "Old trackers found, renaming."
+                newName = "pointInWorldPlaced"
+                renamedPoint = cmds.rename(exists, newName)
+                if (cmds.listRelatives(renamedPoint, p=True) != None):
+                    cmds.parent(renamedPoint, world=True)
+        except:
+            print "No old trackers found, moving on."
+            pass     
+    
+    
+    def removeLocatorPlacementCam():
+        try:
+            exists = []
+            exists = cmds.select("scale_me")
+            if exists < 0:
+                print "Old scale_me nodes found, removing.",
+                newName = "trackedScaler"
+                #cmds.select("scale_me")
+                cmds.rename(exists, newName)
+                cmds.delete(newName)
+        except:
+            print "No old scalers found, moving on."
+            pass
                 
-def moveParentPosition():                  
-    # Move it to world-space and rename it
-    if (cmds.listRelatives(newcam, p=True) != None):
-        cmds.parent(newcam, world=True)	
-    cmds.select( newcam, r=True )
-    locatorParent = cmds.rename( 'scale_me' )
-    # Create and parent a locator
-    pointInWorld = cmds.spaceLocator(n="pointInWorld")
-    cmds.parent(pointInWorld, locatorParent, relative=True)
-    pointInWorld = str(pointInWorld[0]).split("'")
-    pointInWorld = "{}.translateZ".format(pointInWorld[0])
-    #position it
-    locatorScale = 20    
-    locatorDistance = -250
-    cmds.setAttr(pointInWorld, locatorDistance)
-    cmds.setAttr("pointInWorld.scaleX", locatorScale)
-    cmds.setAttr("pointInWorld.scaleY", locatorScale)
-    cmds.setAttr("pointInWorld.scaleZ", locatorScale) 
-
-def setupCamera():
-    print "Camera selected: "+str(cam)
-    camRelatives = cmds.listRelatives(cam)
-    print camRelatives
-    print cmds.nodeType(camRelatives) 
-
-
-newcam = []
-nounicode = []
-pointInWorld = []
-cam = []
-result = []
-#firstCam = []
-
-# Select the camera & check it's a camera
-
-cam = cmds.ls(sl=True)
-if not cam:
-    cmds.error( "Select the tracked camera." )
+    def unlockAllAxes():
+        nounicode=str(newcam[0]).split("'")
+        camNoUnicode = "{}.".format(nounicode[0])
+        axis = ['X', 'Y', 'Z']
+        attrs = ['translate', 'rotate', 'scale']
+        for ax in axis:
+            for attr in attrs:
+                cmds.setAttr(camNoUnicode+attr+ax, lock=0)
+                    
+    def moveParentPosition():                  
+        # Move it to world-space and rename it
+        if (cmds.listRelatives(newcam, p=True) != None):
+            cmds.parent(newcam, world=True)	
+        cmds.select( newcam, r=True )
+        locatorParent = cmds.rename( 'scale_me' )
+        # Create and parent a locator
+        pointInWorld = cmds.spaceLocator(n="pointInWorld")
+        cmds.parent(pointInWorld, locatorParent, relative=True)
+        pointInWorld = str(pointInWorld[0]).split("'")
+        pointInWorld = "{}.translateZ".format(pointInWorld[0])
+        #position it
+        locatorScale = 20    
+        locatorDistance = -250
+        cmds.setAttr(pointInWorld, locatorDistance)
+        cmds.setAttr("pointInWorld.scaleX", locatorScale)
+        cmds.setAttr("pointInWorld.scaleY", locatorScale)
+        cmds.setAttr("pointInWorld.scaleZ", locatorScale) 
     
-
-# Checks it's not one of the permanent cameras
-
-permaCam = [u'top', u'front', u'side', u'persp', u'scale_me']
-result = [i for i in permaCam if cam[0] in i]
-
-if not result:
-    print "Camera selected: "+str(cam)
+    def setupCamera():
+        print "Camera selected: "+str(cam)
+        camRelatives = cmds.listRelatives(cam)
+        print camRelatives
+        print cmds.nodeType(camRelatives) 
     
-    camRelatives = cmds.listRelatives(cam)
-    print camRelatives
-    print cmds.nodeType(camRelatives)
     
-    for node in camRelatives:
-        isCamera = []
-        print node
-        isCamera = cmds.nodeType(node)
-        if isCamera == "camera":
-            print "camera found: "+node, 
-            firstCam = node 
-            newcam = cmds.duplicate(cam, rr=True)  
-        else:
-            print "No camera selected ",
-            if firstCam:
-                if cmds.nodeType(firstCam) == "camera":
-                    print "Using camera from first time around"
-                    cmds.select(firstCam)
-                    newcam = cmds.duplicate(firstCam, rr=True)
-                pass  
-            else:
-                break
+    newcam = []
+    nounicode = []
+    pointInWorld = []
+    cam = []
+    result = []
+    firstCam = []
+    
+    # Select the camera & check it's a camera
+    
+    cam = cmds.ls(sl=True)
+    if not cam:
+        cmds.error( "Select the tracked camera." )
         
+    
+    # Checks it's not one of the permanent cameras
+    
+    permaCam = [u'top', u'front', u'side', u'persp', u'scale_me']
+    result = [i for i in permaCam if cam[0] in i]
+    
+    if not result:
+        print "Camera selected: "+str(cam)
         
-        removeOldTracks()
-        removeLocatorPlacementCam() 
-        unlockAllAxes()
-        moveParentPosition()
-
-else:
-    if "scale_me" in result:
-        print "Scale_me selected."
-        print "Selecting original cam "+str(cam)
-        cmds.select(firstCam)
-        newcam = cmds.duplicate(firstCam, rr=True)
-        
-        camRelatives = cmds.listRelatives(firstCam)
+        camRelatives = cmds.listRelatives(cam)
         print camRelatives
         print cmds.nodeType(camRelatives)
         
-        removeOldTracks()
-        removeLocatorPlacementCam() 
-        unlockAllAxes()
-        moveParentPosition()
-    print "Incorrect camera selected.",
+        for node in camRelatives:
+            isCamera = []
+            print node
+            isCamera = cmds.nodeType(node)
+            if isCamera == "camera":
+                print "camera found: "+node, 
+                firstCam = node 
+                newcam = cmds.duplicate(cam, rr=True)  
+            else:
+                print "No camera selected ",
+                if firstCam:
+                    if cmds.nodeType(firstCam) == "camera":
+                        print "Using camera from first time around"
+                        cmds.select(firstCam)
+                        newcam = cmds.duplicate(firstCam, rr=True)
+                    pass  
+                else:
+                    break
+            
+            
+            removeOldTracks()
+            removeLocatorPlacementCam() 
+            unlockAllAxes()
+            moveParentPosition()
+    
+    else:
+        if "scale_me" in result:
+            print "Scale_me selected."
+            print "Selecting original cam "+str(cam)
+            cmds.select(firstCam)
+            newcam = cmds.duplicate(firstCam, rr=True)
+            
+            camRelatives = cmds.listRelatives(firstCam)
+            print camRelatives
+            print cmds.nodeType(camRelatives)
+            
+            removeOldTracks()
+            removeLocatorPlacementCam() 
+            unlockAllAxes()
+            moveParentPosition()
+        print "Incorrect camera selected.",
 
 
 
- 
-# MSB 241018
 # www.lookbothways.co.uk
 # github.com/lookbothways/vfxTools
   
+
 
 
