@@ -85,10 +85,10 @@ def getShotDetails(scenePath):
     if matches:
         code= matches.groups()[0]
         sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
-
+    print sequence_entity
     shot_id = sequence_entity["id"]
     code = sequence_entity["code"]
-    print sequence_entity
+
     return shot_id, code
 
 
@@ -367,7 +367,13 @@ def getLatestCam():
            for key , value in publishedFile.items():
                print key, value
            cameras.append(publishedFile['path']['local_path_linux'])
-            
+    #Not all matchmoves are called 'camera' - need to enforce 'camera' 
+    if not cameras:       
+        for publishedFile in publishedFiles:
+            if publishedFile['code'].endswith('.ma') and 'matchmove' in publishedFile['code'] :
+               for key , value in publishedFile.items():
+                   print key, value
+               cameras.append(publishedFile['path']['local_path_linux'])            
     
     publishedCameraPath = cameras[-1]
     return publishedCameraPath
@@ -497,3 +503,4 @@ def executeThis():
 
 #end
 #executeThis()   
+
