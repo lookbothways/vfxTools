@@ -2,6 +2,15 @@ import random
 import maya.cmds as cmds
 import maya.mel
 
+"""
+import randomiseSelGUI
+reload(randomiseSelGUI)
+
+
+randomiseSelGUI.randomiseThings()
+"""
+
+
 def zeroAxes():
     for each in selected:
         cmds.setAttr(each+'.rotate', 0, 0, 0, type="double3")    
@@ -158,4 +167,3 @@ cmds.showWindow( randomiser )
 
 # This is a workaround to get MEL global variable value in Python
 gMainWindow = maya.mel.eval('$tmpVar=$gMainWindow')
-
