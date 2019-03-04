@@ -1,0 +1,39 @@
+def autoSED():
+    import maya.cmds as cmds
+
+    # Auto-SED: Search through a file and replace path names with other path names
+    
+    # Create file dialog to choose the file
+    fileFilter = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*)"
+    filePath = str(cmds.fileDialog2(ds=2, cap="Which file you want to change the texture and displacement maps for?", dir="/mnt/projects/shr/assets/Character/creature_adult/RIG/work/maya", ff=fileFilter, fm=1, okc="SWAP!", cc="Cancel"))
+    
+    # Formatting to separate directory and filename
+    niceFilePath = filePath[3:-2]
+    splitPath = niceFilePath.split("/")
+    fileName = splitPath[-1]
+    splitDirectory = niceFilePath.split("/")
+    justFilePath = splitDirectory[:-1]
+    fileDirectory = "/".join(map(str,justFilePath))
+    
+    # Safety check to ensure the whole server isn't being searched
+    if (filePath == False) or ("/mnt/projects/shr/assets/Character" not in filePath):
+        print "ERROR: Either you didn't pick a file, or you aren't somewhere in SHR!",
+    
+    else:
+        # Confirmation of the directory and filename
+        print "You chose this directory: ", fileDirectory
+        print "You chose this Maya file: " + fileName
+    
+        # Create the command for the terminal
+        command1 = "cd " + fileDirectory
+        command2 = "find . -name '"+ fileName +"' -exec sed -i 's!F:/SlaughterhouseRef/Texture/!/mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/!g' '{}' \;"
+        command3 = "find . -name '"+ fileName +"' -exec sed -i 's!/media/space/jobs/wobble/build/wobbledog/rig//sourceimages/dispForRig/!/mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/!g' '{}' \;"
+        
+        finalCommand = command1 + " && " + command2 + " && " + command3
+        print "Command being passed to the terminal: ", finalCommand
+    
+        # Pass the commands to a shell
+        import subprocess
+        subprocess.Popen(finalCommand, shell=True)
+        
+        print "Auto-SED complete for file: %s" % fileName,
