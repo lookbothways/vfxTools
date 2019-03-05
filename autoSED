@@ -16,9 +16,9 @@ def autoSED():
         
         #Creates a window in maya
         # runs queryTextField
-        windowID = 'window'
+        windowID = 'autoSED'
         if cmds.window(windowID, exists = True):
-            cmds.deleteUI('window')
+            cmds.deleteUI('autoSED')
         window = cmds.window(windowID)
         cmds.rowColumnLayout()
         cmds.textFieldGrp('searchFor', label = 'Search for: ')
