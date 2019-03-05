@@ -1,6 +1,15 @@
 import maya.cmds as cmds
 import subprocess
 
+"""
+import autoSED
+reload(autoSED)
+
+autoSED.doSomething()
+
+
+"""
+
 def doSomething():
 
     def autoSED(filePath,searchFor,replaceWith):
