@@ -50,7 +50,7 @@ def queryTextField(filePath):
     # Runs swapPaths
     searchFor = cmds.textFieldGrp( 'searchFor', query = True, text = True)
     replaceWith = cmds.textFieldGrp( 'replaceWith', query = True, text = True)
-    doit = cmds.confirmDialog(m="Search and replace?\n\n{}\n\nfor\n\n{}\n\nThis is not undoable.".format(searchFor,replaceWith), b=["OK","Cancel"], icn="warning", ma="center", t="autoSED")
+    doit = cmds.confirmDialog(m="Search and replace?\n\n{}\n\nfor\n\n{}\n\nIn: {}\nThis is not undoable.".format(searchFor,replaceWith,filePath[3:-2]), b=["OK","Cancel"], icn="warning", ma="center", t="autoSED")
     if doit == 'OK':
         print "Searching {} for: {}. Replacing with: {}".format(filePath[3:-2],searchFor,replaceWith),
         swapPaths(str(filePath),searchFor,replaceWith) 
@@ -79,8 +79,7 @@ doit = ""
 searchFor = ""
 replaceWith = ""
 filePath = ""
+filePath = start()
 
-def autoSED():
-   filePath = start()
     
 
