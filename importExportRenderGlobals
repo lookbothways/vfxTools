@@ -1,4 +1,5 @@
-# via Fabian
+#Via Fabian
+import maya.app.renderSetup.model.renderSetup as renderSetup
 
 def import_render_setup(render_setup_file, import_render_layers=True, import_aovs=True, import_render_settings=True):
     """
@@ -42,5 +43,5 @@ def add_basic_render_info_structure(render_info):
     return basic_structure
     
     
-render_setup_file = "/home/mark/maya/Presets/temp3.json"
+render_setup_file = "/home/mark/maya/Presets/temp4.json"
 import_render_setup(render_setup_file)
