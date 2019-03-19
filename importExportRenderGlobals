@@ -1,0 +1,46 @@
+# via Fabian
+
+def import_render_setup(render_setup_file, import_render_layers=True, import_aovs=True, import_render_settings=True):
+    """
+    Reads and applies the rendersettings contained in the render_setup_file.
+    Optionally you can choose to skip ceratin parts of the settings.
+
+    :param str render_setup_file: The absolute path to the render setup JSON file, that should be loadedself.
+    :param bool import_render_layers: Wehther renderlayers should be imported from the file.
+    :param bool import_aovs: Wehther AOVs should be imported from the file.
+    :param bool import_render_settings: Wehther render settings should be imported from the file.
+    """
+    with open(render_setup_file, "r") as f:
+        render_info = json.load(f)
+
+    if 'renderSetup' not in render_info:
+        render_info = add_basic_render_info_structure(render_info)
+
+    if not import_render_layers:
+        render_info['renderSetup'] = {}
+
+    if not import_aovs:
+        render_info['sceneAOVs'] = {}
+
+    if not import_render_settings:
+        render_info['sceneSettings'] = {}
+
+    renderSetup.instance().decode(render_info, renderSetup.DECODE_AND_OVERWRITE, None)
+
+
+
+def add_basic_render_info_structure(render_info):
+    """
+    :returns: The basic dictionary structure needed for the render setup import to work.
+    :rtype: dict
+    """
+    basic_structure = {'renderSetup': {},
+                       'sceneAOVs': {},
+                       'sceneSettings': {}}
+
+    basic_structure['sceneSettings'] = render_info
+    return basic_structure
+    
+    
+render_setup_file = "/home/mark/maya/Presets/temp3.json"
+import_render_setup(render_setup_file)
