@@ -1,14 +1,23 @@
-def setGeo():
+import maya.mel as mel
+import maya.cmds as cmds
 
-	import maya.mel as mel
-	import maya.cmds as cmds
+sceneGeo = []
 
-	#makes Scengeo the source mesh for the shadowCatcher
+def importDefaultShadowCatcher():
+    fileExists = False
+    fileExists = cmds.file( "/mnt/projects/library/arnoldSettings/scenes/shadowCatcher_v001.ma", q=True, ex=True )
+    if fileExists == True:
+        cmds.file( "/mnt/projects/library/arnoldSettings/scenes/shadowCatcher_v001.ma", i=True, type='mayaAscii')
+        print "Imported: /mnt/projects/library/arnoldSettings/scenes/shadowCatcher_v001.ma"
+    else:
+        cmds.error( "shadowCatcher file not found: /mnt/projects/library/arnoldSettings/scenes/shadowCatcher_v001.ma - Contact your supervisor." )
 
-	sceneGeo = cmds.ls( selection=True )
-	print sceneGeo
+
+def setGeo(sceneGeo):
+
 
 	#Freeze transformations
+	cmds.select(sceneGeo)
 	cmds.makeIdentity(apply=True, t=1, r=1, s=1, n=0)
 
 	#Merges objects if more than one object to catch shadows
@@ -55,14 +64,26 @@ def setGeo():
 		if u'default_light_rig:defaultRenderLayer' in renderlayers:  
 		    renderlayers.remove(u'default_light_rig:defaultRenderLayer')
 		    print renderlayers
-		
-		for layer in renderlayers:
-		    cmds.editRenderLayerGlobals( currentRenderLayer=layer )
-		    cmds.hide( sceneGeo )
-		
+
 		
 	print sillyString
 	mel.eval(sillyString)
 
+def start():
+    sceneGeo = cmds.ls( selection=True )
+    catcherGeo = []
+    catcherGeo = cmds.ls('shadowCatcherShape')
+    if catcherGeo:
+        print "Geo found, setting up catcher"
+        setGeo(sceneGeo)
+    else:
+        importDefaultShadowCatcher()
+        setGeo(sceneGeo)
+
 
 #end
+
+
+
+
+
