@@ -1,33 +1,19 @@
-"""
-
-Put this on the shelf:
-    
-import aovSettings
-reload(aovSettings)
-
-aovSettings.aovSettings()
-
-
-To do:
-Make it support AOVs with namespaces.
-Fails because the character ':' can't be added into the extra attributes in AOV_settings.
-"""
-
 # Set the enabled AOVs to a particular list
 # Made by Toby Sanderson and Mark Bailey 2018
 
 import maya.cmds as cmds
+import mtoa.aovs as aovs
 
 def setupAOV():
 
-    import mtoa.aovs as aovs
-    #### Define list of preferred AOVs with names *EXACTLY* as they appear in the Render Settings window...
     def setPref():
         global AOVpref
-        AOVpref = "N", "P", "UV", "Z", "coat", "crypto_material", "crypto_object", "diffuse_albedo", "diffuse_direct", "diffuse_indirect", "emission", "motionvector", "shadow", "specular_direct", "specular_indirect", "sss", "volume", "L_hdr", "L_key", "L_rim", "L_fill"
+        global AOVoff
+        # Define list of preferred AOVs with names *EXACTLY* as they appear in the Render Settings window...
+        AOVpref = "AO", "coat", "crypto_material", "crypto_object", "diffuse_albedo", "diffuse_direct", "diffuse_indirect", "emission", "L_hdr", "L_key", "L_rim", "L_fill", "motionvector", "N", "P", "shadow_matte", "specular_direct", "specular_indirect", "sss", "transmission", "UV", "volume", "Z"
+        AOVoff = "AO", "volume", "sss", "transmission", "emission"
 
-    #### Turn all the current AOVs off...
-    def allOff():
+    def allOff(): # Turn all the current AOVs off...
         allNiceNames = []
         deactivated = []
         allCurrentAOV = cmds.ls("*aiAOV_*")
@@ -43,14 +29,13 @@ def setupAOV():
                 aovs.AOVInterface().removeAOV(niceName)
 
         if not allNiceNames:
-            print "All AOVs were previously deactivated!"
+            print "AOV-Settings: All AOVs were previously deactivated!\n",
         else:
-            print "These are the AOVs you originally had: ", allNiceNames
+            print "AOV-Settings: These are the AOVs you originally had: ", allNiceNames, "\n",
         if deactivated:
-            print "These AOVs were deactivated because they aren't on the list: ", deactivated
+            print "AOV-Settings: These AOVs were deactivated because they aren't on the list: ", deactivated, "\n",
 
-    #### Turn the preferred set of AOVs on...
-    def prefOn():
+    def prefOn(): # Turn the preferred set of AOVs on...
         AOVerror = []
         for AOV in AOVpref:
             command = "aiAOV_" + AOV + ".enabled"
@@ -61,24 +46,40 @@ def setupAOV():
                     aovs.AOVInterface().addAOV(AOV)
                 except:
                     AOVerror.append(AOV)
+                                        
+        for AOV in AOVoff:
+            command = "aiAOV_" + AOV + ".enabled"
+            try:
+                cmds.setAttr(command, 0)
+            except:
+                try:
+                    aovs.AOVInterface().addAOV(AOV)
+                except:
+                    AOVerror.append(AOV)
 
+        """
+        cmds.setAttr("aiAOV_AO.enabled", 0) # Ambient Occlusion AOV off by default
+        cmds.setAttr("aiAOV_volume.enabled", 0) # Volume AOV off by default
+        cmds.setAttr("aiAOV_sss.enabled", 0) # sss off by default
+        cmds.setAttr("aiAOV_transmission.enabled", 0) # transmission off by default
+        cmds.setAttr("aiAOV_emission.enabled", 0) # emission off by default
+        """
+        
         if AOVerror:
             from maya import OpenMaya
-            print "These AOVs couldn't be switched on: ", AOVerror
-            OpenMaya.MGlobal.displayError("Something didn't work right, see the script editor for details...")
+            print "AOV-Settings: These AOVs couldn't be switched on: ", AOVerror, "\n",
+            OpenMaya.MGlobal.displayError("Something didn't work correctly, see the script editor for details...")
 
         else:
-            print "Complete: The list of preferred AOVs has been turned on, and everything else switched off!",
+            print "AOV-Settings: The list of preferred AOVs has been turned on, and everything else switched off!\n",
             
-    ### Create and connect the nodes needed for the UV AOV...
-    def createUV():
-        # Check if the nodes exist already
-        if cmds.objExists("green_ramp"):
+    def createUV(): # Create and connect the nodes needed for the UV AOV...
+        if cmds.objExists("green_ramp") or cmds.objExists("red_ramp"):
             try:
                 cmds.defaultNavigation(source="green_ramp", destination="aiAOV_UV.defaultValue", ce=True)
-                print "Complete! If this hasn't worked, delete the STMap nodes from the Node Editor and try again.",
+                print "AOV-Settings-UV: Complete! If this hasn't worked, delete the STMap nodes from the Node Editor and try again.\n",
             except:
-                print "Looks like there's been an error. Try deleting the STMap nodes from the Node Editor and running again.",
+                print "AOV-Settings-UV: Looks like there's been an error. Try deleting the STMap nodes from the Node Editor and running again.\n",
     
         else:
             # Create Green Ramp
@@ -106,9 +107,9 @@ def setupAOV():
             # Connect it to the UV AOV
             cmds.defaultNavigation(source="green_ramp", destination="aiAOV_UV.defaultValue", ce=True)
             
-            print "UV STmap setup complete!",
+            print "AOV-Settings-UV: STmap setup complete!\n",
 
-    #### Run the script
+    # Run the script
     setPref()
     allOff()
     prefOn()
@@ -117,16 +118,47 @@ def setupAOV():
     # Hook up the Cryptomatte AOVs
     if not cmds.objExists("_aov_cryptomatte"):
        cmds.shadingNode('cryptomatte', name="_aov_cryptomatte", asUtility=True)
+    if not cmds.objExists("aiAOV_crypto_object"):
        cmds.shadingNode('aiAOV', name="aiAOV_crypto_object", asTexture=True)
+    if not cmds.objExists("aiAOV_crypto_material"):
        cmds.shadingNode('aiAOV', name="aiAOV_crypto_material", asTexture=True)
-       cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_material.defaultValue')
-       cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_object.defaultValue')
+    cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_material.defaultValue')
+    cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_object.defaultValue')
+    print "AOV-Settings-Cryptomatte: Setup complete!\n",
+
+    # Hook up customPref things
+    if not cmds.objExists("prefUtil"):
+        cmds.shadingNode('aiUtility', name="prefUtil", asUtility=True)
+    if not cmds.objExists("prefTex"):
+        cmds.shadingNode('file', name="prefTex", asTexture=True)
+    try:
+        cmds.connectAttr("prefTex.outColor", "prefUtil.color")
+    except:
+        print "AOV-Settings-Pref: Failed to connect the prefTex and prefUtil nodes, they may have been connected already!\n",
+    try:
+        cmds.connectAttr("prefUtil.outColor", "aiAOV_custom_pref.defaultValue")
+    except:
+        print "AOV-Settings-Pref: Failed to connect the prefUtil and AOV nodes!\n",
+    cmds.setAttr("prefUtil.shadeMode", 2)
+    cmds.setAttr("prefTex.fileTextureName", "/mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/pref/prefBody_prefSpaceShapeSpill_<UDIM>.exr", type="string")
+    cmds.setAttr("prefTex.uvTilingMode", 3) # UDIM (Mari)
+    print "AOV-Settings-Pref: Setup complete!\n",
 
     # Hook up the lightGroup things
     cmds.setAttr("aiAOV_L_key.lightPathExpression", "C.*<L.'key'>", type="string")
     cmds.setAttr("aiAOV_L_rim.lightPathExpression", "C.*<L.'rim'>", type="string")
     cmds.setAttr("aiAOV_L_hdr.lightPathExpression", "C.*<L.'hdr'>", type="string")
     cmds.setAttr("aiAOV_L_fill.lightPathExpression", "C.*<L.'fill'>", type="string")
+    #cmds.setAttr("aiAOV_shadow_hdr", "C.*<L.'hdr'>", type="string")
+    print "AOV-Settings-LightGroups: Setup complete!\n",
+
+    # Hook up the Ambient Occlusion things
+    if not cmds.objExists("ambientOcclusion_AOV"):
+        cmds.shadingNode('aiAmbientOcclusion', name="ambientOcclusion_AOV", asTexture=True)
+    cmds.setAttr('ambientOcclusion_AOV.samples', 5)
+    cmds.setAttr('ambientOcclusion_AOV.farClip', 200)
+    cmds.connectAttr('ambientOcclusion_AOV.outColor', 'aiAOV_AO.defaultValue')
+    print "AOV-Settings-AO: Setup complete!\n",
 
 def aovSettings(): 
     
@@ -139,26 +171,26 @@ def aovSettings():
     def loadSettings():
         # Check if AOV Settings are in scene already, and create them if not
         if cmds.objExists("AOV_Settings"):
-            print "Existing AOV_Settings found in scene..."
+            print "AOV-Settings: Existing AOV_Settings found in scene...\n",
             AOV_SettingsExists = True
         else:
             cmds.spaceLocator(n="AOV_Settings") # "Locator"
-            print "No AOV_Settings found in the scene... created some for you."
+            print "AOV-Settings: No AOV_Settings found in the scene... created some for you.\n",
             AOV_SettingsExists = False
     
     def saveCurrentState():
         cmds.select("AOV_Settings")
         if cmds.listAttr(ud = True):
-            print "Updating the attributes..."
+            print "AOV-Settings: Updating the attributes...\n",
             # The Locator alrerady has some saved settings
             settingsExist()
         else:
-            print "No custom attributes found. Creating them..."
+            print "AOV-Settings: No custom attributes found. Creating them...\n",
             # The Locator doesn't have any saved settings
             settingsNew()
     
-        print "These were the AOVs previously switched on: ", aovOn
-        print "These were the AOVs previously switched off: ", aovOff
+        print "AOV-Settings: These were the AOVs previously switched on: ", aovOn, "\n",
+        print "AOV-Settings: These were the AOVs previously switched off: ", aovOff, "\n",
     
     def settingsNew():
         # The Locator doesn't have any saved settings
@@ -210,7 +242,7 @@ def aovSettings():
 
     aovNamespaces = [i for i in aovNamespaces if ":" in i]
     if aovNamespaces:
-        print "Warning, these AOVs have namespaces: "+ str(aovNamespaces)
+        print "AOV-Settings: Warning, these AOVs have namespaces: "+ str(aovNamespaces),
 
     choose = cmds.confirmDialog( title='Change AOV Settings', message='Select one of the following options...', button=['Setup Defaults','ALL OFF','ALL ON','Save State','Restore','Cancel'], defaultButton='Setup Defaults', cancelButton='Cancel', dismissString='No' )
 
@@ -219,7 +251,7 @@ def aovSettings():
     #### SETUP DEFAULTS ###################
     if choose == 'Setup Defaults':
         setupAOV()
-        print "Default AOVs created!",
+        print "AOV-Settings: Default AOVs created!\n",
 
     #### ALL OFF ###########################
     elif choose == 'ALL OFF':
@@ -231,7 +263,7 @@ def aovSettings():
             y = str(y)
             cmds.setAttr(y + ".enabled", 0)
             
-        print "All AOVs have now been turned OFF!",
+        print "AOV-Settings: All AOVs have now been turned OFF!\n",
 
     #### ALL ON ############################
     elif choose == 'ALL ON':
@@ -244,7 +276,7 @@ def aovSettings():
             x = str(x)
             cmds.setAttr(x + ".enabled", 1)
             
-        print "All AOVs have now been turned ON!",
+        print "AOV-Settings: All AOVs have now been turned ON!\n",
 
     #### RESTORE ###########################
     # Load the last saved settings from the Locator
@@ -264,7 +296,7 @@ def aovSettings():
         allSceneAOV = (cmds.listAttr(ud= True))                 # All user-defined attributes stored in the Locator
 
         if allSceneAOV == False:
-            print "Error - no previous set-up found in the Locator",# If there are no user attributes on Locator
+            print "AOV-Settings: Error - no previous set-up found in the Locator\n",# If there are no user attributes on Locator
 
         else:
             for each in allSceneAOV:                          # For each user-defined Locator
@@ -273,15 +305,15 @@ def aovSettings():
                fullName = each + ".enabled"                    # Convert unicode to string and add .enabled
                getState = cmds.getAttr(attrName)                # Get state (0 or 1)
                if getState == 1:                            # If the attribute has a value of 1 (it was previously on)
-                  print "This was ON: ", each
+                  print "AOV-Settings: This was ON: ", each, "\n",
                   restoreOn.append(each)                     # Add to restoreOn list
                   cmds.setAttr(fullName, 1)                   # Turn them on
                else:                                      # If the attribute has a value of 0 (it was previously off)
-                  print "This was OFF: ", each
+                  print "AOV-Settings: This was OFF: ", each, "\n",
                   restoreOff.append(each)                    # Add to restoreOff list
                   cmds.setAttr(fullName, 0)                   # Turn them off
 
-        print "All AOVs have been restored to their last saved state.",
+        print "AOV-Settings: All AOVs have been restored to their last saved state!\n",
 
 
     #### SAVE ################################
@@ -289,13 +321,11 @@ def aovSettings():
         loadSettings()
         getCurrentState(allAOVnames)
         saveCurrentState()
-        print "Current AOV state saved! Use 'Restore' to revert any subsequent changes.",
+        print "AOV-Settings: Current AOV state saved! Use 'Restore' to revert any subsequent changes.\n",
 
 
     #### CANCEL ##############################
     else:
-        print "Cancelled: Nothing was changed.",
-
-############### Toby Sanderson and Mark Bailey 2018 ################# 
+        print "AOV-Settings: Cancelled: Nothing was changed.\n",
 
 # END #
