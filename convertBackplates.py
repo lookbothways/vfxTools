@@ -34,12 +34,12 @@ def start():
     if chooseNode is not 'Cancel':
         if chooseNode == 'Jpg':
             fileFormat = "Jpg" 
-            convertPrep(fileFormat)
+            sillyString = convertPrep(fileFormat)
             subprocess.Popen(sillyString, shell=True)
             print "\nConverting to .jpg",
         if chooseNode == 'Png':
             fileFormat = "Png"
-            convertPrep(fileFormat)
+            sillyString = convertPrep(fileFormat)
             subprocess.Popen(sillyString, shell=True)
             print "\nConverting to .png",             
         if chooseNode == 'Exr':
