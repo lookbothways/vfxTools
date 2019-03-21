@@ -7,7 +7,11 @@ import ssync
 reload(ssync)
 
 ssync.shotgunSync()
+#OR
+from LONshelf import ssync
+reload(ssync)
 
+ssync.executeThis()
 
 
 https://forums.autodesk.com/t5/maya-programming/load-render-setup-json-file-with-python/td-p/6762688
@@ -22,12 +26,20 @@ Useful paths:
 
 In dialogue 'pst' stands for 'Project Specific Thing' - ie set custom clipping planes
 
+
+TO DO:
+
+* Make it recognise when the file as in /assets and act accordingly 
+* ffs fix globals json import borking borked bork
+
+
 """
 
 
 #Setting up the load render globals preset
 import maya.app.renderSetup.model.renderSetup as renderSetup # for renderlayers
 import maya.app.renderSetup.model.renderSettings as renderSettings # for renderGlobals
+
 import json
 
 #Setting up all the other bits
@@ -38,8 +50,12 @@ import re
 import maya.cmds as cmds
 import maya.mel as mel
 # my aovs script
-import aovSettings
+from LONshelf import aovSettings
 reload(aovSettings)
+
+# So the AOVs tool works (does the equivalent of open the renderGlobals window)
+from mtoa.core import createOptions
+createOptions()
 
 # Get CustomQuery /mnt/pipeline/ATK_PIPELINE/atk-api/atk_shotgun/ShotgunTankAccess
 sys.path.append(r"/mnt/pipeline/ATK_PIPELINE/atk-api")
@@ -70,26 +86,42 @@ def get_frame_rate_by_project_name(project_name):
         return result
 
 def getShotDetails(scenePath):
-    code = ""
-    sequence_entity = ""
+   
+    if "assets" in scenePath:
+        # Using placeholder shot for when ssync.py tool is used on scenes with 'assets' in the path.
+        # https://automatik-vfx.shotgunstudio.com/page/10590#Shot_6417
+        
+        shot_id = 6417
+        code = '10590'
+        return shot_id, code
+    else:
+        code = ""
+        sequence_entity = ""
+    
+        from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
+        reload(ShotgunTankAccess)
+        sta= ShotgunTankAccess.Shotgun_Tank_Access()
+        sg= sta.get_sg()
+    
+        basename= os.path.basename(scenePath)
+    
+        regex = r"(\S*?[0-9])_[a-zA-Z]"
+        matches = re.search(regex, basename)
+        if matches:
+            code= matches.groups()[0]
+            #sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
+            sequence_entity= sg.find_one("Shot", [["code", "is", code]],['code'])
+        #print sequence_entity
+        shot_id = sequence_entity["id"]
+        #shot_id = sequence_entity
 
-    from atk_shotgun.ShotgunTankAccess import ShotgunTankAccess
-    reload(ShotgunTankAccess)
-    sta= ShotgunTankAccess.Shotgun_Tank_Access()
-    sg= sta.get_sg()
+        #print shot_id
+        code = sequence_entity["code"]
+        #print code
+    
+        return shot_id, code
 
-    basename= os.path.basename(scenePath)
 
-    regex = r"(\S*?[0-9])_[a-zA-Z]"
-    matches = re.search(regex, basename)
-    if matches:
-        code= matches.groups()[0]
-        sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
-    print sequence_entity
-    shot_id = sequence_entity["id"]
-    code = sequence_entity["code"]
-
-    return shot_id, code
 
 
 
@@ -98,7 +130,7 @@ def get_shot_resolution_by_id(shot_id):
     sg_filters = [["id", "is", shot_id]]
     fields = ['sg_resolution']
     data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
-    print data
+    #print data
     if data is None or data["sg_resolution"] is None:
         return False
     else:
@@ -108,7 +140,7 @@ def get_aspect_ratio_from_project_resolution_by_name(project_name):
     sg_entity_type = "Project"
     sg_filters = [["name", "is", project_name]]
     fields = ['sg_resolution']
-    print fields
+    #print fields
     data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
     if data:
         #data = float(data["sg_resolution"].split(" ")[-1][:-2])
@@ -126,7 +158,7 @@ def get_aspect_ratio_from_project_resolution_by_id(project_id):
     sg_filters = [["id", "is", project_id]]
     fields = ['sg_resolution']
     data = sg.find_one(sg_entity_type, filters=sg_filters, fields=fields)
-    print data
+    #print data
     if data:
         aspect = float(data["sg_resolution"].split(" ")[-1][:-2])
     return data, aspect
@@ -146,7 +178,7 @@ def checkFps(scenePath, project_name ):
     ntscf: 60 fps
 
     May be of help:
-https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
+    https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
     """
     #scenePath = getOpenSceneFilePath() #moved this outside the function
     if scenePath == "":
@@ -178,7 +210,7 @@ https://www.programcreek.com/python/example/107820/maya.cmds.currentUnit
     if int(fps) == sceneTime:
         print "Scene FPS matches shotgun"
     else:
-        print "Project fps {} may not match scene fps: {}".format(str(fps),str(sceneTime))
+        print "Project fps {} does not match scene fps: {}".format(str(fps),str(sceneTime))
         fixFps = True
         return fixFps
 
@@ -203,10 +235,11 @@ def setResolution(pxRes, pyRes, pixelAspect=1.0):
 def get_shot_frame_range_by_shot_code(code):
     sg_filters = [["code", "is", code]]
     fields = ['sg_cut_in', 'sg_cut_out']
-    print fields
+    #print fields
     data = sg.find_one("Shot", filters=sg_filters, fields=fields)
-
+    #data = sg.find_one("Asset", filters=sg_filters, fields=fields)
     if data is None or data["sg_cut_in"] is None or data["sg_cut_out"] is None:
+        print "no shot data found"
         return False
     else:
         return int(data["sg_cut_in"]), int(data["sg_cut_out"])
@@ -215,22 +248,88 @@ def get_shot_frame_range_by_shot_code(code):
 
 def importDefaultLights():
     fileExists = False
-    fileExists = cmds.file( "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma", q=True, ex=True )
+    fileExists = cmds.file( "/mnt/projects/library/arnoldSettings/scenes/atk_defaultLights_v001.ma", q=True, ex=True )
     if fileExists == True:
-        cmds.file( "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma", i=True, type='mayaAscii', namespace='lightRig' )
-        print "Imported: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
+        cmds.file( "/mnt/projects/library/arnoldSettings/scenes/atk_defaultLights_v001.ma", i=True, type='mayaAscii', namespace='lightRig' )
+        print "Imported: /mnt/projects/library/arnoldSettings/scenes/atk_defaultLights_v001.ma"
     else:
-        cmds.error( "LightRig file not found: /mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma - Contact your supervisor." )
+        cmds.error( "LightRig file not found: /mnt/projects/library/arnoldSettings/scenes/atk_defaultLights_v001.ma - Contact your supervisor." )
+
+
+
+
+def importRenderSetup(pFilename):
+    with open(pFilename, "r") as file:
+        renderSetup.instance().decode(json.load(file), renderSetup.DECODE_AND_OVERWRITE, None)
+
+def exportFile(filename):
+    with open(filename, "w+") as file:
+        json.dump(renderSetup.instance().encode(None), fp=file, indent=2, sort_keys=True)
+        
+        #exportFile(filename)      
+
+# For importing renderGlobal prefs
+# The Json file *could* have a different AOV set to the set Toby's script creates, in which case 'import_aovs' could be True and it'd still work
+# as long as the other aovSettings script wasn't run
+
+def import_render_setup(render_setup_file, import_render_layers=False, import_aovs=False, import_render_settings=True):
+    """
+    Reads and applies the rendersettings contained in the render_setup_file.
+    Optionally you can choose to skip ceratin parts of the settings.
+
+    :param str render_setup_file: The absolute path to the render setup JSON file, that should be loadedself.
+    :param bool import_render_layers: Wehther renderlayers should be imported from the file.
+    :param bool import_aovs: Wehther AOVs should be imported from the file.
+    :param bool import_render_settings: Wehther render settings should be imported from the file.
+    """
+    with open(render_setup_file, "r") as f:
+        render_info = json.load(f)
+
+    if 'renderSetup' not in render_info:
+        render_info = add_basic_render_info_structure(render_info)
+
+    if not import_render_layers:
+        render_info['renderSetup'] = {}
+
+    if not import_aovs:
+        render_info['sceneAOVs'] = {}
+
+    if not import_render_settings:
+        render_info['sceneSettings'] = {}
+
+    renderSetup.instance().decode(render_info, renderSetup.DECODE_AND_OVERWRITE, None)
+
+
+
+def add_basic_render_info_structure(render_info):
+    """
+    :returns: The basic dictionary structure needed for the render setup import to work.
+    :rtype: dict
+    """
+    basic_structure = {'renderSetup': {},
+                       'sceneAOVs': {},
+                       'sceneSettings': {}}
+
+    basic_structure['sceneSettings'] = render_info
+    return basic_structure
+
+
 
 
 def shotgunSync():
     
     # Load atk_arnoldSettings .json file
     
-    import maya.app.renderSetup.views.renderSetupPreferences as prefs
-    prefs.loadGlobalPreset("atk_arnoldSettings_v003")
+    render_setup_file = "/mnt/projects/library/arnoldSettings/presets/atk_arnoldSettings_v004.json"
+    import_render_setup(render_setup_file)
+
+    # This way (below) breaks now
+    #import maya.app.renderSetup.views.renderSetupPreferences as prefs
+    #prefs.loadGlobalPreset("atk_arnoldSettings_v003")
     
     # Full Path to the globals preset it's importing "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
+
+
     
     #----------------- Check the Resolution is correct
     # Setup summary
@@ -242,13 +341,23 @@ def shotgunSync():
     fixRes = False
     scenePath = ""
     scenePath = getOpenSceneFilePath()
+    isAsset = str(False)
+    # Is it an asset?
+    if "asset" in scenePath:
+        isAsset = str(True)
+        print "scenePath contains asset"
+
     if scenePath:
         project_name = (str(scenePath).split("/")[3])
     else:
-        cmds.error( "Scene not saved. Save scene via Shotgun > file save first." )
+        engine = sgtk.platform.current_engine() 
+        engine.apps['tk-multi-workfiles2'].show_file_save_dlg()
+        cmds.error( "Scene not saved. Save scene via Shotgun > file save first." ),
     
     shot_id = ""
     shot_id =  getShotDetails(scenePath)[0]
+    print "Shot ID: "+ str(shot_id)
+    
     
     xRes = ""
     yRes = ""
@@ -261,7 +370,7 @@ def shotgunSync():
         
     # Get project resolution by project ID
     project_id = (get_project_id_by_name(project_name))["id"]
-    print project_id
+    print "Project ID :"+str(project_id)
     
     projectRes, aspect = get_aspect_ratio_from_project_resolution_by_id(project_id)
     projectRes = str(projectRes["sg_resolution"])
@@ -280,7 +389,7 @@ def shotgunSync():
     
     
     # Forces shot res is res field isn't False (empty)
-    
+    print "\n\nSetting shot resolution -------------------------------------"
     if xRes == pxRes and yRes == pyRes and localxRes == pxRes and localyRes == pxRes and localxRes == xRes and localyRes == yRes:
         print "Local scene resolution matches shot and project resolution. Moving on."
     else:    
@@ -298,15 +407,18 @@ def shotgunSync():
             print "Setting res to project res: {} x {}. Forcing pixel aspect to 1.0".format(pxRes, pyRes),
             setResolution(int(pxRes), int(pyRes), pixelAspect=1.0)
             resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(pxRes), str(pyRes))
+            
+    
     
     
     
     
     #----------------- CHECKS PROJECT FPS
+    print "\n\nChecking FPS -------------------------------------" 
     fixFps = checkFps(scenePath, project_name)
     
     if fixFps == True:
-        print "Setting fps to project fps. Warning - Keys may have changed"
+        #print "Setting fps to project fps. Warning - Keys may have changed"
         fpsSummary = "Set project fps, WARNING - existing keys may have changed "
         scenePath = getOpenSceneFilePath()
         project_name = (str(scenePath).split("/")[3]) # projectname is always after projects/
@@ -317,20 +429,28 @@ def shotgunSync():
     
     #----------------- Set start-end-frame (especially changing fps will move the start-end frames)
     code = getShotDetails(scenePath)[1]
-    sg_startFrame, sg_endFrame = get_shot_frame_range_by_shot_code(code)
-    
-    fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
-    fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
-    
-    if fStart != sg_startFrame or fEnd != sg_endFrame:
-        cmds.setAttr("defaultRenderGlobals.startFrame", sg_startFrame)
-        cmds.setAttr("defaultRenderGlobals.endFrame", sg_endFrame)
-        cmds.playbackOptions(min=sg_startFrame,max=sg_endFrame)
-        cmds.playbackOptions(animationStartTime=sg_startFrame)
-        cmds.playbackOptions(animationEndTime=sg_endFrame)
-    
-        startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
-    
+    if "asset" not in scenePath:
+        sg_startFrame, sg_endFrame = get_shot_frame_range_by_shot_code(code)
+        
+        fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
+        fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
+        
+        if fStart != sg_startFrame or fEnd != sg_endFrame:
+            cmds.setAttr("defaultRenderGlobals.startFrame", sg_startFrame)
+            cmds.setAttr("defaultRenderGlobals.endFrame", sg_endFrame)
+            cmds.playbackOptions(min=sg_startFrame,max=sg_endFrame)
+            cmds.playbackOptions(animationStartTime=sg_startFrame)
+            cmds.playbackOptions(animationEndTime=sg_endFrame)
+        
+            startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
+    else:
+        cmds.setAttr("defaultRenderGlobals.startFrame", 1001)
+        cmds.setAttr("defaultRenderGlobals.endFrame", 1001)
+        cmds.playbackOptions(min=1001,max=1001)
+        cmds.playbackOptions(animationStartTime=1001)
+        cmds.playbackOptions(animationEndTime=1001)
+        startEndFrameSummary = "| Set render-range to {}-{} ".format(1001, 1001)
+        
     
     
     #------------- OPTIONAL SETTINGS
@@ -339,8 +459,10 @@ def shotgunSync():
     # Create and set up lightgroup aovs (import scene from assets)
     
     
-    #Summary output
+    #Summary output:
     print fpsSummary+resolutionSummary+startEndFrameSummary,
+    return isAsset
+    
     
    
 
@@ -357,15 +479,19 @@ def getLatestCam():
     
     shot_id = ""
     shot_id =  getShotDetails(scenePath)[0]
+    print "Shot ID :"+str(shot_id)
     #Uses ATK customQuery to get all published objects
     publishedFiles = custom_query_obj.get_all_published_files_by_shot_id(shot_id)
+    print "publishedFiles :"+str(shot_id)
     
     # Useful code: Runs through the dictionary searching for camera .ma
     cameras=[]
     for publishedFile in publishedFiles:
         if publishedFile['code'].endswith('.ma') and 'camera' in publishedFile['code'] :
+           """
            for key , value in publishedFile.items():
                print key, value
+               """
            cameras.append(publishedFile['path']['local_path_linux'])
     #Not all matchmoves are called 'camera' - need to enforce 'camera' 
     if not cameras:       
@@ -375,7 +501,11 @@ def getLatestCam():
                    print key, value
                cameras.append(publishedFile['path']['local_path_linux'])            
     
-    publishedCameraPath = cameras[-1]
+    if cameras:
+        publishedCameraPath = cameras[-1]
+    else:
+        print "\n\nNo published cameras found.\n",
+        publishedCameraPath = ""
     return publishedCameraPath
     
 def forceClippingPlanes():
@@ -465,10 +595,10 @@ def executeThis():
 
             # Get and perform the requested actions
             if cmds.checkBox(self.ssyncBox, q=True, v=True) == True:
-                shotgunSync()
+                isAsset = shotgunSync()
                 
             if cmds.checkBox(self.aovsExistBox, q=True, v=True) == True:
-                aovSettings.aovSettings()
+                aovSettings.setupAOV()
                 
             if cmds.checkBox(self.lightsExistBox, q = True, v = True) == True:
                 importDefaultLights()
@@ -503,4 +633,9 @@ def executeThis():
 
 #end
 #executeThis()   
+#shotgunSync()
+
+
+
+
 
