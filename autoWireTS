@@ -1,106 +1,114 @@
-########################
-##                    ##
-##    Auto Wire v2    ##
-##                    ##
-########################
-
-## Toby Sanderson 2018
-
 ## Select two groups containing locators and run script.
 ## This will generate one wire from each locator in
 ## Group 1 to a random locator in Group 2.
+## Autowire v1 by Toby Sanderson & Mark Bailey
 
 import maya.cmds as cmds
 import random
 
-def autoWire():
+def genCurve(originalSelection,droopVal, randomVal):
     
-    global dropAmount
-    global randomAmount
+    twoSelected = True
+    list = cmds.ls(sl=True)
+    if list != 2:
+        twoSelected = False
+        print "Only one locator selected, using first selected locator as source"
+        list = originalSelection
+    
+    p1X = (cmds.getAttr(list[0]+".translateX"))
+    p1Y = (cmds.getAttr(list[0]+".translateY"))
+    p1Z = (cmds.getAttr(list[0]+".translateZ"))
+    p2X = (cmds.getAttr(list[1]+".translateX"))
+    p2Y = (cmds.getAttr(list[1]+".translateY"))
+    p2Z = (cmds.getAttr(list[1]+".translateZ"))
+    nCurve = cmds.curve( p=[(p1X, p1Y, p1Z),(p1X, p1Y, p1Z), (p2X, p2Y, p2Z), (p2X, p2Y, p2Z)] )
+    cmds.rebuildCurve( rt=0, s=1 )
+    cmds.select(nCurve+".cv[1:2]")
 
-    ###### EDIT THESE VALUES #######
-    dropAmount = 160
-    randomAmount = 100
-    ################################
+    amount = droopVal
+    rndAmount = randomVal
+    amount = (amount*-1.0)+((random.random()*rndAmount)*-1.0)
+    cmds.move(0,amount,0,r=True,ls=True,wd=True)
+    cmds.select(nCurve)
+    setupArnoldCurves(nCurve)
+    cmds.rebuildCurve( rt=0, s=3 )
     
-    print "\n\n-------AutoWire-------\n",
-    
-    #---genCurve - Lunar Animation---------------------------------#   
-    def genCurve():
-    
-        list = cmds.ls(sl=True)
-        
-        p1X = (cmds.getAttr(list[0]+".translateX"))
-        p1Y = (cmds.getAttr(list[0]+".translateY"))
-        p1Z = (cmds.getAttr(list[0]+".translateZ"))
-    
-        p2X = (cmds.getAttr(list[1]+".translateX"))
-        p2Y = (cmds.getAttr(list[1]+".translateY"))
-        p2Z = (cmds.getAttr(list[1]+".translateZ"))
-    
-        nCurve = cmds.curve( p=[(p1X, p1Y, p1Z),(p1X, p1Y, p1Z), (p2X, p2Y, p2Z), (p2X, p2Y, p2Z)] )
-        cmds.rebuildCurve( rt=0, s=1 )
-        cmds.select(nCurve+".cv[1:2]")
-    
-        global dropAmount
-        global randomAmount
-    
-        amount = dropAmount#cmds.floatSliderGrp(dropAmount, q=True,value=True)
-        rndAmount = randomAmount#cmds.floatSliderGrp(randomAmount, q=True,value=True)
-        amount = (amount*-1.0)+((random.random()*rndAmount)*-1.0)
-        cmds.move(0,amount,0,r=True,ls=True,wd=True)
-        cmds.select(nCurve)
-        cmds.rebuildCurve( rt=0, s=3 )
+    if twoSelected == False:
+        cmds.select(list[-1])
+    else:
         cmds.select(list)
-        
-        curves.append(nCurve)
-    
-    #--------------------------------------------------------------#
-    
-    if len(cmds.ls(selection=True)) != 2:
-        cmds.confirmDialog(m="Select two objects only!", t="Error", b="OK", icn="warning")
-        print "Error - select two objects only!\n",
-    
-    selectedPoles = cmds.ls(selection=True)
-    poleOne = selectedPoles[0]
-    poleTwo = selectedPoles[1]
-    
-    cmds.select(poleOne)
-    poleOneLocators = []
-    poleOneSelection = cmds.ls( dag=True, ap=True, sl=True)
-    for obj in poleOneSelection:
-        if cmds.nodeType(obj) == 'locator':
-            poleOneLocators.append(obj)
-    
-    cmds.select(poleTwo)
-    poleTwoLocators = []
-    poleTwoSelection = cmds.ls( dag=True, ap=True, sl=True)
-    for obj in poleTwoSelection:
-        if cmds.nodeType(obj) == 'locator':
-            poleTwoLocators.append(obj)
-            
-    poleOneLen = len(poleOneLocators)
-    poleTwoLen = len(poleTwoLocators)
-    print "There are", poleOneLen, "locators in", poleOne, "\n",
-    print "There are", poleTwoLen, "locators in", poleTwo, "\n",
-    
-    curves = []
-    
-    for loc in poleOneLocators:
-        cmds.select(loc)
-        randomNumber = random.randint(0, (poleTwoLen-1))
-        randomLoc = poleTwoLocators[randomNumber]
-        cmds.select(randomLoc)
-        cmds.parent([loc, randomLoc], world=True)
-        genCurve()
-        cmds.parent(loc, poleOne)
-        cmds.parent(randomLoc, poleTwo)
-        print "Hung a wire between", loc, "and", randomLoc,"!\n",
-        
-    cmds.select(curves)
-    curvesNumber = len(curves)
-    
-    print "\nAutoWire finished hanging {} wires!\n".format(curvesNumber),
+    curves.append(nCurve)
+      
 
-autoWire()
-## END
+
+def createWindow(originalSelection):
+    
+    windowID = 'Autowire'
+    if cmds.window(windowID, exists = True):
+        cmds.deleteUI('Autowire')
+    window = cmds.window(windowID)
+    cmds.rowColumnLayout()
+     
+    cmds.textFieldGrp('droopVal', label = 'Droop: ')
+    cmds.textFieldGrp('randomVal', label = 'Random: ' )
+    #cmds.button( label='Choose these values', command=('queryTextField();cmds.deleteUI(\"' + window + '\", window=True)') )
+    cmds.button( label='Choose these values:', command=('queryTextField(originalSelection)') )   
+    #cmds.button( label='Make renderable and close', command=('setupArnoldCurves();cmds.deleteUI(\"' + window + '\", window=True)') )
+    #cmds.button( label='Generate again', command=('queryTextField()') )
+    cmds.showWindow( window )
+    return values
+        
+                    
+def queryTextField(originalSelection):
+    # Gets the contents of the fiels in 'createWindow' 
+    droopVal = cmds.textFieldGrp( 'droopVal', query = True, text = True)
+    randomVal = cmds.textFieldGrp( 'randomVal', query = True, text = True)
+    doit = 'OK'
+    selectedThings = cmds.ls(sl=True)
+    print selectedThings
+    if selectedThings != 1:
+        print "Creating wire.",
+        genCurve(originalSelection,int(droopVal), int(randomVal))
+    if selectedThings == 0:
+        print "Nothing selected",
+    else:
+        print "Only one object selected",
+    
+ 
+
+def setupArnoldCurves(nCurve):
+    try:
+        cmds.setAttr(nCurve+".aiRenderCurve",1)
+        cmds.setAttr(nCurve+".aiMode",1)
+        cmds.setAttr(nCurve+".aiCurveWidth",0.02)
+        #cmds.setAttr(nCurve+".aiMinPixelWidth",1)
+    except:
+        print "Curve not found",
+        
+        
+    
+    
+def start():
+    originalSelection = cmds.ls(sl=True) 
+    values = createWindow(originalSelection)
+    return originalSelection
+
+nCurve = []
+values = ""
+originalSelection = []
+#
+#originalSelection = start()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
