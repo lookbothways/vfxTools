@@ -1,10 +1,10 @@
 ## Select two groups containing locators and run script.
 ## This will generate one wire from each locator in
 ## Group 1 to a random locator in Group 2.
-## Autowire v1 by Toby Sanderson & Mark Bailey
 
 import maya.cmds as cmds
 import random
+from pymel.core import *
 
 def genCurve(originalSelection,droopVal, randomVal):
     
@@ -40,23 +40,6 @@ def genCurve(originalSelection,droopVal, randomVal):
     curves.append(nCurve)
       
 
-
-def createWindow(originalSelection):
-    
-    windowID = 'Autowire'
-    if cmds.window(windowID, exists = True):
-        cmds.deleteUI('Autowire')
-    window = cmds.window(windowID)
-    cmds.rowColumnLayout()
-     
-    cmds.textFieldGrp('droopVal', label = 'Droop: ')
-    cmds.textFieldGrp('randomVal', label = 'Random: ' )
-    #cmds.button( label='Choose these values', command=('queryTextField();cmds.deleteUI(\"' + window + '\", window=True)') )
-    cmds.button( label='Choose these values:', command=('queryTextField(originalSelection)') )   
-    #cmds.button( label='Make renderable and close', command=('setupArnoldCurves();cmds.deleteUI(\"' + window + '\", window=True)') )
-    #cmds.button( label='Generate again', command=('queryTextField()') )
-    cmds.showWindow( window )
-    return values
         
                     
 def queryTextField(originalSelection):
@@ -86,7 +69,27 @@ def setupArnoldCurves(nCurve):
         print "Curve not found",
         
         
+def createWindow(originalSelection):
     
+    windowID = 'Autowire'
+    if cmds.window(windowID, exists = True):
+        cmds.deleteUI('Autowire')
+    window = cmds.window(windowID)
+    cmds.rowColumnLayout()
+     
+    cmds.textFieldGrp('droopVal', label = 'Droop: ')
+    cmds.textFieldGrp('randomVal', label = 'Random: ' )
+    #cmds.button( label='Choose these values', command=('queryTextField();cmds.deleteUI(\"' + window + '\", window=True)') )
+    """
+    This button calls autoWire.queryTextField and therefore will have interesting issues if run from the script editor.
+    Use this line if running from the script editor:
+    cmds.button( label='Choose these values:', command=('queryTextField(originalSelection)') )   
+    """
+    cmds.button( label='Choose these values:', command=Callback(queryTextField, originalSelection)) 
+    # The old way
+    #cmds.button( label='Choose these values:', command=('autoWire.queryTextField(originalSelection)') )   
+    cmds.showWindow( window )
+    return values
     
 def start():
     originalSelection = cmds.ls(sl=True) 
@@ -94,10 +97,12 @@ def start():
     return originalSelection
 
 nCurve = []
+curves = []
 values = ""
 originalSelection = []
 #
 #originalSelection = start()
+
 
 
 
