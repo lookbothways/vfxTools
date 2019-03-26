@@ -3,15 +3,28 @@
 
 import maya.cmds as cmds
 import mtoa.aovs as aovs
+from mtoa.core import createOptions
+createOptions()
 
 def setupAOV():
+
+    def setFullFloat(AOVfullFloat):
+        # creates new arnoldDriver and connects tech AOVs to it. 
+        fullFlotAD = cmds.createNode( 'aiAOVDriver', name='fullFloatArnoldDriver')
+        cmds.setAttr("defaultArnoldDriver.halfPrecision", 1)
+        cmds.setAttr( fullFlotAD+".mergeAOVs", 1 )       
+        for AOV in AOVfullFloat:
+            cmds.connectAttr(fullFlotAD + ".message", "aiAOV_{}.outputs[0].driver".format(AOV), force=True)
+
 
     def setPref():
         global AOVpref
         global AOVoff
+        global AOVfullFloat
         # Define list of preferred AOVs with names *EXACTLY* as they appear in the Render Settings window...
         AOVpref = "AO", "coat", "crypto_material", "crypto_object", "diffuse_albedo", "diffuse_direct", "diffuse_indirect", "emission", "L_hdr", "L_key", "L_rim", "L_fill", "motionvector", "N", "P", "shadow_matte", "specular_direct", "specular_indirect", "sss", "transmission", "UV", "volume", "Z"
         AOVoff = "AO", "volume", "sss", "transmission", "emission"
+        AOVfullFloat = "Z", "P", "UV", "motionvector", "N", "volume", "crypto_object", "crypto_material"
 
     def allOff(): # Turn all the current AOVs off...
         allNiceNames = []
@@ -106,7 +119,9 @@ def setupAOV():
             
             # Connect it to the UV AOV
             cmds.defaultNavigation(source="green_ramp", destination="aiAOV_UV.defaultValue", ce=True)
-            
+
+            # Sets the AOVs to full / half float based on list at top.
+            setFullFloat(AOVfullFloat)
             print "AOV-Settings-UV: STmap setup complete!\n",
 
     # Run the script
@@ -159,6 +174,9 @@ def setupAOV():
     cmds.setAttr('ambientOcclusion_AOV.farClip', 200)
     cmds.connectAttr('ambientOcclusion_AOV.outColor', 'aiAOV_AO.defaultValue')
     print "AOV-Settings-AO: Setup complete!\n",
+
+    # Set AOVfullFloat to full and other drivers to half
+
 
 def aovSettings(): 
     
@@ -329,3 +347,4 @@ def aovSettings():
         print "AOV-Settings: Cancelled: Nothing was changed.\n",
 
 # END #
+
