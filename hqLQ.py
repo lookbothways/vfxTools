@@ -8,7 +8,20 @@ createOptions()
 from LONshelf import ssync
 reload(ssync)
 
-
+AAsamples = ''
+GIDiffuseSamples = ''
+GISpecularSamples = ''
+GITransmissionSamples = ''
+GISssSamples = ''
+GIVolumeSamples = ''
+GIDiffuseDepth = ''
+GISpecularDepth = ''
+GITransmissionDepth = ''
+lowLightThreshold = ''
+project = ''
+output = ''
+    
+    
 def setSamples(samples):
 
     cmds.setAttr('defaultArnoldRenderOptions.AASamples', samples[0])
@@ -66,59 +79,8 @@ def getLQsamples(project,AAsamples,GIDiffuseSamples,GISpecularSamples,GITransmis
               
 
 def start():
-    # LQ / HQ sets the following values:
-    AAsamples = ''
-    GIDiffuseSamples = ''
-    GISpecularSamples = ''
-    GITransmissionSamples = ''
-    GISssSamples = ''
-    GIVolumeSamples = ''
-    GIDiffuseDepth = ''
-    GISpecularDepth = ''
-    GITransmissionDepth = ''
-    lowLightThreshold = ''
-    project = ''
-    output = ''
-
-    # get project and check for custom .json file
-    project = ssync.getProject()
-    defaultJsonPresetsPath = "/mnt/projects/library/arnoldSettings/presets/samples_defaultSettings.json"
-    pathExists = "/mnt/projects/library/arnoldSettings/presets/{}.json".format(project)
-    if os.path.exists(pathExists) == False:
-        print "Project level presets {}.json does not exist, using default: /mnt/projects/library/arnoldSettings/presets/samples_defaultSettings.json".format(project) 
-        project = "defaultSettings"
-
-    outputQuality = cmds.confirmDialog( title='Set render quality', message='Choose settings for a HQ or LQ render...', button=['HQ','LQ','Cancel'], defaultButton='HQ', cancelButton='Cancel', dismissString='Cancel' )
-
-
-    if outputQuality == "HQ":
-        samples = getHQsamples(project,AAsamples,GIDiffuseSamples,GISpecularSamples,GITransmissionSamples,GISssSamples,GIVolumeSamples,GIDiffuseDepth,GISpecularDepth,GITransmissionDepth,lowLightThreshold)
-        setSamples(samples)
-        print samples[10],
-        
-    if outputQuality == "LQ":
-        samples = getLQsamples(project,AAsamples,GIDiffuseSamples,GISpecularSamples,GITransmissionSamples,GISssSamples,GIVolumeSamples,GIDiffuseDepth,GISpecularDepth,GITransmissionDepth,lowLightThreshold)
-        setSamples(samples)
-        print samples[10],
-        
-    if outputQuality == "Cancel":
-        print "No settings changed.",
-
-
-def start():
     # LQ / HQ sets the following values - Update the PRChqOnly funciton below also!!
-    AAsamples = ''
-    GIDiffuseSamples = ''
-    GISpecularSamples = ''
-    GITransmissionSamples = ''
-    GISssSamples = ''
-    GIVolumeSamples = ''
-    GIDiffuseDepth = ''
-    GISpecularDepth = ''
-    GITransmissionDepth = ''
-    lowLightThreshold = ''
-    project = ''
-    output = ''
+
 
     # get project and check for custom .json file
     project = ssync.getProject()
@@ -146,19 +108,6 @@ def start():
 
 
 def PRChqOnly():
-    # LQ / HQ sets the following values - Update the start funciton also!!
-    AAsamples = ''
-    GIDiffuseSamples = ''
-    GISpecularSamples = ''
-    GITransmissionSamples = ''
-    GISssSamples = ''
-    GIVolumeSamples = ''
-    GIDiffuseDepth = ''
-    GISpecularDepth = ''
-    GITransmissionDepth = ''
-    lowLightThreshold = ''
-    project = ''
-    output = ''
 
     # get project and check for custom .json file
     project = ssync.getProject()
