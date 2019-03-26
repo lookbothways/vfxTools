@@ -314,14 +314,23 @@ def add_basic_render_info_structure(render_info):
     return basic_structure
 
 
+def getArnoldSettingsJsonPath(project):
+    #Sets hard-coded preset path if it can't find project specific settings
+    defaultJsonPresetsPath = "/mnt/projects/library/arnoldSettings/presets/atk_arnoldSettings_defaultSettings.json"
+    pathExists = "/mnt/projects/library/arnoldSettings/presets/atk_arnoldSettings_{}.json".format(project)
+    if os.path.exists(pathExists) == False:
+        print "Project level preset atk_arnoldSettings_{}.json does not exist, using default: /mnt/projects/library/arnoldSettings/presets/atk_arnoldSettings_defaultSettings.json".format(project)
+        project = "defaultSettings"
+
+    return project
+
+   
+
 
 
 def shotgunSync():
     
-    # Load atk_arnoldSettings .json file
-    
-    render_setup_file = "/mnt/projects/library/arnoldSettings/presets/atk_arnoldSettings_v004.json"
-    import_render_setup(render_setup_file)
+
 
     # This way (below) breaks now
     #import maya.app.renderSetup.views.renderSetupPreferences as prefs
@@ -353,7 +362,16 @@ def shotgunSync():
         engine = sgtk.platform.current_engine() 
         engine.apps['tk-multi-workfiles2'].show_file_save_dlg()
         cmds.error( "Scene not saved. Save scene via Shotgun > file save first." ),
+ 
+     # Load atk_arnoldSettings .json file
+    project = getProject()
+    print "Project is "+str(project)
+    project = getArnoldSettingsJsonPath(project)
+    print "atk_arnoldSettings_{}.json".format(project)
+    render_setup_file = "/mnt/projects/library/arnoldSettings/presets/atk_arnoldSettings_{}.json".format(project)
     
+    import_render_setup(render_setup_file)
+
     shot_id = ""
     shot_id =  getShotDetails(scenePath)[0]
     print "Shot ID: "+ str(shot_id)
@@ -464,8 +482,15 @@ def shotgunSync():
     return isAsset
     
     
-   
-
+def getProject():    
+    scenePath = ""
+    scenePath = getOpenSceneFilePath()
+    if scenePath:
+        project_name = (str(scenePath).split("/")[3])
+    else:
+        cmds.error( "Scene not saved, path not resolved. Save scene via Shotgun > file save first." )
+    return project_name
+    
 
 
 def getLatestCam():
@@ -634,7 +659,6 @@ def executeThis():
 #end
 #executeThis()   
 #shotgunSync()
-
 
 
 
