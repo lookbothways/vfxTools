@@ -1,18 +1,27 @@
 import maya.cmds as cmds
+import pymel.core as pm
 import subprocess
 
 """
 import autoSED
 reload(autoSED)
 
-autoSED.autoSED()
+# for shelf
+doit = ""
+searchFor = ""
+replaceWith = ""
+filePath = ""
+filePath = start()
+
+
+
 
 
 """
 
 
 def createWindow(filePath):
-    
+
     #Creates a window in maya
     # runs queryTextField
     windowID = 'autoSED'
@@ -21,12 +30,23 @@ def createWindow(filePath):
     window = cmds.window(windowID)
     cmds.rowColumnLayout()
     cmds.textFieldGrp('searchFor', label = 'Search for: ')
-    cmds.textFieldGrp('replaceWith', label = 'Replace with: ' )
+    cmds.textFieldGrp('replaceWith', label = 'Replace with: ')
     #cmds.button(label = 'pass textfield values', command = queryTextField)
-    cmds.button( label='Search and Replace', command=('queryTextField(filePath);cmds.deleteUI(\"' + window + '\", window=True)') )
+    #cmds.button( label='Search and Replace', command=('queryTextField(filePath);cmds.deleteUI(\"' + window + '\", window=True)') )
+    cmds.button('search_and_replace_btn', label='Search and Replace', command=pm.Callback(search_and_replace_btn_clicked, filePath, window))
     cmds.showWindow( window )
     return filePath
-        
+
+def search_and_replace_btn_clicked(filePath, window):
+    """
+    Gets called when the "Search and Replace" Button is clicked.
+
+    :param str filePath: The file path on which to operate on.
+    :param str window: The name of the window that this button lives in.
+    """
+    queryTextField(filePath)
+    cmds.deleteUI(window, window=True)
+
 def swapPaths(filePath,searchFor,replaceWith):
     niceFilePath = filePath[3:-2]
     splitPath = niceFilePath.split("/")
@@ -37,24 +57,24 @@ def swapPaths(filePath,searchFor,replaceWith):
 
     # Create the command for the terminal
     command1 = "find "+ fileDirectory +" -maxdepth 1 -name '"+ fileName +"' -exec sed -i 's!"+searchFor+"!"+replaceWith+"!g' '{}' \;"
-    
+
     finalCommand = command1# + " && " + command2
     print "Command being passed to the terminal: \n", finalCommand
 
     # Pass the commands to a shell
     subprocess.Popen(finalCommand, shell=True)
     print "Auto-SED complete for file: %s" % fileName,
-                    
+
 def queryTextField(filePath):
-    # Gets the contents of the fiels in 'createWindow' 
+    # Gets the contents of the fiels in 'createWindow'
     # Runs swapPaths
     searchFor = cmds.textFieldGrp( 'searchFor', query = True, text = True)
     replaceWith = cmds.textFieldGrp( 'replaceWith', query = True, text = True)
     doit = cmds.confirmDialog(m="Search and replace?\n\n{}\n\nfor\n\n{}\n\nIn: {}\nThis is not undoable.".format(searchFor,replaceWith,filePath[3:-2]), b=["OK","Cancel"], icn="warning", ma="center", t="autoSED")
     if doit == 'OK':
         print "Searching {} for: {}. Replacing with: {}".format(filePath[3:-2],searchFor,replaceWith),
-        swapPaths(str(filePath),searchFor,replaceWith) 
-        return searchFor, replaceWith      
+        swapPaths(str(filePath),searchFor,replaceWith)
+        return searchFor, replaceWith
 
     if "/mnt/" in filePath:
         print "Running autoSED"
@@ -62,24 +82,23 @@ def queryTextField(filePath):
         return filePath
     else:
         print "File not on /mnt/",
-        
+
 def getFilePath():
     fileFilter = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*)"
     filePath = str(cmds.fileDialog2(ds=2, cap="Choose a file to search & replace in.", ff=fileFilter, fm=1, okc="This file", cc="Cancel"))
     return filePath
-    
-def start():    
+
+def start():
     filePath = getFilePath()
     print filePath
     createWindow(filePath)
     return filePath
 
-
+"""
 doit = ""
 searchFor = ""
 replaceWith = ""
 filePath = ""
 filePath = start()
 
-    
-
+"""
