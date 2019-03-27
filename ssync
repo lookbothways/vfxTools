@@ -23,6 +23,8 @@ Useful paths:
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_setups"
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/atk_defaultLights_v001.ma"
 "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
+localScriptsPath
+"/mnt/pipeline/ATK_PIPELINE/maya/modules/DCO/scripts"
 
 In dialogue 'pst' stands for 'Project Specific Thing' - ie set custom clipping planes
 
@@ -231,6 +233,8 @@ def setResolution(pxRes, pyRes, pixelAspect=1.0):
     cmds.setAttr("defaultResolution.height", pyRes)
     cmds.setAttr("defaultResolution.deviceAspectRatio", device_aspect)
     cmds.setAttr("defaultResolution.aspectLock", 1) # locks ratio
+"""
+# This way is cut-in cut-out:
 
 def get_shot_frame_range_by_shot_code(code):
     sg_filters = [["code", "is", code]]
@@ -244,6 +248,19 @@ def get_shot_frame_range_by_shot_code(code):
     else:
         return int(data["sg_cut_in"]), int(data["sg_cut_out"])
 
+"""        
+# This way is head-in tail-out
+def get_shot_frame_range_by_shot_code(code):
+    sg_filters = [["code", "is", code]]
+    fields = ['sg_head_in', 'sg_tail_out']
+    #print fields
+    data = sg.find_one("Shot", filters=sg_filters, fields=fields)
+    #data = sg.find_one("Asset", filters=sg_filters, fields=fields)
+    if data is None or data["sg_head_in"] is None or data["sg_tail_out"] is None:
+        print "no shot data found"
+        return False
+    else:
+        return int(data["sg_head_in"]), int(data["sg_tail_out"])
 
 
 def importDefaultLights():
@@ -256,7 +273,30 @@ def importDefaultLights():
         cmds.error( "LightRig file not found: /mnt/projects/library/arnoldSettings/scenes/atk_defaultLights_v001.ma - Contact your supervisor." )
 
 
+def projectSpecificThing():
+    
+    
+    scenePath = ""
+    scenePath = getOpenSceneFilePath()
+    if scenePath:
+        project_name = str.upper((str(scenePath).split("/")[3]))
+        # Uppercase because modules folders are always in upper case (so far)
+        localScriptsPath = "/mnt/pipeline/ATK_PIPELINE/maya/modules/{}/scripts/ssync_projectSpecifcThing.py".format(project_name)
+    
+    fileExists = False
+    fileExists = cmds.file( localScriptsPath, q=True, ex=True )
+        
+    print "Checking for project specific ssync code for {} in {}".format(project_name, localScriptsPath)
+    print "File exists: "+ str(fileExists)
+    
+    if fileExists == True:
+        import ssync_projectSpecifcThing
+        reload(ssync_projectSpecifcThing)
+        ssync_projectSpecifcThing.start()
+    else:
+        print "No project specific code found."
 
+    
 
 def importRenderSetup(pFilename):
     with open(pFilename, "r") as file:
@@ -345,6 +385,7 @@ def shotgunSync():
     fpsSummary = ""
     resolutionSummary = ""
     startEndFrameSummary = ""
+
     
     # Get shot resolution by shot ID
     fixRes = False
@@ -468,13 +509,12 @@ def shotgunSync():
         cmds.playbackOptions(animationStartTime=1001)
         cmds.playbackOptions(animationEndTime=1001)
         startEndFrameSummary = "| Set render-range to {}-{} ".format(1001, 1001)
+
+    cmds.currentTime( 1001 )
         
     
     
-    #------------- OPTIONAL SETTINGS
-    # Aovs
-    # Load project renderGlobals preset
-    # Create and set up lightgroup aovs (import scene from assets)
+
     
     
     #Summary output:
@@ -543,8 +583,8 @@ def forceClippingPlanes():
     
     renderableCamera = renderCam[0]
     # set clipping planes
-    cmds.setAttr(renderableCamera+".nearClipPlane", 100)
-    cmds.setAttr(renderableCamera+".farClipPlane", 600000)
+    cmds.setAttr(renderableCamera+".nearClipPlane", 10)
+    cmds.setAttr(renderableCamera+".farClipPlane", 100000)
     
 ### USER INTERFACE
 def executeThis():
@@ -574,12 +614,6 @@ def executeThis():
     
     # Project Specific Thing
     pst = False
-    """
-    doPst = cmds.ls(type="imagePlane") #Example existing object check
-    if doPst:
-        print "Project Specific Thing!\n",
-        pst = True
-    """
 
     class PreRenderChecks(object):
         def __init__(self, *args):
@@ -599,14 +633,14 @@ def executeThis():
             cmds.setParent(menu=True)
 
             # Create a main layout...
-            mainLayout = cmds.columnLayout(w = 200, h = 250, cw = 10, rs = 8, co = ['both',2])
+            mainLayout = cmds.columnLayout(w = 200, h = 260, cw = 10, rs = 8, co = ['both',2])
 
             # Add the checkboxes...
             self.ssyncBox = cmds.checkBox('Shotgun Sync:\nFramerange\nResolution\nFPS\nArnold renderSettings', value=True)
             self.aovsExistBox = cmds.checkBox('Set up AOVs', value=aovsExist)
             self.lightsExistBox = cmds.checkBox('Import default lightrig', value=lightsExist)
             self.refLatestCameraBox = cmds.checkBox('Reference published camera', value=False)
-            self.pstBox = cmds.checkBox('Clipping planes: 100,600000', value=pst)
+            self.pstBox = cmds.checkBox('Large scene clipping planes:\n10,100000', value=pst)
             
             # Add the buttons...
             cmds.button(label = 'Setup above', width = 200, height = 30, c = self.GetSelectedNodes)
@@ -615,12 +649,13 @@ def executeThis():
             # Show the window...
             cmds.showWindow(self.window)
 
-        # Perform selected actions then submit to Deadline
+        # Perform selected actions
         def GetSelectedNodes(self,*args):
 
             # Get and perform the requested actions
             if cmds.checkBox(self.ssyncBox, q=True, v=True) == True:
                 isAsset = shotgunSync()
+
                 
             if cmds.checkBox(self.aovsExistBox, q=True, v=True) == True:
                 aovSettings.setupAOV()
@@ -634,12 +669,12 @@ def executeThis():
                 cmds.file(publishedCameraPath, r=True)
 
             if cmds.checkBox(self.pstBox, q = True, v = True) == True:
-                # DO PROJCET SPECIFIC THING HERE
-                #print "No project specific thing set!",
                 forceClippingPlanes()
 
 
             if cmds.window('ShotgunSync', exists = True):
+                #------------- OPTIONAL SETTINGS - runs projectSpecificThing last:
+                projectSpecificThing()
                 cmds.deleteUI('ShotgunSync')
             
         # Make no changes and submit to Deadline anyway
@@ -659,6 +694,7 @@ def executeThis():
 #end
 #executeThis()   
 #shotgunSync()
+
 
 
 
