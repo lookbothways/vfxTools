@@ -15,6 +15,7 @@ def setupAOV():
         cmds.setAttr( fullFlotAD+".mergeAOVs", 1 )       
         for AOV in AOVfullFloat:
             cmds.connectAttr(fullFlotAD + ".message", "aiAOV_{}.outputs[0].driver".format(AOV), force=True)
+        print "fullFloatArnoldDriver created for: "+ str(AOVfullFloat)
 
 
     def setPref():
@@ -121,8 +122,10 @@ def setupAOV():
             cmds.defaultNavigation(source="green_ramp", destination="aiAOV_UV.defaultValue", ce=True)
 
             # Sets the AOVs to full / half float based on list at top.
-            setFullFloat(AOVfullFloat)
+            
             print "AOV-Settings-UV: STmap setup complete!\n",
+
+        setFullFloat(AOVfullFloat)
 
     # Run the script
     setPref()
@@ -141,23 +144,28 @@ def setupAOV():
     cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_object.defaultValue')
     print "AOV-Settings-Cryptomatte: Setup complete!\n",
 
-    # Hook up customPref things
-    if not cmds.objExists("prefUtil"):
-        cmds.shadingNode('aiUtility', name="prefUtil", asUtility=True)
-    if not cmds.objExists("prefTex"):
-        cmds.shadingNode('file', name="prefTex", asTexture=True)
-    try:
-        cmds.connectAttr("prefTex.outColor", "prefUtil.color")
-    except:
-        print "AOV-Settings-Pref: Failed to connect the prefTex and prefUtil nodes, they may have been connected already!\n",
-    try:
-        cmds.connectAttr("prefUtil.outColor", "aiAOV_custom_pref.defaultValue")
-    except:
-        print "AOV-Settings-Pref: Failed to connect the prefUtil and AOV nodes!\n",
-    cmds.setAttr("prefUtil.shadeMode", 2)
-    cmds.setAttr("prefTex.fileTextureName", "/mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/pref/prefBody_prefSpaceShapeSpill_<UDIM>.exr", type="string")
-    cmds.setAttr("prefTex.uvTilingMode", 3) # UDIM (Mari)
-    print "AOV-Settings-Pref: Setup complete!\n",
+    # Hook up customPref things if Pref in list of AOVs - created for SHR. Change the path to the pref map when pref is required again:
+
+    if "pref" in AOVpref:
+        if not cmds.objExists("prefUtil"):
+            cmds.shadingNode('aiUtility', name="prefUtil", asUtility=True)
+        if not cmds.objExists("prefTex"):
+            cmds.shadingNode('file', name="prefTex", asTexture=True)
+        try:
+            cmds.connectAttr("prefTex.outColor", "prefUtil.color")
+        except:
+            print "AOV-Settings-Pref: Failed to connect the prefTex and prefUtil nodes, they may have been connected already!\n",
+        try:
+            cmds.connectAttr("prefUtil.outColor", "aiAOV_custom_pref.defaultValue")
+        except:
+            print "AOV-Settings-Pref: Failed to connect the prefUtil and AOV nodes!\n",
+
+        cmds.setAttr("prefUtil.shadeMode", 2)
+        cmds.setAttr("prefTex.fileTextureName", "/mnt/projects/shr/assets/Character/creature_adult/RIG/publish/textures/pref/prefBody_prefSpaceShapeSpill_<UDIM>.exr", type="string")
+        cmds.setAttr("prefTex.uvTilingMode", 3) # UDIM (Mari)
+        print "AOV-Settings-Pref: Setup complete!\n",
+
+
 
     # Hook up the lightGroup things
     cmds.setAttr("aiAOV_L_key.lightPathExpression", "C.*<L.'key'>", type="string")
