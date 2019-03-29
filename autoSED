@@ -11,7 +11,7 @@ doit = ""
 searchFor = ""
 replaceWith = ""
 filePath = ""
-filePath = start()
+filePath = AUTOsed.start()
 
 
 
