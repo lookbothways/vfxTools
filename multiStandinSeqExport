@@ -60,10 +60,19 @@ def exportAssSeq():
                 print ("Folder exists")
     
     
-    
+    # Choose frame-range to export
     startFrame = cmds.getAttr('defaultRenderGlobals.startFrame')
     endFrame = cmds.getAttr('defaultRenderGlobals.endFrame')
+    one = "ran"
+    result = cmds.promptDialog(title='Arbitrary #',message='Range {}-{} \nOr enter custom range: '.format(int(startFrame), int(endFrame)),button=['OK', 'Cancel'],defaultButton='OK',dismissString='Cancel')    
+    if result == 'OK':
+        output = cmds.promptDialog(query=True, text=True)
+        if "-" in output:
+            startFrame, endFrame = str(output).split("-")
+            print output
     
+
+
     breakLoop.breakLoopSetup()
     if not breakLoop.breakLoop():
         #export selected into the folders if 'deleteMeToStop' found in /tmp
@@ -76,4 +85,5 @@ def exportAssSeq():
                 print export_file  
     else:
         print "breakLoop: deleteMeToStop not found. Ending loop."
+
 
