@@ -1,24 +1,4 @@
-   
-import breakLoop
-reload(breakLoop)
-
-breakLoop.breakLoopSetup()
-breakLoop.breakLoop()
-
-#demo loop to prove it works:
-
-c=0
-while c<1000000:
-    c+= 1
-    print c
-    if breakLoop.breakLoop():
-        break
-
-
-#Save this in the scripts dir:
-"""
-
-print "Setting up breakLoop functions. Call breakLoop.breakLoopSetup to create file in /tmp for breaking while loops."
+print "Setting up breakLoop functions. Call breakLoop.breakLoopSetup() to create file in /tmp for breaking while loops."
 
 def breakLoopSetup(loopStopperPath = "/tmp/deleteMeToStop"):
     
@@ -39,4 +19,12 @@ def breakLoop(loopStopperPath = "/tmp/deleteMeToStop"):
         return True
 
 """
-   
+#Example code
+from LONshelf import breakLoop
+
+breakLoop.breakLoopSetup()
+if not breakLoop.breakLoop():
+    print "test"
+else:
+    print "deleteMeToStop not found. Ending loop."
+"""
