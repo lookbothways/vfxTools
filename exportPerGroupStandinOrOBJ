@@ -24,54 +24,60 @@ import maya.mel as mel
 import arnold as arnold
 from arnold import *
 
+from LONshelf import multiStandinSeqExporter
+
 def exportFiles():
-    
     def getFilePath(export_file):
         objOutPath = cmds.file(export_file,pr=1,typ="OBJexport",es=1,op="groups=0; ptgroups=0; materials=0; smoothing=0; normals=0")
         return objOutPath
-    
     def exportAss(export_file):
         exportAss = cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=0, shadowLinks=0, selected=True)
-        return exportAss   
-    
-    
-    export_dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here')
-    export_dir = export_dir[0]+"/"
-    mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+        return exportAss  
+    #mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+    mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
     print mask
     selected = cmds.ls(sl=True)
     #Some options to choose from:
     option=""
-    option=cmds.confirmDialog(title='Export selected',message="Export selected as standins",button=['Export and reimport .ass', 'Export .ass only', 'Export OBJs', 'Cancel'],defaultButton='Export and reimport',cancelButton='Cancel',dismissString='Cancel')
+    option=cmds.confirmDialog(title='Export selected',message="Export selected as standins",button=['Export and reimport .ass', 'Export .ass only', 'Export .ass per-object seq', 'Export OBJs', 'Cancel'],defaultButton='Export and reimport',cancelButton='Cancel',dismissString='Cancel')
     #empties reimport:
     reimport = ""
-    if option == 'Export and reimport .ass':
-        reimport = True
-    else:
-        reimport = False
-    
-    if option == 'Export OBJs':
-        suffix = ".obj"
-    else:
-        suffix = ".ass"
-    for sel in selected: 
-        print "Exporting {}".format(sel)
-        export_file = export_dir+sel+suffix
-        cmds.select(sel)        
-        if option == 'Export OBJs':
-            getFilePath(export_file)
-            #cmds.file(export_file,pr=1,typ="OBJexport",es=1,op="groups=0; ptgroups=0; materials=0; smoothing=0; normals=0")
+    if option == 'Cancel':
+        cmds.error( 'Export cancelled' )  
+    else:    
+        if option == 'Export and reimport .ass':
+            reimport = True
         else:
-            #cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=0, shadowLinks=0, selected=True)
-            exportAss(export_file)
-        if reimport == True:
-            cmds.file( export_file, i=True )
-            #cmds.setAttr( "ArnoldStandInShape.deferStandinLoad", 0)
-            imported = cmds.ls( 'ArnoldStandIn*', sl=False )  
-            #selects and renames the standin
-            swapOutName = ( sel+"_standIn" )
-            cmds.rename( imported[0], swapOutName)
-            cmds.select( sel, swapOutName )
-            cmds.warning( "If original objects were in render layers, imported objects will need to be added to those layers manually." )
+            reimport = False
+        if option == 'Export OBJs':
+            suffix = ".obj"
+        else:
+            suffix = ".ass"
+        # do the exporting bit:        
+        if option == 'Export .ass per-object seq':
+            multiStandinSeqExporter.exportAssSeq()
+        else:
+            export_dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here')
+            export_dir = export_dir[0]+"/"       
+            
+            for sel in selected: 
+                print "Exporting {}".format(sel)
+                export_file = export_dir+sel+suffix
+                cmds.select(sel)        
+                if option == 'Export OBJs':
+                    getFilePath(export_file)
+                    #cmds.file(export_file,pr=1,typ="OBJexport",es=1,op="groups=0; ptgroups=0; materials=0; smoothing=0; normals=0")
+                else:
+                    #cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=0, shadowLinks=0, selected=True)
+                    exportAss(export_file)
+                if reimport == True:
+                    cmds.file( export_file, i=True )
+                    #cmds.setAttr( "ArnoldStandInShape.deferStandinLoad", 0)
+                    imported = cmds.ls( 'ArnoldStandIn*', sl=False )  
+                    #selects and renames the standin
+                    swapOutName = ( sel+"_standIn" )
+                    cmds.rename( imported[0], swapOutName)
+                    cmds.select( sel, swapOutName )
+                    cmds.warning( "If original objects were in render layers, imported objects will need to be added to those layers manually." )
                 
                 
