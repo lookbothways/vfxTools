@@ -1,0 +1,79 @@
+# Export all selected as individual standins to specified path
+"""
+Get the correct mask value using these constants:
+    AI_NODE_UNDEFINED   0x0000
+    AI_NODE_OPTIONS     0x0001
+    AI_NODE_CAMERA      0x0002
+    AI_NODE_LIGHT       0x0004
+    AI_NODE_SHAPE       0x0008
+    AI_NODE_SHADER      0x0010
+    AI_NODE_OVERRIDE    0x0020
+    AI_NODE_DRIVER      0x0040
+    AI_NODE_FILTER      0x0080
+    AI_NODE_ALL         0xFFFF
+    
+    
+No shaders:
+mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+
+    Everything:
+    mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_ALL
+"""
+import maya.cmds as cmds
+import maya.mel as mel
+import arnold as arnold
+import os
+from arnold import *
+from LONshelf import breakLoop
+
+def exportAssSeq():
+    
+    
+    cmds.getAttr('defaultRenderGlobals.startFrame')
+    
+    def exportAss(export_file):
+        exportAss = cmds.arnoldExportAss( f=export_file, fsh=True, mask=65535, lightLinks=0, shadowLinks=0, selected=True)
+        return exportAss   
+    
+    
+    export_dir = cmds.fileDialog2(fm=3, dialogStyle=2, cap='Select output location', okCaption='Save here')
+    export_dir = export_dir[0]+"/"
+    #mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+    mask = arnold.AI_NODE_OPTIONS | arnold.AI_NODE_SHAPE | arnold.AI_NODE_OVERRIDE | arnold.AI_NODE_FILTER
+    print mask
+    selected = cmds.ls(sl=True)
+    
+    suffix = ".ass"
+    
+    
+    
+    #create the folders
+    for sel in selected:
+        folder= export_dir+ sel
+        if os.path.exists(folder):
+            print "folder exists "+ folder
+        else:
+            try: 
+                os.mkdir(folder)
+                print "Created "+ folder            
+            except OSError:  
+                print ("Folder exists")
+    
+    
+    
+    startFrame = cmds.getAttr('defaultRenderGlobals.startFrame')
+    endFrame = cmds.getAttr('defaultRenderGlobals.endFrame')
+    
+    breakLoop.breakLoopSetup()
+    if not breakLoop.breakLoop():
+        #export selected into the folders if 'deleteMeToStop' found in /tmp
+        for frame in range(int(startFrame), int(endFrame)+1):
+            cmds.currentTime( frame, update=True, edit=True )
+            for sel in selected:
+                cmds.select(sel)    
+                export_file = export_dir+ sel+ os.sep+ sel+ "."+ str(int(frame))+ suffix
+                exportAss(export_file) 
+                print export_file  
+    else:
+        print "breakLoop: deleteMeToStop not found. Ending loop."
+
