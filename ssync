@@ -71,6 +71,20 @@ reload(ShotgunTankAccess)
 sta= ShotgunTankAccess.Shotgun_Tank_Access()
 sg= sta.get_sg()
 
+# Load projectSpecificThing
+# import ssync_projectSpecificThing
+# reload(ssync_projectSpecificThing)
+import fnmatch
+
+try:
+    import ssync_projectSpecificThing
+except ImportError as err:
+    print "ssync_projectSpecificThing not found"
+
+if not fnmatch.fnmatch(ssync_projectSpecificThing.__file__, "/mnt/pipeline/ATK_PIPELINE/maya/modules/*/scripts/ssync_projectSpecificThing.py"):
+    print "ssync_projectSpecificThing.py not found at project level. Setting ATK 3D defaults."
+
+
 def getOpenSceneFilePath():
     scene = cmds.file(q=1,sn=1)
     project = os.path.dirname(os.path.dirname(scene))
@@ -281,7 +295,7 @@ def projectSpecificThing():
     if scenePath:
         project_name = str.upper((str(scenePath).split("/")[3]))
         # Uppercase because modules folders are always in upper case (so far)
-        localScriptsPath = "/mnt/pipeline/ATK_PIPELINE/maya/modules/{}/scripts/ssync_projectSpecifcThing.py".format(project_name)
+        localScriptsPath = "/mnt/pipeline/ATK_PIPELINE/maya/modules/{}/scripts/ssync_projectSpecificThing.py".format(project_name)
     
     fileExists = False
     fileExists = cmds.file( localScriptsPath, q=True, ex=True )
@@ -290,9 +304,8 @@ def projectSpecificThing():
     print "File exists: "+ str(fileExists)
     
     if fileExists == True:
-        import ssync_projectSpecifcThing
-        reload(ssync_projectSpecifcThing)
-        ssync_projectSpecifcThing.start()
+
+        ssync_projectSpecificThing.start()
     else:
         print "No project specific code found."
 
@@ -510,12 +523,14 @@ def shotgunSync():
         cmds.playbackOptions(animationEndTime=1001)
         startEndFrameSummary = "| Set render-range to {}-{} ".format(1001, 1001)
 
+    # Some cleaning up
     cmds.currentTime( 1001 )
-        
-    
-    
+    try:
+        # Because persp is renderable by default and we rarely want to render persp
+        cmds.setAttr( 'perspShape.renderable', 0 )
+    except:
+        pass
 
-    
     
     #Summary output:
     print fpsSummary+resolutionSummary+startEndFrameSummary,
@@ -674,6 +689,7 @@ def executeThis():
 
             if cmds.window('ShotgunSync', exists = True):
                 #------------- OPTIONAL SETTINGS - runs projectSpecificThing last:
+
                 projectSpecificThing()
                 cmds.deleteUI('ShotgunSync')
             
