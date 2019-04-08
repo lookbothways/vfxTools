@@ -74,16 +74,19 @@ sg= sta.get_sg()
 # Load projectSpecificThing
 # import ssync_projectSpecificThing
 # reload(ssync_projectSpecificThing)
-import fnmatch
+
+
 
 try:
     import ssync_projectSpecificThing
 except ImportError as err:
-    print "ssync_projectSpecificThing not found"
+    print "ssync_projectSpecificThing.py not found in /mnt/pipeline/ATK_PIPELINE/maya/modules/<project>/scripts"
 
+"""
+import fnmatch
 if not fnmatch.fnmatch(ssync_projectSpecificThing.__file__, "/mnt/pipeline/ATK_PIPELINE/maya/modules/*/scripts/ssync_projectSpecificThing.py"):
     print "ssync_projectSpecificThing.py not found at project level. Setting ATK 3D defaults."
-
+"""
 
 def getOpenSceneFilePath():
     scene = cmds.file(q=1,sn=1)
@@ -429,16 +432,27 @@ def shotgunSync():
     shot_id = ""
     shot_id =  getShotDetails(scenePath)[0]
     print "Shot ID: "+ str(shot_id)
+
+    xRes = "blank"
+    yRes = "blank"    
     
-    
-    xRes = ""
-    yRes = ""
+    shotRes = get_shot_resolution_by_id(shot_id)
+    print "Shot res: "+ str(shotRes)
     
     if get_shot_resolution_by_id(shot_id) != False:
-        xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
-        print "Shot res is {}x{}".format(xRes,yRes)
-    else:
-        print "Using project res as shot res"
+        try:
+            xRes,yRes = ((get_shot_resolution_by_id(shot_id)).split(" ")[1]).split("x")
+            print "xRes yRes {}x{}".format(xRes,yRes)
+        except:
+            pass
+        try:
+            #in case it has only number x number
+            xRes,yRes = get_shot_resolution_by_id(shot_id).split("x")
+            print "xRes yRes {}x{}".format(xRes,yRes)
+        except:
+            print "Getting shot-res failed. Using project res as shot res."
+            xRes = "blank"
+            yRes = "blank"
         
     # Get project resolution by project ID
     project_id = (get_project_id_by_name(project_name))["id"]
@@ -470,9 +484,10 @@ def shotgunSync():
            
     if get_shot_resolution_by_id(shot_id) != False:
         if localxRes != xRes or localyRes != yRes:
-            print "Setting local shot res to {} x {}. Forcing pixel aspect to 1.0".format(xRes, yRes),
-            setResolution(int(xRes), int(yRes), pixelAspect=1.0)
-            resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(xRes), str(yRes))
+            if xRes != "blank" or yRes != "blank":
+                print "Setting local shot res to {} x {}. Forcing pixel aspect to 1.0".format(xRes, yRes),
+                setResolution(int(xRes), int(yRes), pixelAspect=1.0)
+                resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(xRes), str(yRes))
                     
     if get_shot_resolution_by_id(shot_id) == False:
         if localxRes != pxRes or localyRes != pyRes:
