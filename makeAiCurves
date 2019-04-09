@@ -1,0 +1,21 @@
+#Make wires out of selected curves
+import maya.cmds as cmds
+
+def setupArnoldCurves(nCurve):
+    try:
+        cmds.setAttr(nCurve+".aiRenderCurve",1)
+        cmds.setAttr(nCurve+".aiMode",1)
+        cmds.setAttr(nCurve+".aiCurveWidth",0.02)
+        #cmds.setAttr(nCurve+".aiMinPixelWidth",1)
+        print "Setup aiRenderCurve",
+    except:
+        pass
+        
+        
+        
+
+
+sel = cmds.ls(sl=True)
+for each in sel:
+    setupArnoldCurves(sel)
+    
