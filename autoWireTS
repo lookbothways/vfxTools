@@ -96,6 +96,21 @@ def start():
     values = createWindow(originalSelection)
     return originalSelection
 
+
+#--------------------
+
+def temp():
+    # Source curve
+    selectedSource = cmds.ls(sl=True)
+
+    # Curves to get extruded along
+    selected = cmds.ls(sl=True)
+    for each in selected:
+        cmds.extrude( selectedSource, each, et=2, fpt=True, ucp=1, upn=True )
+
+
+
+
 nCurve = []
 curves = []
 values = ""
