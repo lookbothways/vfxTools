@@ -615,6 +615,24 @@ def forceClippingPlanes():
     # set clipping planes
     cmds.setAttr(renderableCamera+".nearClipPlane", 10)
     cmds.setAttr(renderableCamera+".farClipPlane", 100000)
+
+def forceClippingPlanesAllCams():
+    # Get the renderable camera
+    renderCam = []
+    allCams = cmds.ls(type = "camera")
+    for cam in allCams:
+        try:
+            cmds.setAttr(cam+".nearClipPlane", 10)
+            cmds.setAttr(cam+".farClipPlane", 100000)
+        except:
+            pass
+        
+    
+    renderableCamera = renderCam[0]
+    # set clipping planes
+    cmds.setAttr(renderableCamera+".nearClipPlane", 10)
+    cmds.setAttr(renderableCamera+".farClipPlane", 100000)
+    
     
 ### USER INTERFACE
 def executeThis():
@@ -725,7 +743,6 @@ def executeThis():
 #end
 #executeThis()   
 #shotgunSync()
-
 
 
 
