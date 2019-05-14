@@ -1,76 +1,90 @@
-## Toby Sanderson, 2018. Modified 0219 MSB
-"""
-TO DO:
-
-* Get renderable camera, check for arnold ST incoming and break connection.
-disconnectAttr WB_001_086_060_camera:aiImage1.outColor WB_001_086_060_camera:WB_001_086_060_cameraShape.aiUvRemap;
-
-
-"""
+## Toby Sanderson, 2018. Modified 2019 MSB
 ## Applies a selected amount of overscan based on current frame resolution.
 
+import maya.cmds as cmds
+
+"""
+To Do: 
+Check res against shot res / project res to see if shot may already have overscan on it. Important for bounding box option. 
+
+"""
+
 def overscanPicker():
-        
-    import maya.cmds as cmds
-    
     currentWidth = cmds.getAttr("defaultResolution.width")
     currentHeight = cmds.getAttr("defaultResolution.height")
-    
+    preScaleAmount = 1 
     # Get the renderable camera
     renderCam = []
     allCams = cmds.ls(type = "camera")
     for cam in allCams:
         if cmds.getAttr(cam+".renderable") == 1:
             renderCam.append(cam)
-    #print "Render Cameras:", renderCam
-    
     # Ensure only one render camera
     if len(renderCam) != 1:
-        cmds.confirmDialog(m="Looks like you've got multiple cameras set to render!\nSelect just one and try again...", b="OK", icn="warning", ma="center", t="Overscan Picker")
-        return
-        
+        cmds.confirmDialog(m="Multiple cameras set to render.\nSelect one and try again...", b="OK", icn="warning", ma="center", t="Overscan Picker")
+        return  
     # Choose overscan amount
     theCamera = str(renderCam[0])
-    print "Choose the overscan amount...",
+    currentPrescale = cmds.getAttr(theCamera+".preScale")
+    print "Choose the overscan method and amount..."
+    isBoundingBox = cmds.confirmDialog(m="Change resolution and preScale or put overscan in exr bounding box?", b=["Bounding box", "Change res and preScale"], t="Overscan method")
     overscanAmount = cmds.confirmDialog(m="Choose the amount of overscan you'd like...", b=["10%", "15%", "20%", "Arbitrary", "Cancel"], t="Overscan Picker")
     if overscanAmount == "10%":
-        newWidth = currentWidth*1.1
-        newHeight = currentHeight*1.1
-        cmds.setAttr(theCamera+".preScale", (1/1.1))
-        cmds.setAttr("defaultResolution.width", newWidth)
-        cmds.setAttr("defaultResolution.height", newHeight)
-        print "10% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
+        preScaleAmount = 1.1
     elif overscanAmount == "15%":
-        newWidth = currentWidth*1.15
-        newHeight = currentHeight*1.15
-        cmds.setAttr(theCamera+".preScale", (1/1.15))
-        cmds.setAttr("defaultResolution.width", newWidth)
-        cmds.setAttr("defaultResolution.height", newHeight)
-        print "15% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
+        preScaleAmount = 1.15    
     elif overscanAmount == "20%":
-        newWidth = currentWidth*1.2
-        newHeight = currentHeight*1.2
-        cmds.setAttr(theCamera+".preScale", (1/1.2))
-        cmds.setAttr("defaultResolution.width", newWidth)
-        cmds.setAttr("defaultResolution.height", newHeight)
-        print "20% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
+        preScaleAmount = 1.2   
     elif overscanAmount == "Arbitrary":
         result = cmds.promptDialog(title='Arbitrary #',message='Percent: ',button=['OK', 'Cancel'],defaultButton='OK',dismissString='Cancel')
         if result == 'OK':
             output = cmds.promptDialog(query=True, text=True)
             print output+"% overscan."
-            preScaleAmount = float("1."+output)
+            preScaleAmount = float("1."+output) 
+    # Free the aspectLock                        
+    cmds.setAttr("defaultResolution.aspectLock",False)
+    if isBoundingBox == "Change res and preScale":        
+        #Set the values  
+        newWidth = currentWidth*preScaleAmount
+        newHeight = currentHeight*preScaleAmount 
         
-        newWidth = currentWidth*1.2
-        newHeight = currentHeight*1.2
-        cmds.setAttr(theCamera+".preScale", (1/preScaleAmount))
+        #Force pixel aspect to one        
+        pixelAspect = 1.0
+        cmds.setAttr("defaultResolution.aspectLock", 0) # unlocks ratio
+        #Calculates the device aspect since pixel aspect isn't an actual attribute.
+        device_aspect = float(int(currentWidth) * pixelAspect)/float(int(currentHeight))
+        #Set the Lock Device Aspect Ratio. IMPORTANT!
+        #If you don't do this it won't work.
+        cmds.setAttr("defaultResolution.lockDeviceAspectRatio", 1)
+        #Set width, height, and aspect ratio.
         cmds.setAttr("defaultResolution.width", newWidth)
         cmds.setAttr("defaultResolution.height", newHeight)
-        print "20% overscan applied - new resolution: {} x {}\n".format(newWidth, newHeight),
-    else:
-        print "No overscan applied, resolution is {} x {}\n".format(currentWidth, currentHeight),
-        
+        cmds.setAttr("defaultResolution.deviceAspectRatio", device_aspect)
+        cmds.setAttr("defaultResolution.aspectLock", 1) # locks ratio
+        cmds.setAttr(theCamera+".preScale", (currentPrescale/preScaleAmount))
+        newPrescale = cmds.getAttr(theCamera+".preScale")        
+        # Remove any arnold overscan from other tests
+        cmds.setAttr( 'defaultArnoldRenderOptions.outputOverscan', 0, type='string' )
+        print "Overscan applied - new resolution: {} x {}. Prescale: {}\n".format(int(newWidth), int(newHeight), (round(newPrescale, 3))),                      
+           
+    # The bounding box way
+    if isBoundingBox == "Bounding box":
+        print "Setting overscan as bounding box for exr."
+        arnoldTranslator = cmds.getAttr( 'defaultArnoldDriver.ai_translator')
+        if arnoldTranslator != "exr":
+            cmds.error("Output format is not exr, can't set bounding box overscan.")                                   
+        preScaleAmount = int((currentWidth*preScaleAmount)-currentWidth)
+        if (preScaleAmount % 2) == 0:
+           print("Overscan is {0} pixels, an even number - setting to {0}".format(preScaleAmount))
+        else:
+           roundedOverscan = preScaleAmount + 1
+           print("Overscan is {0} pixels. NOT an even number - rounding up to {1} to aid filtering in Nuke.".format(preScaleAmount, roundedOverscan))
+           preScaleAmount = preScaleAmount + 1
+        cmds.setAttr( 'defaultArnoldRenderOptions.outputOverscan', preScaleAmount, type='string' )
+
+    if overscanAmount == "Cancel":
+        print "No overscan applied, resolution is {} x {}\n".format(currentWidth, currentHeight),  
+
+           
 # END
-
-
 
