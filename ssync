@@ -29,12 +29,6 @@ localScriptsPath
 In dialogue 'pst' stands for 'Project Specific Thing' - ie set custom clipping planes
 
 
-TO DO:
-
-* Make it recognise when the file as in /assets and act accordingly 
-* ffs fix globals json import borking borked bork
-
-
 """
 
 
