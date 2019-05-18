@@ -726,7 +726,7 @@ def executeThis():
                 projectSpecificThing()
                 cmds.deleteUI('ShotgunSync')
             
-        # Make no changes and submit to Deadline anyway
+        
         def getLatestCam(self,*args):
             print "Referencing in latest camera...\n",
             cmds.deleteUI('ShotgunSync')
