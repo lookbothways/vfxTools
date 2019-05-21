@@ -14,14 +14,36 @@ export LD_LIBRARY_PATH="/mnt/deadlinerepository/draft/Linux/64bit"
 
 # Output from this causes an error in noice:
 # The number of output paths does not match the number of inputs.
+
+#--------------
+
+C:\solidangle\mtoadeploy\2018\bin\noice -i beauty\denoise_me.exr -i variance\denoise_me.exr -i N_noice\denoise_me.exr -i Z_noice\denoise_me.exr -o denoised.exr
+noice 5.2.0.0 [4fb9451c] - the Arnold denoiser
+Loading images...
+Using 40 threads.
+Loading file "beauty\denoise_me.exr".
+Loading file "variance\denoise_me.exr".
+Loading file "N_noice\denoise_me.exr".
+Loading file "Z_noice\denoise_me.exr".
+Using feature AOV 'N'
+Using feature AOV 'Z'
+Working with 1 frame.
+Will denoise AOV "RGBA"
+Found variance for AOV "RGBA"
+Start denoising (patch radius 3, search radius 9, variance 0.5)
+Denoising RGBA
+Finished denoising
+Saving image denoised.exr (960 x 540 x 4)
+
+
 """
 import os
 import Draft
 
-noiceAOVs = "beauty", "diffuse_albedo", "N_noice", "Z_noice", "variance"
+noiceAOVs = "beauty", "diffuse_albedo_noice", "N_noice", "Z_noice", "variance"
 lightGroups = "L_hdr", "L_key", "L_rim", "L_fill"
 #Replace this with GUI (Nuke + Maya)
-inputPath = "/mnt/pipeline/ATK_PIPELINE/maya/modules/ATK/all/release/2017x64/scripts/LONshelf/autoArnoldDenoicer/demoFiles/IBK_RL04_UTP_020_LGT_separateNoiceAovs_v001.masterLayer.beauty.1011.exr"
+inputPath = "/mnt/projects/ibk/sequences/RL04_UTP/IBK_RL04_UTP_020/LGT/work/maya/images/IBK_RL04_UTP_020_LGT_noiceTest_v008_aovs/masterLayer/32b/IBK_RL04_UTP_020_LGT_noiceTest_v008_aovs.masterLayer.beauty.1126.exr"
 
 file = os.path.basename( inputPath )
 path,renderLayer,aov,frame,exr = inputPath.split(".")
@@ -69,8 +91,8 @@ aovD.RenameChannel( 'Y', 'Z_noice' )
 imgC = Draft.Image.CreateImage( aovA.width, aovA.height, [ 'R', 'G', 'B', 'A', 'diffuse_albedo_noice.R', 'diffuse_albedo_noice.G', 'diffuse_albedo_noice.B', 'N_noice.X', 'N_noice.Y', 'Z_noice', 'N_noice.Z', 'variance.R', 'variance.G', 'variance.B', 'variance.A' ] )
 
 #Sets 32bit float output. But causes tearing! Arg.
-#fileChannelMap = { 'R':'32f', 'G':'32f', 'B':'32f', 'A':'32f', 'N_noice.X':'32f', 'N_noice.Y':'32f', 'N_noice.Z':'32f', 'diffuse_albedo_noice.R':'32f', 'diffuse_albedo_noice.G':'32f', 'diffuse_albedo_noice.B':'32f', 'Z_noice':'32f', 'variance.R':'32f', 'variance.G':'32f', 'variance.B':'32f', 'variance.A':'32f' }
-#imgC.SetFileChannelMap( fileChannelMap )
+fileChannelMap = { 'R':'32f', 'G':'32f', 'B':'32f', 'A':'32f', 'N_noice.X':'32f', 'N_noice.Y':'32f', 'N_noice.Z':'32f', 'diffuse_albedo_noice.R':'32f', 'diffuse_albedo_noice.G':'32f', 'diffuse_albedo_noice.B':'32f', 'Z_noice':'32f', 'variance.R':'32f', 'variance.G':'32f', 'variance.B':'32f', 'variance.A':'32f' }
+imgC.SetFileChannelMap( fileChannelMap )
 
 imgC.Copy( aovRGBA, channels=[ 'R', 'G', 'B', 'A' ] )
 #imgC.Copy( aovA, channels=[ 'beauty.R', 'beauty.G', 'beauty.B', 'beauty.A' ] )
