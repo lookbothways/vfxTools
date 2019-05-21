@@ -1,0 +1,57 @@
+import re
+import subprocess
+import shlex
+
+def denoiceSeparatedAOVs():
+
+    filename_input = cmds.fileDialog2(fm=1, dialogStyle=2, cap='Select beauty pass to denoise', okCaption='This sequence')[0]
+    filename_output = filename_input.replace("beauty", "denoiced")
+    path = ""
+    frameSet = ""
+    temporal_range_string = ""
+    
+    arnold_bin_path = "/mnt/pipeline/ATK_PIPELINE/maya/modules/2017x64/mtoa_3.0.1.1/bin" # Note this will change as Arnold gets updated
+    # Get these from shotgun or dialogue:
+    # currently it will assume a sequence lenght of 999 frames:
+    startFrame = 1001
+    endFrame = 2001
+    
+    #Other user inputs
+    variance = 0.70
+    extraFrames = 1 #temporal
+    pixel_search_radius = 13
+    pixel_neighborhood_patch_radius = 3
+    
+    frames = endFrame - startFrame
+    
+    #temporal_range = 6
+    #unfinished lightGroup aovs also:
+    light_aov_names = []
+    
+    variance_aovs = ["beauty", "N_noice", "Z_noice", "variance", "diffuse_albedo_noice"]
+    lightGroups = []
+    mainPath,renderLayer,aov,frame,exr = filename_input.split(".")
+    
+    if "beauty" in aov:
+        beauty_aov = filename_input
+        N_noice_aov = filename_input.replace("beauty", "N_noice")
+        Z_noice_aov = filename_input.replace("beauty", "Z_noice")
+        variance_aov = filename_input.replace("beauty", "variance")
+        diffuse_albedo_noice_aov = filename_input.replace("beauty", "diffuse_albedo_noice")
+        
+    else:
+        # Maya specific line
+        cmds.error("Select beauty aov")
+    
+    
+    path = arnold_bin_path + "/noice " + "-patchradius " + str(pixel_neighborhood_patch_radius) + " " + "-searchradius " + str(pixel_search_radius) + " " + "-variance " + str(variance) + " " + light_aov_string + " -f " + str(frames) + " -ef " + str(extraFrames)
+    # This frameset does NOT include the diffuse_albedo_noice as it caused artefacts. Report this to Solidangle.
+    #frameSet = "-i " + beauty_aov.format(i) + " " + "-i " + N_noice_aov.format(i) + " "   + "-i " + Z_noice_aov.format(i) + " " + "-i " + variance_aov.format(i) + " " + temporal_range_string + " " + "-output " + filename_output.format(i) 
+    
+    # This frameset DOES include the diffuse_albedo_noice - though it caused artefacts. Report this to Solidangle.
+    frameSet = " -i " + beauty_aov.format(i) + " -i " + N_noice_aov.format(i) + " -i " + Z_noice_aov.format(i) + " -i " + variance_aov.format(i) + " -i " + diffuse_albedo_noice_aov.format(i) + " -output " + filename_output.format(i) 
+    
+    
+    outputPath = path + frameSet
+    subprocess.Popen(outputPath, shell=True)
+    # MSB 210519
