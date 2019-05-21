@@ -2,8 +2,14 @@ import re
 import subprocess
 import shlex
 
-def denoiceSeparatedAOVs():
+"""
+Maya Specific lines:
+    13 filename_input = cmds.fileDialog2(fm=1, dialogStyle=2, cap='Select beauty pass to denoise', okCaption='This sequence')[0]
+    50 cmds.error("Select beauty aov")
 
+"""
+def denoiceSeparatedAOVs():
+    # THIS LINE IS MAYA SPECIFIC, as is line 44
     filename_input = cmds.fileDialog2(fm=1, dialogStyle=2, cap='Select beauty pass to denoise', okCaption='This sequence')[0]
     filename_output = filename_input.replace("beauty", "denoiced")
     path = ""
@@ -53,5 +59,6 @@ def denoiceSeparatedAOVs():
     
     
     outputPath = path + frameSet
-    subprocess.Popen(outputPath, shell=True)
+    subprocess.Popen(outputPath, shell=True) 
+
     # MSB 210519
