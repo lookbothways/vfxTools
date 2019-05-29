@@ -1,4 +1,4 @@
-# Send path to denoice via Deadline
+
 
 import maya.cmds as cmds
 import re
