@@ -1,36 +1,80 @@
 # Set the enabled AOVs to a particular list
-# Made by Toby Sanderson and Mark Bailey 2018
+# Made by Toby Sanderson and Mark Bailey 2019
+# Updated May 2019 to include noice aovs
 
 import maya.cmds as cmds
 import mtoa.aovs as aovs
 from mtoa.core import createOptions
 createOptions()
 
+
+
 def setupAOV():
 
     def setFullFloat(AOVfullFloat):
         # creates new arnoldDriver and connects tech AOVs to it. 
-        fullFlotAD = cmds.createNode( 'aiAOVDriver', name='fullFloatArnoldDriver')
+        fullFloatAD = cmds.createNode( 'aiAOVDriver', name='fullFloatArnoldDriver')
         cmds.setAttr("defaultArnoldDriver.halfPrecision", 1)
-        cmds.setAttr( fullFlotAD+".mergeAOVs", 1 )       
+        #cmds.setAttr( fullFloatAD+".mergeAOVs", 1 )       
         for AOV in AOVfullFloat:
-            cmds.connectAttr(fullFlotAD + ".message", "aiAOV_{}.outputs[0].driver".format(AOV), force=True)
+            try:
+                cmds.connectAttr(fullFloatAD + ".message", "aiAOV_{}.outputs[0].driver".format(AOV), force=True)
+            except:
+                pass
         print "fullFloatArnoldDriver created for: "+ str(AOVfullFloat)
 
+    def setHalfFloat(AOVhalfFloat):
+        # creates new arnoldDriver and connects tech AOVs to it. 
+        halfFloatAD = cmds.createNode( 'aiAOVDriver', name='halfFloatArnoldDriver')
+        cmds.setAttr("defaultArnoldDriver.halfPrecision", 0)
+        cmds.setAttr("halfFloatArnoldDriver.halfPrecision", 1)
+        #cmds.setAttr( halfFlotAD+".mergeAOVs", 1 )       
+        for AOV in AOVhalfFloat:
+            try:
+                cmds.connectAttr(halfFloatAD + ".message", "aiAOV_{}.outputs[0].driver".format(AOV), force=True)
+            except:
+                pass
+        print "halfFloatArnoldDriver created for: "+ str(AOVhalfFloat)
 
+    def setAOVrgba():
+        print "Setting rgba output: {}".format(AOVrgba)
+        for each in AOVrgba:
+            try:
+                setRGBA = "aiAOV_{}.type".format(each)
+                cmds.setAttr(setRGBA, 6)
+            except:
+                pass
+            
+        
+    
     def setPref():
         global AOVpref
         global AOVoff
         global AOVfullFloat
+        global AOVhalfFloat
+        global AOVrgba
+        global noiceStatus
+        
         # Define list of preferred AOVs with names *EXACTLY* as they appear in the Render Settings window...
-        AOVpref = "AO", "coat", "crypto_material", "crypto_object", "diffuse_albedo", "diffuse_direct", "diffuse_indirect", "emission", "L_hdr", "L_key", "L_rim", "L_fill", "motionvector", "N", "P", "shadow_matte", "specular_direct", "specular_indirect", "sss", "transmission", "UV", "volume", "Z"
+        # Below, list for no-noice 
+        # AOVpref = "AO", "coat", "crypto_material", "crypto_object", "diffuse_albedo", "diffuse_direct", "diffuse_indirect", "emission", "L_hdr", "L_key", "L_rim", "L_fill", "motionvector", "N", "P", "shadow_matte", "specular_direct", "specular_indirect", "sss", "transmission", "UV", "volume", "Z"
+        AOVpref = "AO", "coat", "crypto_material", "crypto_object", "diffuse_direct", "diffuse_indirect", "emission", "L_hdr", "L_key", "L_rim", "L_fill", "motionvector", "shadow_matte", "specular_direct", "specular_indirect", "sss", "transmission", "UV", "volume"
+        AOVprefNoNoice = "N", "P", "Z", "diffuse_albedo" # Not used in tool (yet?)
+
         AOVoff = "AO", "volume", "sss", "transmission", "emission"
+
+        #AOVfullFloat = "Z", "P", "UV", "motionvector", "N", "volume", "crypto_object", "crypto_material"
         AOVfullFloat = "Z", "P", "UV", "motionvector", "N", "volume", "crypto_object", "crypto_material"
+        AOVhalfFloat = "AO", "coat", "diffuse_direct", "diffuse_indirect", "emission", "L_hdr", "L_key", "L_rim", "L_fill", "shadow_matte", "specular_direct", "specular_indirect", "sss", "transmission"
+
+        AOVrgba = "coat", "diffuse_albedo", "diffuse_direct", "diffuse_indirect", "emission", "specular_direct", "specular_indirect", "sss", "transmission"
+
 
     def allOff(): # Turn all the current AOVs off...
         allNiceNames = []
         deactivated = []
         allCurrentAOV = cmds.ls("*aiAOV_*")
+
         for AOV in allCurrentAOV:
             AOV = str(AOV)
             command = AOV + ".enabled"
@@ -48,6 +92,8 @@ def setupAOV():
             print "AOV-Settings: These are the AOVs you originally had: ", allNiceNames, "\n",
         if deactivated:
             print "AOV-Settings: These AOVs were deactivated because they aren't on the list: ", deactivated, "\n",
+
+
 
     def prefOn(): # Turn the preferred set of AOVs on...
         AOVerror = []
@@ -70,6 +116,8 @@ def setupAOV():
                     aovs.AOVInterface().addAOV(AOV)
                 except:
                     AOVerror.append(AOV)
+        # Enable Noice aovs:
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 1)
 
         """
         cmds.setAttr("aiAOV_AO.enabled", 0) # Ambient Occlusion AOV off by default
@@ -125,13 +173,16 @@ def setupAOV():
             
             print "AOV-Settings-UV: STmap setup complete!\n",
 
-        setFullFloat(AOVfullFloat)
+        #setFullFloat(AOVfullFloat)
+        setHalfFloat(AOVhalfFloat)
 
     # Run the script
     setPref()
     allOff()
     prefOn()
     createUV()
+
+    
 
     # Hook up the Cryptomatte AOVs
     if not cmds.objExists("_aov_cryptomatte"):
@@ -140,8 +191,11 @@ def setupAOV():
        cmds.shadingNode('aiAOV', name="aiAOV_crypto_object", asTexture=True)
     if not cmds.objExists("aiAOV_crypto_material"):
        cmds.shadingNode('aiAOV', name="aiAOV_crypto_material", asTexture=True)
-    cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_material.defaultValue')
-    cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_object.defaultValue')
+    try:   
+        cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_material.defaultValue')
+        cmds.connectAttr('_aov_cryptomatte.outColor', 'aiAOV_crypto_object.defaultValue')
+    except:
+        pass
     print "AOV-Settings-Cryptomatte: Setup complete!\n",
 
     # Hook up customPref things if Pref in list of AOVs - created for SHR. Change the path to the pref map when pref is required again:
@@ -180,10 +234,18 @@ def setupAOV():
         cmds.shadingNode('aiAmbientOcclusion', name="ambientOcclusion_AOV", asTexture=True)
     cmds.setAttr('ambientOcclusion_AOV.samples', 5)
     cmds.setAttr('ambientOcclusion_AOV.farClip', 200)
-    cmds.connectAttr('ambientOcclusion_AOV.outColor', 'aiAOV_AO.defaultValue')
+    try:
+        cmds.connectAttr('ambientOcclusion_AOV.outColor', 'aiAOV_AO.defaultValue')
+    except:
+        pass
+    
+
     print "AOV-Settings-AO: Setup complete!\n",
 
-    # Set AOVfullFloat to full and other drivers to half
+    # Set some AOVs to rgba (see list at top)
+    setAOVrgba()
+    # Turn on noice denoiser AOVs 
+    cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 1)
 
 
 def aovSettings(): 
@@ -194,6 +256,35 @@ def aovSettings():
     
     wordIn = "aiAOV_"
 
+
+    def createNoiceStatusLocator():
+        noiceStatus = cmds.getAttr( 'defaultArnoldRenderOptions.outputVarianceAOVs' )
+        cmds.spaceLocator(n="AOV_Settings_noiceStatus")
+        cmds.addAttr("AOV_Settings_noiceStatus", ln= 'noiceStatus', at="bool", defaultValue= noiceStatus) 
+        return noiceStatus
+       
+
+    def getNoiceStatus():
+        noiceStatus = None
+        try:
+            cmds.select("AOV_Settings_noiceStatus")
+            noiceStatus = cmds.getAttr( 'AOV_Settings_noiceStatus.noiceStatus' )
+            noiceLocator = True
+        except:
+            noiceLocator = False
+            pass
+            
+        return noiceLocator, noiceStatus
+      
+
+    def restoreNoiceStatus():
+        storedNoiceStatus = getNoiceStatus()
+        if storedNoiceStatus[0] == True:
+            storedNoice = cmds.getAttr( 'AOV_Settings_noiceStatus.noiceStatus' )
+            cmds.setAttr( 'defaultArnoldRenderOptions.outputVarianceAOVs', storedNoice)
+        else:
+            print "No AOV_Settings_noiceStatus locator found."
+        
     def loadSettings():
         # Check if AOV Settings are in scene already, and create them if not
         if cmds.objExists("AOV_Settings"):
@@ -203,9 +294,21 @@ def aovSettings():
             cmds.spaceLocator(n="AOV_Settings") # "Locator"
             print "AOV-Settings: No AOV_Settings found in the scene... created some for you.\n",
             AOV_SettingsExists = False
+
+        
     
     def saveCurrentState():
+        noiceLocator = getNoiceStatus()
+        sceneNoiceStatus = cmds.getAttr( 'defaultArnoldRenderOptions.outputVarianceAOVs' )
+        if noiceLocator[0] == True:
+            cmds.setAttr( 'AOV_Settings_noiceStatus.noiceStatus', sceneNoiceStatus )
+        else:
+            createNoiceStatusLocator()
+
         cmds.select("AOV_Settings")
+
+       
+
         if cmds.listAttr(ud = True):
             print "AOV-Settings: Updating the attributes...\n",
             # The Locator alrerady has some saved settings
@@ -221,6 +324,9 @@ def aovSettings():
     def settingsNew():
         # The Locator doesn't have any saved settings
         allAOVnames = cmds.ls("*" + wordIn + "*")
+
+        #cmds.addAttr("AOV_Settings", ln= noiceStatus, at="bool", defaultValue= noiceStatus)
+
         for x in allAOVnames:
             allAOVs.append(x)
             AOVenabled = cmds.getAttr( x + ".enabled")
@@ -238,7 +344,9 @@ def aovSettings():
     def settingsExist():
         # The Locator already has some saved settings
         allAOVnames = cmds.ls("*aiAOV_*")
-           
+        
+        #cmds.setAttr("AOV_Settings."+"noiceStatus", noiceStatus )
+
         for aov in allAOVnames:
             if cmds.getAttr( aov + ".enabled") == True:
                 cmds.setAttr("AOV_Settings."+aov, 1) 
@@ -256,7 +364,10 @@ def aovSettings():
         for each in allAOVnames:
             if cmds.getAttr( each + ".enabled") == False:
                 aovOff.append(each)
-        return
+
+        
+
+        return allAOVnames
 
     
     #### START HERE ########################
@@ -268,7 +379,7 @@ def aovSettings():
 
     aovNamespaces = [i for i in aovNamespaces if ":" in i]
     if aovNamespaces:
-        print "AOV-Settings: Warning, these AOVs have namespaces: "+ str(aovNamespaces),
+        print "AOV-Settings: Warning, these AOVs have namespaces - check they're not from a referenced scene: "+ str(aovNamespaces),
 
     choose = cmds.confirmDialog( title='Change AOV Settings', message='Select one of the following options...', button=['Setup Defaults','ALL OFF','ALL ON','Save State','Restore','Cancel'], defaultButton='Setup Defaults', cancelButton='Cancel', dismissString='No' )
 
@@ -277,6 +388,8 @@ def aovSettings():
     #### SETUP DEFAULTS ###################
     if choose == 'Setup Defaults':
         setupAOV()
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 1)
+
         print "AOV-Settings: Default AOVs created!\n",
 
     #### ALL OFF ###########################
@@ -289,6 +402,8 @@ def aovSettings():
             y = str(y)
             cmds.setAttr(y + ".enabled", 0)
             
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
+
         print "AOV-Settings: All AOVs have now been turned OFF!\n",
 
     #### ALL ON ############################
@@ -301,7 +416,8 @@ def aovSettings():
         for x in aovOff:
             x = str(x)
             cmds.setAttr(x + ".enabled", 1)
-            
+
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 1)    
         print "AOV-Settings: All AOVs have now been turned ON!\n",
 
     #### RESTORE ###########################
@@ -339,6 +455,7 @@ def aovSettings():
                   restoreOff.append(each)                    # Add to restoreOff list
                   cmds.setAttr(fullName, 0)                   # Turn them off
 
+        restoreNoiceStatus()
         print "AOV-Settings: All AOVs have been restored to their last saved state!\n",
 
 
@@ -347,6 +464,8 @@ def aovSettings():
         loadSettings()
         getCurrentState(allAOVnames)
         saveCurrentState()
+        
+
         print "AOV-Settings: Current AOV state saved! Use 'Restore' to revert any subsequent changes.\n",
 
 
