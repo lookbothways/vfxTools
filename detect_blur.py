@@ -1,4 +1,4 @@
-# USAGE
+# Returns a folder with the top n percent sharpest image
 # python detect_blur.py -i images -p percentage to extract
 
 """
