@@ -1,0 +1,31 @@
+//Split alembic to multiple groups when primitive groups is set to 'name using transform node full path'
+
+selNode = hou.selectedNodes()[0]
+selNode.setPosition([0,0])
+if len(hou.selectedNodes()) == 0:
+    hou.ui.displayMessage("Make your selection first", title = "Error")
+else:
+    listGroups = selNode.geometry().primGroups()
+    groupsNum = len(listGroups)
+    hou.clearAllSelected()
+ 
+    for prim in listGroups:
+        createDel = selNode.createOutputNode("blast", "OBJ_"+prim.name())
+        createDel.parm("group").set(prim.name())
+        createDel.parm("negate").set(1)
+        createDel.parm("removegrp").set(1)
+        createDel.setSelected(True, clear_all_selected = False)
+    
+selNode.setPosition([(groupsNum),0])
+hou.ui.displayMessage("Created " + str(groupsNum) +" objects")
+
+--------------------------------
+
+//Create a material node for all selected nodes
+
+import hou
+nodes = hou.selectedNodes()
+for node in nodes:
+    newMat = node.createOutputNode("material");
+
+---------------------------------
