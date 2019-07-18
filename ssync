@@ -29,6 +29,10 @@ localScriptsPath
 In dialogue 'pst' stands for 'Project Specific Thing' - ie set custom clipping planes
 
 
+TO DO:
+
+* Saves out renderlayers and reimports
+
 """
 
 
@@ -45,6 +49,7 @@ import sys
 import re
 import maya.cmds as cmds
 import maya.mel as mel
+import math
 # my aovs script
 from LONshelf import aovSettings
 reload(aovSettings)
@@ -108,6 +113,24 @@ def getShotDetails(scenePath):
         code = '10590'
         return shot_id, code
     else:
+        shot_id = ""
+        code = ""
+        engine = sgtk.platform.current_engine() 
+        shotInfo = engine.context.entity
+        
+        if 'id' in shotInfo:
+            shot_id = shotInfo.get("id")
+            print "shot_id: "+str(shot_id)
+            code = shotInfo.get("name")
+            print "code (name): "+str(code)
+        
+            return shot_id, code
+        else:
+            print "sgtk error: shot_id, code not resolved."
+
+
+        """
+        #OLD CODE, now using engine. Delete this if engine works.
         code = ""
         sequence_entity = ""
     
@@ -124,6 +147,7 @@ def getShotDetails(scenePath):
             code= matches.groups()[0]
             #sequence_entity= sg.find("Shot", [["code", "is", code]],['code'])[-1]
             sequence_entity= sg.find_one("Shot", [["code", "is", code]],['code'])
+            print "Sequence_entity is "+str(sequence_entity)
         #print sequence_entity
         shot_id = sequence_entity["id"]
         #shot_id = sequence_entity
@@ -133,6 +157,7 @@ def getShotDetails(scenePath):
         #print code
     
         return shot_id, code
+        """
 
 
 
@@ -259,7 +284,7 @@ def get_shot_frame_range_by_shot_code(code):
     else:
         return int(data["sg_cut_in"]), int(data["sg_cut_out"])
 
-"""        
+       
 # This way is head-in tail-out
 def get_shot_frame_range_by_shot_code(code):
     sg_filters = [["code", "is", code]]
@@ -272,6 +297,35 @@ def get_shot_frame_range_by_shot_code(code):
         return False
     else:
         return int(data["sg_head_in"]), int(data["sg_tail_out"])
+"""
+
+def get_shot_frame_range(sg, shot_id):
+    """
+    :param Shotgun sg: A fully initialzed Shotgun API object
+    :param int shot_id: The ID of the shot to query.
+    :returns: the frame range ('sg_head_in' and 'sg_tail_out') of the shot with the given ID.
+              headin and tail out can be None when there is nothing entered in Shotgunself.
+    :rtype: int|None, int|None
+    """
+    data = sg.find_one("Shot",
+                       filters=[["id", "is", shot_id]],
+                       fields=['sg_head_in', 'sg_tail_out'])
+
+    if data is None:
+        print "no shot data found"
+        return None, None
+    else:
+        if data["sg_head_in"] is None:
+            head_in = None
+        else:
+            head_in = int(data["sg_head_in"])
+
+        if data["sg_tail_out"] is None:
+            tail_out = None
+        else:
+            tail_out = int(data["sg_tail_out"])
+
+        return head_in, tail_out
 
 
 def importDefaultLights():
@@ -286,7 +340,7 @@ def importDefaultLights():
 
 def projectSpecificThing():
     
-    
+    print "\n\nNow checking for project-specific code -------------------------------------"    
     scenePath = ""
     scenePath = getOpenSceneFilePath()
     if scenePath:
@@ -297,20 +351,21 @@ def projectSpecificThing():
     fileExists = False
     fileExists = cmds.file( localScriptsPath, q=True, ex=True )
         
-    print "Checking for project specific ssync code for {} in {}".format(project_name, localScriptsPath)
-    print "File exists: "+ str(fileExists)
+    print "Code for {} in {}".format(project_name, localScriptsPath)
+    print "Project specific file exists: "+ str(fileExists)
     
     if fileExists == True:
-
+        print "Executing project-specific code..."
         ssync_projectSpecificThing.start()
     else:
         print "No project specific code found."
 
     
-
+"""
 def importRenderSetup(pFilename):
     with open(pFilename, "r") as file:
         renderSetup.instance().decode(json.load(file), renderSetup.DECODE_AND_OVERWRITE, None)
+"""
 
 def exportFile(filename):
     with open(filename, "w+") as file:
@@ -388,7 +443,7 @@ def shotgunSync():
     
     # Full Path to the globals preset it's importing "/mnt/pipeline/ATK_PIPELINE/maya/modules/WB/presets/render_settings/atk_arnoldSettings_v003.json"
 
-
+    print "\n\nGetting info from Shotgun -------------------------------------"
     
     #----------------- Check the Resolution is correct
     # Setup summary
@@ -467,8 +522,10 @@ def shotgunSync():
     print "Project Resolution     : "+ str(pxRes), str(pyRes)
     print "Local scene Resolution : "+ str(localxRes), str(localyRes)
     
+    #If resetting res after overscan has been applied:
+    resetPreScale()
     
-    # Forces shot res is res field isn't False (empty)
+    # Forces shot res if res field isn't False (empty)
     print "\n\nSetting shot resolution -------------------------------------"
     if xRes == pxRes and yRes == pyRes and localxRes == pxRes and localyRes == pxRes and localxRes == xRes and localyRes == yRes:
         print "Local scene resolution matches shot and project resolution. Moving on."
@@ -488,7 +545,8 @@ def shotgunSync():
             print "Setting res to project res: {} x {}. Forcing pixel aspect to 1.0".format(pxRes, pyRes),
             setResolution(int(pxRes), int(pyRes), pixelAspect=1.0)
             resolutionSummary = "| Set resolution to project res: {} x {} ".format(str(pxRes), str(pyRes))
-            
+    
+
     
     
     
@@ -509,21 +567,33 @@ def shotgunSync():
     
     
     #----------------- Set start-end-frame (especially changing fps will move the start-end frames)
+    print "\n\nSetting framerange -------------------------------------"
     code = getShotDetails(scenePath)[1]
+    engine = sgtk.platform.current_engine()
+    sg = engine.shotgun
+    
     if "asset" not in scenePath:
-        sg_startFrame, sg_endFrame = get_shot_frame_range_by_shot_code(code)
+        sg_startFrame, sg_endFrame = get_shot_frame_range(sg, shot_id)
+        
         
         fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
         fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
-        
-        if fStart != sg_startFrame or fEnd != sg_endFrame:
-            cmds.setAttr("defaultRenderGlobals.startFrame", sg_startFrame)
-            cmds.setAttr("defaultRenderGlobals.endFrame", sg_endFrame)
-            cmds.playbackOptions(min=sg_startFrame,max=sg_endFrame)
-            cmds.playbackOptions(animationStartTime=sg_startFrame)
-            cmds.playbackOptions(animationEndTime=sg_endFrame)
-        
-            startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
+
+
+        if sg_startFrame is not None:
+            print "SG: head-in tail-out: "+ str(sg_startFrame)+" "+ str(sg_endFrame)
+
+            if fStart != sg_startFrame or fEnd != sg_endFrame:
+                cmds.setAttr("defaultRenderGlobals.startFrame", sg_startFrame)
+                cmds.setAttr("defaultRenderGlobals.endFrame", sg_endFrame)
+                cmds.playbackOptions(min=sg_startFrame,max=sg_endFrame)
+                cmds.playbackOptions(animationStartTime=sg_startFrame)
+                cmds.playbackOptions(animationEndTime=sg_endFrame)
+            
+                startEndFrameSummary = "| Set render-range to {}-{} ".format(sg_startFrame, sg_endFrame)
+        else:
+            print "No head-in tail-out specified. Not setting frame range."
+
     else:
         cmds.setAttr("defaultRenderGlobals.startFrame", 1001)
         cmds.setAttr("defaultRenderGlobals.endFrame", 1001)
@@ -542,7 +612,7 @@ def shotgunSync():
 
     
     #Summary output:
-    print fpsSummary+resolutionSummary+startEndFrameSummary,
+    print "\nSummary:\n"+fpsSummary+resolutionSummary+startEndFrameSummary+"\n",
     return isAsset
     
     
@@ -600,15 +670,21 @@ def getLatestCam():
 def forceClippingPlanes():
     # Get the renderable camera
     renderCam = []
+    renderableCamera = []
     allCams = cmds.ls(type = "camera")
     for cam in allCams:
         if cmds.getAttr(cam+".renderable") == 1:
             renderCam.append(cam)
     
-    renderableCamera = renderCam[0]
+    if renderCam:
+        renderableCamera = renderCam[0]
+        cmds.setAttr(renderableCamera+".nearClipPlane", 10)
+        cmds.setAttr(renderableCamera+".farClipPlane", 100000)
+    else:
+        print "No renderable camera found. Check your render globals."
+
     # set clipping planes
-    cmds.setAttr(renderableCamera+".nearClipPlane", 10)
-    cmds.setAttr(renderableCamera+".farClipPlane", 100000)
+
 
 def forceClippingPlanesAllCams():
     # Get the renderable camera
@@ -621,11 +697,18 @@ def forceClippingPlanesAllCams():
         except:
             pass
         
-    
-    renderableCamera = renderCam[0]
-    # set clipping planes
-    cmds.setAttr(renderableCamera+".nearClipPlane", 10)
-    cmds.setAttr(renderableCamera+".farClipPlane", 100000)
+def resetPreScale():
+    renderCam = []
+    allCams = cmds.ls(type = "camera")
+    for cam in allCams:
+        preScale = cmds.getAttr(cam+".preScale")
+        if preScale != 1:
+            reset = cmds.confirmDialog(m="Camera preScale is not 1:\n{}\n\nResetting resolution will make applied overscan incorrect.\nReset preScale to 1?".format(cam), b=["Yes", "No"], t="Overscan preScale check")
+            if reset == "Yes":
+                try:
+                    cmds.setAttr(cam+".preScale", 1)
+                except:
+                    pass     
     
     
 ### USER INTERFACE
@@ -658,6 +741,20 @@ def executeThis():
     pst = False
 
     class PreRenderChecks(object):
+
+        #Checks for renderLayers first and aborts if user requests
+        RLoutput = ""
+        render_layer_names = []
+        render_layer_names = cmds.renderSetup(q=True, renderLayers=True)
+
+        if render_layer_names:
+            RLoutput = cmds.confirmDialog( title='Render Layers - deletion imminient', message='Render layers found.\n\nSsync will remove them when importing the render presets.\nDo you want to continue, or stop and export the renderlayers for reimporting once ssync is finished?\n\nPS: Typically ssync should be run before doing anything with the scene.', button=['Continue','Stop'], defaultButton='Continue', cancelButton='Stop', dismissString='No' )
+
+
+        if RLoutput == "Stop":
+            sys.exit("Aborting ssync. Save your renderlayers and re-run.")
+
+     
         def __init__(self, *args):
             pass
 
@@ -711,7 +808,7 @@ def executeThis():
                 cmds.file(publishedCameraPath, r=True)
 
             if cmds.checkBox(self.pstBox, q = True, v = True) == True:
-                forceClippingPlanes()
+                forceClippingPlanesAllCams()
 
 
             if cmds.window('ShotgunSync', exists = True):
@@ -720,7 +817,7 @@ def executeThis():
                 projectSpecificThing()
                 cmds.deleteUI('ShotgunSync')
             
-        
+        # Make no changes and submit to Deadline anyway
         def getLatestCam(self,*args):
             print "Referencing in latest camera...\n",
             cmds.deleteUI('ShotgunSync')
@@ -737,6 +834,7 @@ def executeThis():
 #end
 #executeThis()   
 #shotgunSync()
+
 
 
 
