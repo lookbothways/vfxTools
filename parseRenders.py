@@ -1,6 +1,18 @@
 import csv
 import os
 
+"""
+* Submit to farm
+* Select nodes in Houdini
+* Ask when the renders should be finished
+* Open terminal, get pstat output, save to textfile
+* Compare selected nodes in houdini with pstat output, extract job IDs
+* Generate CSV with both and save
+* Upload csv to gdocs as sheet (or enter directly into renders sheet?)
+
+
+"""
+
 print ("Parsing renders textfile:")
 with open ("renders.txt", "r") as rendersRaw:
     data= rendersRaw.readlines()
