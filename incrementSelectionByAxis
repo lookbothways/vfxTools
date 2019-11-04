@@ -1,0 +1,9 @@
+import maya.cmds as cmds
+startframe = 1001
+endframe = 1051
+list = cmds.ls(sl=True)
+increment = 0
+for each in list:
+    cmds.setAttr("{}.translateZ".format(each), increment)
+    increment = increment + 2
+    
