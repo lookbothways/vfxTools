@@ -1,0 +1,30 @@
+#incrementSelectionByAxis and move keys by value
+import maya.cmds as cmds
+startframe = 1001
+endframe = 1051
+list = cmds.ls(sl=True)
+increment = 0
+for each in list:
+    cmds.setAttr("{}.translateZ".format(each), increment)
+    increment = increment + 2
+    
+    
+    
+animcurves = cmds.ls(sl=True)
+startKeys = 1001
+endKeys = 1004
+animIncrement = 1001
+animIncrementEnd = 1004
+for each in animcurves:
+    print "Increment "+str(animIncrement)
+    cmds.keyframe(each+".translateZ",edit=True,index=(startKeys,startKeys),timeChange=animIncrement)
+    cmds.keyframe(each+".translateZ",edit=True,index=(startKeys,startKeys),timeChange=animIncrementEnd)
+    #cmds.keyframe('surface1.translateX',edit=True,index=(1,1),timeChange='1.5sec',valueChange=10.25)
+    animIncrement = animIncrement + 0.31
+    animIncrementEnd = animIncrementEnd + 0.31
+    print animIncrement
+    
+    
+    
+
+    
