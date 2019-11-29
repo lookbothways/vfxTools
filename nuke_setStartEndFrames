@@ -1,0 +1,15 @@
+startFrameRange = 1001
+endFrameRange = 1130
+
+for a in nuke.allNodes():
+    if 'Read' in a['name'].value():
+        if 'exr' in a['file'].value():
+            file = a.knob('file').getValue()
+            print file
+            currentStart = a.knob('first').getValue()
+            print currentStart
+            currentEnd = a.knob('last').getValue()
+            print currentEnd
+
+            a.knob('first').setValue(startFrameRange)
+            a.knob('last').setValue(endFrameRange)            
