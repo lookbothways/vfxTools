@@ -1,5 +1,6 @@
 #Nuke tool to swap shot name and version for another
 #https://note.nkmk.me/en/python-str-replace-translate-re-sub/
+#note this code is WIP and specific to a project
 
 import re
 
