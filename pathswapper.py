@@ -1,4 +1,4 @@
-#//islay/projects/shangrila/publish/episodes/ep101_banished/ep101_sh1130/Lighting/ep101_sh1130_Lighting_v012/images/char_beauty/
+
 
 newShotNumber = ""
 newVersion = ""
@@ -8,7 +8,7 @@ each = []
 
 #Get path to new sequence
 p = nuke.Panel('Pathswapper')
-p.addFilenameSearch('Path to new seq', "//islay/projects/shangrila/publish/episodes/ep101_banished/ep101_sh1130/Lighting/ep101_sh1130_Lighting_v012/images/char_beauty/")
+p.addFilenameSearch('Path to new seq', "choose seq")
 p.addButton('Cancel')
 p.addButton('Update all read nodes')
 ret = p.show()
