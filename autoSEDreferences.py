@@ -14,6 +14,7 @@ def search_and_replace_btn_clicked(items, refDict,filePath, window):
     doit = cmds.confirmDialog(m="Search and replace versions on current scene?\n\nDid you include the version as three digits?\ni.e: 015\n\nThis is not undoable.", b=["OK","Cancel"], icn="warning", ma="center", t="autoSED")
     if doit == 'OK':
         somethingWrong = False
+        changes = False
         refPath = ""
         searchFor = ""
         replaceWith = ""
@@ -21,6 +22,7 @@ def search_and_replace_btn_clicked(items, refDict,filePath, window):
         finalCommand = []
         newValue = ""
         for key in refDict:
+            
             refPath = str(refDict.get(key))
             searchFor = refPath.split("_v")[2][:3]
             newValue = str(cmds.textFieldGrp( key, query = True, text = True))
@@ -34,7 +36,8 @@ def search_and_replace_btn_clicked(items, refDict,filePath, window):
 
             if str(refPath) == str(replaceWith):
                 print "Value unchanged, skipping"
-            elif os.path.exists(replaceWith) == True: 
+            elif os.path.exists(replaceWith) == True:
+                changes = True
                 # This is a clumsy string reconstrut, to improve.                  
                 splitPath = filePath.split("/")
                 fileName = splitPath[-1]
@@ -54,9 +57,12 @@ def search_and_replace_btn_clicked(items, refDict,filePath, window):
                 somethingWrong = True
                 print replaceWith+ "\nThis file does not exist!"
                 
-        # Reopen the updated scene                                          
-        cmds.file( filePath, o=True )
-        print "\nUpdated reference in:\n %s\n" % filePath
+        # Reopen the updated scene if anything has been done
+        if changes == True:
+            cmds.file( filePath, o=True )
+            print "\nUpdated reference in:\n %s\n" % filePath
+        else:
+            print "No changes made."
                 
         if somethingWrong == True:
             print "There was an error, see script editor for details."
@@ -110,6 +116,3 @@ referencePath = []
 
 filePath = cmds.file(q=1,sn=1)
 autoSED(filePath) 
-
-###### powershell is a bastard.
-
