@@ -1,0 +1,162 @@
+def exportImportRenderGlobals():
+    import maya.cmds as cmds
+    import maya.app.renderSetup.model.renderSetup as renderSetup
+    import json
+
+
+    #in
+    import maya.app.renderSetup.model.renderSetup as renderSetup
+
+    def import_render_setup(filename, import_render_layers, import_aovs, import_render_settings):
+        """
+        Reads and applies the rendersettings contained in the render_setup_file.
+        Optionally you can choose to skip ceratin parts of the settings.
+
+        :param str render_setup_file: The absolute path to the render setup JSON file, that should be loadedself.
+        :param bool import_render_layers: Wehther renderlayers should be imported from the file.
+        :param bool import_aovs: Wehther AOVs should be imported from the file.
+        :param bool import_render_settings: Wehther render settings should be imported from the file.
+        """
+        with open(render_setup_file, "r") as f:
+            render_info = json.load(f)
+
+        if 'renderSetup' not in render_info:
+            render_info = add_basic_render_info_structure(render_info)
+
+        if not import_render_layers:
+            render_info['renderSetup'] = {}
+
+        if not import_aovs:
+            render_info['sceneAOVs'] = {}
+
+        if not import_render_settings:
+            render_info['sceneSettings'] = {}
+
+        renderSetup.instance().decode(render_info, renderSetup.DECODE_AND_OVERWRITE, None)
+
+
+
+    def add_basic_render_info_structure(render_info):
+        """
+        :returns: The basic dictionary structure needed for the render setup import to work.
+        :rtype: dict
+        """
+        basic_structure = {'renderSetup': {},
+                           'sceneAOVs': {},
+                           'sceneSettings': {}}
+
+        basic_structure['sceneSettings'] = render_info
+        return basic_structure
+        
+      
+        
+
+    #Creates the import gui
+    def importGlobals(render_setup_file):
+        class createMyLayoutCls(object):
+            def __init__(self, *args):
+                pass
+
+            def show(self):
+                self.createMyLayout()
+
+            def createMyLayout(self):
+
+                #check to see if our window exists
+                if cmds.window('utility', exists = True):
+                    cmds.deleteUI('utility')
+
+                # create window
+                self.window = cmds.window('utility', widthHeight = (250, 180), title = 'renderSetup', resizeToFitChildren=0, sizeable = True)
+
+                cmds.setParent(menu=True)
+
+                # create a main layout
+                mainLayout = cmds.columnLayout(w = 200, h = 100, cw = 10, rs = 8, co = ['both',2])
+
+                # Control - which things to do
+                self.renderSettingsOption = cmds.checkBox('Render settings', value=True)
+                self.renderLayersOption = cmds.checkBox('Render Layers', value=True)
+                self.aovsOption = cmds.checkBox('AOVs', value=False)
+
+                # Buttons that do things
+                btnDoSelected = cmds.button(label = 'Import with selected', width = 200, height = 40, c = self.GetSelectedNodes)
+                btnNoChanges = cmds.button(label = 'Make no changes', width = 200, height = 40, c = self.noChangesMade)
+     
+                # show window
+                cmds.showWindow(self.window)
+
+            def GetSelectedNodes(self,*args):
+                rl= False
+                aov= False
+                rs= False       
+                         
+                renderSettingsOptionCB = cmds.checkBox(self.renderSettingsOption,q = True, v = True)
+                renderLayersOptionCB = cmds.checkBox(self.renderLayersOption,q = True, v = True)
+                aovsOptionCB = cmds.checkBox(self.aovsOption,q = True, v = True)
+                print "\nLoading "+ str(render_setup_file)
+                #print renderSettingsOptionCB
+                if renderSettingsOptionCB == True:
+                    print "Applying render settings"
+                    rs= True
+
+                #print renderLayersOptionCB
+                if renderLayersOptionCB == True:
+                    print "Creating render layers"
+                    rl= True
+
+                #print aovsOptionCB
+                if aovsOptionCB == True:
+                    print "Creating AOVs"
+                    aov= True
+                                    
+                if cmds.window('utility', exists = True):
+                    cmds.deleteUI('utility')
+                    
+                #Executes import here:
+                import_render_setup(render_setup_file, rl, aov, rs)
+                
+                
+                
+
+            def noChangesMade(self,*args):
+                cmds.deleteUI('utility')
+                print "No changes made..."
+
+        b_cls = createMyLayoutCls()  
+        b_cls.show()
+
+
+
+
+    #Start here
+
+
+    choice = cmds.confirmDialog( title='Render Globals', message='Import / export?', button=['Import','Export'], defaultButton='Import', cancelButton='No', dismissString='No' )
+
+    if choice == 'Import':
+        #import file
+        print "Importing globals"
+        basicFilter = "*.json"
+        render_setup_file = cmds.fileDialog2(fileMode=1, okc="This one", cap="Choose renderGlobals.json file", fileFilter=basicFilter, dialogStyle=2, startingDirectory="//islay/production/Shangri-La/sandbox/mark.bailey/scripts/")
+        render_setup_file = str(render_setup_file)[3:-2]
+        importGlobals(render_setup_file)
+        print "Imported .json globals for "+ render_setup_file
+                       
+    if choice == 'Export':
+        #export file
+        basicFilter = "*.json"
+        filename = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, startingDirectory="//islay/production/Shangri-La/sandbox/mark.bailey/scripts/")
+        filename = str(filename)[3:-2]
+        
+        
+        def exportFile(filename):
+            with open(filename, "w+") as fileOut:
+                json.dump(renderSetup.instance().encode(None), fp=fileOut, indent=2, sort_keys=True)
+                
+        exportFile(filename)
+        print "Exported .json globals for "+ filename
+        
+
+
+    #msb080420
