@@ -4,7 +4,7 @@ import json
 
 #chooseFile
 basicFilter = "*.json"
-filename = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, startingDirectory="//SERVER/production/Shangri-La/sandbox/mark.bailey/scripts/")
+filename = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, startingDirectory="//SERVER/production/PROJECT/sandbox/mark.bailey/scripts/")
 
 
 def exportFile(filename):
