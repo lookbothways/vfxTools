@@ -1,23 +1,23 @@
 from maya import cmds
 import maya.app.renderSetup.model.renderSetup as renderSetup
+import json
+
+#chooseFile
+basicFilter = "*.json"
+filename = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, startingDirectory="//islay/production/Shangri-La/sandbox/mark.bailey/scripts/")
+
 
 def exportFile(filename):
-    with open(filename, "w+") as file:
-        json.dump(renderSetup.instance().encode(None), fp=file, indent=2, sort_keys=True)
+    with open(filename, "w+") as fileOut:
+        json.dump(renderSetup.instance().encode(None), fp=fileOut, indent=2, sort_keys=True)
         
 exportFile(filename)       
 
 
 
-import json
-
-filename = "/home/mark/maya/Presets/temp.json"
 
 def importRenderSetup(pFilename):
     with open(pFilename, "r") as file:
         renderSetup.instance().decode(json.load(file), renderSetup.DECODE_AND_OVERWRITE, None)
 
 importRenderSetup(filename)
-
-
-        
