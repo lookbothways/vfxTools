@@ -1,17 +1,37 @@
-import maya.cmds as cmds
-scene = cmds.file(q=1,sn=1)
-filename = scene[:-3]+ "_eyeLocs.abc"
-save_name = filename.replace("/maya/", "/maya/cache/")
-
-fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
-fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
+"""
+For shelf:
+    
+import os, sys
+sys.path.append(r"\\scripts\path")
+import exportCustomAbc
+reload(exportCustomAbc)
 
 wordIn = "eyeLoc"
 sel = cmds.ls("*" + wordIn + "*", r=True)
-cmds.select(sel)
-#modelpanelView = cmds.paneLayout('viewPanes', q=True, pane1=True)
-#cmds.isolateSelect( modelpanelView, state=1 )
 
-command = "-frameRange " + str(fStart) + " " + str(fEnd) +" -uvWrite -worldSpace -file " + save_name
-cmds.AbcExport ( j = command )
-print "Exported: "+ save_name,
+cmds.select(sel)
+exportCustomAbc.exportCustomAbc(sel)
+
+
+"""
+import maya.cmds as cmds
+def exportCustomAbc(sel):
+    if "eyeLoc" in str(sel):
+        print "eyeLoc found"
+    
+        scene = cmds.file(q=1,sn=1)
+        filename = scene[:-3]+ "_eyeLocs.abc"
+        save_name = filename.replace("/maya/", "/maya/cache/")
+        
+        fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
+        fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
+        
+        #modelpanelView = cmds.paneLayout('viewPanes', q=True, pane1=True)
+        #cmds.isolateSelect( modelpanelView, state=1 )
+        cmds.select(sel)
+        command = "-sl -frameRange " + str(fStart) + " " + str(fEnd) +" -uvWrite -worldSpace -file " + save_name
+        cmds.AbcExport ( j = command )
+        print "Exported: "+ save_name,
+    else:
+        cmds.warning("No eyeLoc nodes found. Does your scene have the latest DragonHead in it?")
+    
