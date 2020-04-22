@@ -1,0 +1,17 @@
+import maya.cmds as cmds
+scene = cmds.file(q=1,sn=1)
+filename = scene[:-3]+ "_eyeLocs.abc"
+save_name = filename.replace("/maya/", "/maya/cache/")
+
+fStart = int(cmds.getAttr('defaultRenderGlobals.startFrame'))
+fEnd = int(cmds.getAttr('defaultRenderGlobals.endFrame'))
+
+wordIn = "eyeLoc"
+sel = cmds.ls("*" + wordIn + "*", r=True)
+cmds.select(sel)
+#modelpanelView = cmds.paneLayout('viewPanes', q=True, pane1=True)
+#cmds.isolateSelect( modelpanelView, state=1 )
+
+command = "-frameRange " + str(fStart) + " " + str(fEnd) +" -uvWrite -worldSpace -file " + save_name
+cmds.AbcExport ( j = command )
+print "Exported: "+ save_name,
