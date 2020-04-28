@@ -1,28 +1,99 @@
 # import/export .json globals, aovs + render layers to
+#\\###\projects\###\pipeline\project_configs\renderSettings
 
+"""
+Reads and applies the rendersettings contained in the render_setup_file.
+Optionally you can choose to skip ceratin parts of the settings.
+
+:param str render_setup_file: The absolute path to the render setup JSON file, that should be loadedself.
+:param bool import_render_layers: Wehther renderlayers should be imported from the file.
+:param bool import_aovs: Wehther AOVs should be imported from the file.
+:param bool import_render_settings: Wehther render settings should be imported from the file.
+#For shelf
+import os, sys
+sys.path.append(r"###")
+import exportImportRenderGlobals_v002
+reload(exportImportRenderGlobals_v002)
+
+exportImportRenderGlobals_v002.exportImportRenderGlobals()
+
+#-------------------------------
+
+import maya.cmds as cmds
+def exportImportRenderGlobals(dialog,hq,lq):
+    cmds.warning("Tool is currently out of service")
+
+"""
 def exportImportRenderGlobals(dialog,hq,lq):
     import maya.cmds as cmds
-    import maya.app.renderSetup.model.renderSetup as renderSetup
-    import json
+    # Maya 2019's buggy renderSetup:
+    # Error: AttributeError: file C:\Program Files\Autodesk\Maya2019\Python\lib\site-packages\maya\app\renderSetup\model\collection.py line 843: 'ArnoldAOVChildSelector' object has no attribute 'staticSelection' # 
 
+    #import maya.app.renderSetup.model.renderSetup as renderSetup
+    # HACKY HACK HACK
+    #import os, sys
+    #sys.path.append(r"\\###\production\###\sandbox\mark.bailey\scripts\rs2020")
+    # use Maya 2020's renderSetup. WHAT COULD POSSIBLY GO WRONG?!
+    #from model import renderSetup
+
+    def connectCrypto():
+        #Imports the crypto shader and hooks it up. 
+        #There's no straightforward python to make a crypto* AOV (that I could find in April 2020), so this.
+        def connect(sel):
+            if cryptoMatteAOV:
+                try:
+                    cmds.connectAttr( sel[1]+".outColor", cryptoMatteAOV[0]+".defaultValue" )
+                except:
+                    pass                
+            if cryptoObjectAOV:
+                try:
+                    cmds.connectAttr( sel[1]+".outColor", cryptoObjectAOV[0]+".defaultValue" )
+                except:
+                    pass
+                #Should really unload the reference if both are False 
+
+        sel = cmds.ls("*cryptoAOVs*", r=True)
+        cryptoMatteAOV = cmds.ls("*aiAOV_crypto_material*", r=True)
+        cryptoObjectAOV = cmds.ls("*aiAOV_crypto_object*", r=True)
+        
+        if sel:
+            print "Cryptomatte aovs found, connecting."
+            cmds.select(sel)
+            connect(sel)
+        else:
+            print "Cryptomatte aovs not found, referencing, connecting."
+            #import cryptoAOVs file, then connect
+            cmds.file( "//###/production/###/sandbox/mark.bailey/scripts/cryptoAOVs.ma", reference=True)
+            sel = cmds.ls("*cryptoAOVs*", r=True)
+            cmds.select(sel)
+            connect(sel)
+
+
+    import json
+    #cmds.warning("'ArnoldAOVChildSelector has no attr 'staticSelection'. - THIS TOOL IS CURRENTLY BROKEN. Run for testing only")
 
     #in
     import maya.app.renderSetup.model.renderSetup as renderSetup
 
     def import_render_setup(filename, import_render_layers, import_aovs, import_render_settings):
-        """
-        Reads and applies the rendersettings contained in the render_setup_file.
-        Optionally you can choose to skip ceratin parts of the settings.
 
-        :param str render_setup_file: The absolute path to the render setup JSON file, that should be loadedself.
-        :param bool import_render_layers: Wehther renderlayers should be imported from the file.
-        :param bool import_aovs: Wehther AOVs should be imported from the file.
-        :param bool import_render_settings: Wehther render settings should be imported from the file.
-        """
+        #write temp localSettings from current scene
+        currentSettingsFile = filename+ "_localTemp"
+
+        with open(currentSettingsFile, "w+") as fileOut:
+            json.dump(renderSetup.instance().encode(None), fp=fileOut, indent=2, sort_keys=True)
+ 
+        with open(currentSettingsFile, "r") as c:
+            local_info = json.load(c)
+            #for i in local_info:
+            #    print i, local_info[i]
+
         print filename
         with open(filename, "r") as f:
             render_info = json.load(f)
             print render_info
+            for i in render_info:
+                print i, render_info[i]
 
             # Culls the sceneLightEditor key, as this was causing crashing. 
             if "sceneLightEditor" in render_info:
@@ -33,23 +104,33 @@ def exportImportRenderGlobals(dialog,hq,lq):
             render_info = add_basic_render_info_structure(render_info)
 
         if not import_render_layers:
-            render_info['renderSetup'] = {}
+            render_info['renderSetup'] = local_info['renderSetup']
+            #print render_info['renderSetup']
 
         if not import_aovs:
-            render_info['sceneAOVs'] = {}
+            render_info['sceneAOVs'] = local_info['sceneAOVs']
+            #print render_info['sceneAOVs']
 
         if not import_render_settings:
-            render_info['sceneSettings'] = {}
+            render_info['sceneSettings'] = local_info['sceneSettings']
+            #print render_info['sceneSettings']
+
+        for i in render_info:
+            print i, render_info[i]
 
         renderSetup.instance().decode(render_info, renderSetup.DECODE_AND_OVERWRITE, None)
+        if import_aovs:
+            connectCrypto()
+            
+
 
 
 
     def add_basic_render_info_structure(render_info):
-        """
-        :returns: The basic dictionary structure needed for the render setup import to work.
-        :rtype: dict
-        """
+
+        #:returns: The basic dictionary structure needed for the render setup import to work.
+        #:rtype: dict
+
         basic_structure = {'renderSetup': {},
                            'sceneAOVs': {},
                            'sceneSettings': {}}
@@ -84,6 +165,7 @@ def exportImportRenderGlobals(dialog,hq,lq):
 
                 # Control - which things to do
                 self.renderSettingsOption = cmds.checkBox('Render settings', value=True)
+                #muted
                 self.renderLayersOption = cmds.checkBox('Render Layers', value=False)
                 self.aovsOption = cmds.checkBox('AOVs', value=False)
 
@@ -100,6 +182,7 @@ def exportImportRenderGlobals(dialog,hq,lq):
                 rs= False       
                          
                 renderSettingsOptionCB = cmds.checkBox(self.renderSettingsOption,q = True, v = True)
+                #muted
                 renderLayersOptionCB = cmds.checkBox(self.renderLayersOption,q = True, v = True)
                 aovsOptionCB = cmds.checkBox(self.aovsOption,q = True, v = True)
                 print "\nLoading "+ str(render_setup_file)
@@ -145,7 +228,7 @@ def exportImportRenderGlobals(dialog,hq,lq):
             #import file
             print "Importing globals"
             basicFilter = "*.json"
-            render_setup_file = cmds.fileDialog2(fileMode=1, okc="This one", cap="Choose renderGlobals.json file", fileFilter=basicFilter, dialogStyle=2, startingDirectory="//islay/production/###/sandbox/mark.bailey/scripts/")
+            render_setup_file = cmds.fileDialog2(fileMode=1, okc="This one", cap="Choose renderGlobals.json file", fileFilter=basicFilter, dialogStyle=2, startingDirectory="//###/projects/###/pipeline/project_configs/renderSettings/")
             render_setup_file = str(render_setup_file)[3:-2]
             importGlobals(render_setup_file)
             print "Imported .json globals from: "+ render_setup_file,
@@ -153,7 +236,7 @@ def exportImportRenderGlobals(dialog,hq,lq):
         if choice == 'Export':
             #export file
             basicFilter = "*.json"
-            filename = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, startingDirectory="path")
+            filename = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, startingDirectory="//###/projects/###/pipeline/project_configs/renderSettings/")
             filename = str(filename)[3:-2]
             
             
@@ -164,27 +247,20 @@ def exportImportRenderGlobals(dialog,hq,lq):
             exportFile(filename)
             print "Exported .json globals to: "+ filename,
 
+
     if hq == True:
-        filename = "path.json"
+        filename = "//###/projects/###/pipeline/project_configs/renderSettings/renderSettings_HQ.json"
         # as rl, aov, rs:
         import_render_setup(filename, False, False, True)
         print "HQ render settings applied.",
+        #cmds.warning("No changes applied. Pipeline are aware this button isn't working right now.")
 
     if lq == True:
-        filename = "path.json"
+        filename = "//###/projects/###/pipeline/project_configs/renderSettings/renderSettings_LQ.json"
         # as rl, aov, rs:
         import_render_setup(filename, False, False, True)
         print "LQ render settings applied.",
-         
-"""
-#For shelf
-import os, sys
-sys.path.append(r"###")
-import exportImportRenderGlobals_v002
-reload(exportImportRenderGlobals_v002)
-
-exportImportRenderGlobals_v002.exportImportRenderGlobals()
-
-"""
+        #cmds.warning("No changes applied. Pipeline are aware this button isn't working right now.")
+    
 
 #msb0420
