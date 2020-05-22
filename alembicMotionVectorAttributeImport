@@ -1,0 +1,6 @@
+#Because Maya's import alembic dialogue STILL doesn't read alembics with motion vector attributes on variable pointcount meshes
+import os
+def getRcsAlembic():
+    filename = cmds.fileDialog2(fileMode=1, caption="Import alembic with -rcs flags")
+    maya.cmds.AbcImport(filename, rcs=True)
+getRcsAlembic()
