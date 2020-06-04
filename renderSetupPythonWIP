@@ -7,6 +7,28 @@ https://knowledge.autodesk.com/support/maya/learn-explore/caas/CloudHelp/cloudhe
 Also:
 https://fredrikaverpil.github.io/2017/05/07/querying-render-setup-in-maya-2017/ 
 """
+
+#-------------------------
+#Get list of things
+import maya.app.renderSetup.model.renderSetup as renderSetup
+
+def get_callable_attributes(obj):
+    """Returns the callable attributes of an object"""
+    
+    callable_attrs = {}
+    for attr in dir(obj):
+        attr_obj = getattr(obj, attr)
+        if callable(attr_obj):
+            callable_attrs[attr] = attr_obj
+    return sorted(callable_attrs)
+
+render_setup = renderSetup.instance()
+callable_attrs = get_callable_attributes(render_setup)
+for callable_attr in callable_attrs:
+    print(callable_attr)
+
+#-------------------------
+
 import maya.app.renderSetup.model.renderSetup as renderSetup
 
 """create render setup instance"""
