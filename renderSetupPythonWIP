@@ -1,0 +1,37 @@
+
+"""
+Help here:
+https://stackoverflow.com/questions/53341079/maya-python-add-multiple-strings-to-render-setup-layer-collections
+Render Setup API:
+https://knowledge.autodesk.com/support/maya/learn-explore/caas/CloudHelp/cloudhelp/2019/ENU/Maya-Rendering/files/GUID-FFC3298A-9803-4EAF-B472-D13247319EB0-htm.html
+Also:
+https://fredrikaverpil.github.io/2017/05/07/querying-render-setup-in-maya-2017/ 
+"""
+import maya.app.renderSetup.model.renderSetup as renderSetup
+
+"""create render setup instance"""
+rs = renderSetup.instance()
+
+"""create the render layer"""
+test = rs.createRenderLayer("eyeGlow")
+
+"""set render layer to be visible"""
+rs.switchToLayer(test)
+
+#create collection
+#scene_Assets = test.createCollection("scene_Assets")
+
+#use collection
+#doesn't work yet
+scene_Assets = test.createCollection("scene_Assets")
+
+# add specific items to collection
+
+scene_Assets.getSelector().setPattern('test1')
+
+old_pattern = scene_Assets.getSelector().getPattern()
+new_pattern = ', '.join([old_pattern, 'test3', 'test4'])
+
+scene_Assets.getSelector().setPattern(new_pattern)
+
+
