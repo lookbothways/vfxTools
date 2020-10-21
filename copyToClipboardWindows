@@ -1,0 +1,9 @@
+filePath = cmds.file(q=1,sn=1) 
+import os 
+filePath = "file:" +os.path.dirname(filePath)
+import subprocess
+def copy2clip(txt):
+    cmd='echo '+txt.strip()+'|clip'
+    return subprocess.check_call(cmd, shell=True)
+    
+copy2clip(filePath)
