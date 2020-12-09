@@ -146,7 +146,7 @@ def exportImportRenderGlobals():
     if choice == 'Export':
         #export file
         basicFilter = "*.json"
-        filename = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, startingDirectory="//islay/production/Shangri-La/sandbox/mark.bailey/scripts/")
+        filename = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, startingDirectory="//###/production/###/scripts/")
         filename = str(filename)[3:-2]
         
         
